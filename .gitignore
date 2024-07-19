@@ -1,0 +1,40 @@
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+
+# Express
+.env
+
+# Logs
+logs
+*.log
+
+# Dependency directories
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Build artifacts
+dist
+build
+out
+
+# IDE and editor files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Compiled templates (if using a view engine)
+*.pugc
+*.ejsc
+*.hbsc
+*.handlebarsc
+*.nunjucksc
+*.twigc
+
+# db files
+*.sqlite
