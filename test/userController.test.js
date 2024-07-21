@@ -10,6 +10,12 @@ const userData = {
     password: "password123",
     role: "student",
   },
+  validAdmin: {
+    name: "Admin User",
+    email: "admin@example.com",
+    password: "password123",
+    role: "admin",
+  },
   invalidNameList: ["", 0, "12", undefined, null, "", true, false, NaN],
   invalidEmailList: [
     "",
@@ -45,6 +51,10 @@ const userUpdateData = {
     NaN,
   ],
   invalidConfirmedList: ["invalid", "confirmed", null, NaN],
+};
+
+const userDeleteData = {
+  invalidIdList: ["invalid", 0, "1n", undefined, null, "", true, false, NaN],
 };
 
 describe("User Controller", () => {
@@ -99,6 +109,42 @@ describe("User Controller", () => {
       expect(res.statusCode).toEqual(400);
       expect(res.body.success).toBe(false);
     }
+  });
+
+  test("POST /user fails to create admin when CREATE_ADMIN_USER_ENABLED is false", async () => {
+    process.env.CREATE_ADMIN_USER_ENABLED = "false";
+
+    const res = await request(app)
+      .post("/api/v1/users")
+      .send(userData.validAdmin);
+
+    expect(res.statusCode).toEqual(400);
+    expect(res.body.success).toBe(false);
+    expect(res.body.message).toBe("Creating admin user is disabled");
+
+    const user = await sequelize.models.User.findOne({
+      where: { email: userData.validAdmin.email },
+    });
+    expect(user).toBeNull();
+  });
+
+  test("POST /user creates admin when CREATE_ADMIN_USER_ENABLED is true", async () => {
+    process.env.CREATE_ADMIN_USER_ENABLED = "true";
+
+    const res = await request(app)
+      .post("/api/v1/users")
+      .send(userData.validAdmin);
+
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.message).toBe("User created successfully");
+
+    const user = await sequelize.models.User.findOne({
+      where: { email: userData.validAdmin.email },
+    });
+    expect(user).not.toBeNull();
+    expect(user.username).toBe(userData.validAdmin.name);
+    expect(user.role).toBe(userData.validAdmin.role);
   });
 
   test("POST /user with invalid email", async () => {
@@ -203,5 +249,33 @@ describe("User Controller", () => {
     expect(res.statusCode).toEqual(404);
     expect(res.body.success).toBe(false);
     expect(res.body.message).toBe("User not found");
+  });
+
+  test("DELETE /user", async () => {
+    const res = await request(app).delete("/api/v1/users").query({
+      id: 1,
+    });
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.message).toBe("User deleted successfully");
+  });
+
+  test("DELETE /no user", async () => {
+    const res = await request(app).delete("/api/v1/users").query({
+      id: 9999,
+    });
+    expect(res.statusCode).toEqual(404);
+    expect(res.body.success).toBe(false);
+    expect(res.body.message).toBe("User not found");
+  });
+
+  test("DELETE /with invalid id", async () => {
+    for (const invalid of userDeleteData.invalidIdList) {
+      const res = await request(app).delete("/api/v1/users").query({
+        id: invalid,
+      });
+      expect(res.statusCode).toEqual(400);
+      expect(res.body.success).toBe(false);
+    }
   });
 });

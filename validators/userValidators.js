@@ -60,4 +60,20 @@ const validateUpdateUser = [
   },
 ];
 
-module.exports = { validateCreateUser, validateGetUser, validateUpdateUser };
+const validateDeleteUser = [
+  query("id").notEmpty().isInt({ min: 1 }).withMessage("Valid id is required"),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ success: false, message: errors.array() });
+    }
+    next();
+  },
+];
+
+module.exports = {
+  validateCreateUser,
+  validateGetUser,
+  validateUpdateUser,
+  validateDeleteUser,
+};
