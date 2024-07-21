@@ -27,13 +27,14 @@ async function createUser(req, res) {
     };
 
     await User.create(user);
+
+    return res
+      .status(200)
+      .json({ success: true, message: "User created successfully" });
   } catch (error) {
     logger.error(error);
     return res.status(400).json({ success: false });
   }
-  return res
-    .status(200)
-    .json({ success: true, message: "User created successfully" });
 }
 
 async function updateUser(req, res) {
@@ -43,31 +44,6 @@ async function updateUser(req, res) {
     difficulty_clearance_level,
     is_confirmed,
   };
-
-  if (!user_id || typeof user_id !== "number" || Number(user_id) < 1) {
-    return res.status(400).json({ success: false, message: "Invalid user ID" });
-  }
-
-  if (!difficulty_clearance_level && !is_confirmed) {
-    return res
-      .status(400)
-      .json({ success: false, message: "No update data provided" });
-  }
-
-  if (
-    typeof difficulty_clearance_level !== "number" ||
-    Number(difficulty_clearance_level) < 0
-  ) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Invalid difficulty clearance level" });
-  }
-
-  if (typeof is_confirmed !== "boolean") {
-    return res
-      .status(400)
-      .json({ success: false, message: "Invalid confirmation value" });
-  }
 
   try {
     const update = await User.update(userUpdateData, {

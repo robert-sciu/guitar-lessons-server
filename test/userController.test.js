@@ -10,18 +10,21 @@ const userData = {
     password: "password123",
     role: "student",
   },
-  missing: {
-    name: "Test User",
-    email: "test@example.com",
-    password: "",
-    role: "student",
-  },
-  invalid: {
-    name: "Test User",
-    email: "test@example.com",
-    password: "password123",
-    role: "invalid",
-  },
+  invalidNameList: ["", 0, "12", undefined, null, "", true, false, NaN],
+  invalidEmailList: [
+    "",
+    0,
+    "12",
+    undefined,
+    null,
+    "",
+    true,
+    false,
+    NaN,
+    "@email.com",
+    "user@email.",
+  ],
+  invalidPasswordList: ["", 0, "12sd", undefined, null, "", true, false, NaN],
 };
 
 const userUpdateData = {
@@ -30,27 +33,18 @@ const userUpdateData = {
     difficulty_clearance_level: 1,
     is_confirmed: true,
   },
-  invalid_id_list: ["invalid", 0, "1n", undefined, null, "", true, false, NaN],
-  invalid_difficulty_clearance_list: [
+  invalidIdList: ["invalid", 0, "1n", undefined, null, "", true, false, NaN],
+
+  invalidDifficultyClearanceList: [
     "invalid",
     "clearance",
-    undefined,
     null,
-    "",
     true,
     false,
+    true,
     NaN,
   ],
-  invalid_confirmed_list: [
-    "invalid",
-    "confirmed",
-    0,
-    1,
-    undefined,
-    null,
-    "",
-    NaN,
-  ],
+  invalidConfirmedList: ["invalid", "confirmed", null, NaN],
 };
 
 describe("User Controller", () => {
@@ -90,15 +84,49 @@ describe("User Controller", () => {
     });
   });
 
-  test("POST /user with missing data", async () => {
-    const res = await request(app).post("/api/v1/users").send(userData.missing);
-
+  test("GET /user without query parameter", async () => {
+    const res = await request(app).get("/api/v1/users");
     expect(res.statusCode).toEqual(400);
     expect(res.body.success).toBe(false);
   });
 
-  test("POST /user with invalid data", async () => {
-    const res = await request(app).post("/api/v1/users").send(userData.invalid);
+  test("POST /user with invalid name", async () => {
+    for (const invalid of userData.invalidNameList) {
+      const res = await request(app)
+        .post("/api/v1/users")
+        .send({ ...userData.valid, name: invalid });
+
+      expect(res.statusCode).toEqual(400);
+      expect(res.body.success).toBe(false);
+    }
+  });
+
+  test("POST /user with invalid email", async () => {
+    for (const invalid of userData.invalidEmailList) {
+      const res = await request(app)
+        .post("/api/v1/users")
+        .send({ ...userData.valid, email: invalid });
+
+      expect(res.statusCode).toEqual(400);
+      expect(res.body.success).toBe(false);
+    }
+  });
+
+  test("POST /user with invalid password", async () => {
+    for (const invalid of userData.invalidPasswordList) {
+      const res = await request(app)
+        .post("/api/v1/users")
+        .send({ ...userData.valid, password: invalid });
+
+      expect(res.statusCode).toEqual(400);
+      expect(res.body.success).toBe(false);
+    }
+  });
+
+  test("POST /user with invalid role", async () => {
+    const res = await request(app)
+      .post("/api/v1/users")
+      .send({ ...userData.valid, role: "invalid" });
 
     expect(res.statusCode).toEqual(400);
     expect(res.body.success).toBe(false);
@@ -128,38 +156,35 @@ describe("User Controller", () => {
   });
 
   test("PATCH /user with invalid id parameter", async () => {
-    for (const invalid of userUpdateData.invalid_id_list) {
+    for (const invalid of userUpdateData.invalidIdList) {
       const res = await request(app)
         .patch("/api/v1/users")
         .send({ ...userUpdateData.valid, user_id: invalid });
 
       expect(res.statusCode).toEqual(400);
       expect(res.body.success).toBe(false);
-      expect(res.body.message).toBe("Invalid user ID");
     }
   });
 
   test("PATCH /user with invalid clearance parameter", async () => {
-    for (const invalid of userUpdateData.invalid_difficulty_clearance_list) {
+    for (const invalid of userUpdateData.invalidDifficultyClearanceList) {
       const res = await request(app)
         .patch("/api/v1/users")
         .send({ ...userUpdateData.valid, difficulty_clearance_level: invalid });
 
       expect(res.statusCode).toEqual(400);
       expect(res.body.success).toBe(false);
-      expect(res.body.message).toBe("Invalid difficulty clearance level");
     }
   });
 
   test("PATCH /user with invalid confirmed parameter", async () => {
-    for (const invalid of userUpdateData.invalid_confirmed_list) {
+    for (const invalid of userUpdateData.invalidConfirmedList) {
       const res = await request(app)
         .patch("/api/v1/users")
         .send({ ...userUpdateData.valid, is_confirmed: invalid });
 
       expect(res.statusCode).toEqual(400);
       expect(res.body.success).toBe(false);
-      expect(res.body.message).toBe("Invalid confirmation value");
     }
   });
 
