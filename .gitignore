@@ -4,6 +4,7 @@ npm-debug.log
 yarn-error.log
 package-lock.json
 
+
 # Express
 .env
 
@@ -38,3 +39,7 @@ out
 
 # db files
 *.sqlite
+
+# utilities for local testing
+config/minioClient.js
+utilities/minioUploader.js

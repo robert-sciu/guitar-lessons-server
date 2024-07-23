@@ -11,6 +11,7 @@ module.exports = (sequelize, DataTypes) => {
       title: {
         type: DataTypes.STRING,
         allowNull: false,
+        unique: true,
       },
       artist: {
         type: DataTypes.STRING,
@@ -20,7 +21,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: true,
       },
-      file: {
+      filename: {
         type: DataTypes.STRING,
         allowNull: true,
       },

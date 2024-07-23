@@ -7,7 +7,12 @@ async function getUser(req, res) {
   if (!user) {
     return res.status(404).json({ success: false, message: "User not found" });
   }
-  const { password, ...userData } = user.dataValues;
+  const {
+    password,
+    reset_password_token,
+    reset_password_token_expiry,
+    ...userData
+  } = user.dataValues;
   return res.status(200).json({ success: true, userData });
 }
 

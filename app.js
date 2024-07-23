@@ -1,6 +1,7 @@
 const createError = require("http-errors");
 const express = require("express");
-const usersRouter = require("./routes/users");
+const router = require("./routes");
+
 const path = require("path");
 
 const {
@@ -23,7 +24,7 @@ useSecureConnection(app);
 
 useRateLimit(app);
 
-app.use("/api/v1/users", usersRouter);
+router(app);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

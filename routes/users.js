@@ -6,6 +6,8 @@ const {
   validateGetUser,
   validateUpdateUser,
   validateDeleteUser,
+  validateResetPasswordRequest,
+  validateResetPassword,
 } = require("../validators/userValidators");
 
 router
@@ -14,5 +16,10 @@ router
   .post(validateCreateUser, usersController.createUser)
   .patch(validateUpdateUser, usersController.updateUser)
   .delete(validateDeleteUser, usersController.deleteUser);
+
+router
+  .route("/reset_password")
+  .post(validateResetPasswordRequest, usersController.resetPasswordRequest)
+  .patch(validateResetPassword, usersController.resetPassword);
 
 module.exports = router;
