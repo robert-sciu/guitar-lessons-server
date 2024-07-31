@@ -41,13 +41,13 @@ module.exports = (sequelize, DataTypes) => {
 
   Task.associate = (models) => {
     Task.belongsToMany(models.User, {
-      through: "User_task",
+      through: "UserTask",
       foreignKey: "task_id",
       otherKey: "user_id",
       allowNull: false,
     });
     Task.belongsToMany(models.Tag, {
-      through: "Task_tag",
+      through: "TaskTag",
       foreignKey: "task_id",
       otherKey: "tag_id",
       allowNull: false,

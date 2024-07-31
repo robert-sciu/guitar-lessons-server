@@ -29,9 +29,9 @@ async function checkIfFileExists(bucketName, path, file) {
   }
 }
 
-async function deleteFileFromS3(bucketName, file) {
+async function deleteFileFromS3(bucketName, path, filename) {
   try {
-    await minioClient.removeObject(bucketName, file);
+    await minioClient.removeObject(bucketName, path + "/" + filename);
   } catch (error) {
     throw new Error(error);
   }

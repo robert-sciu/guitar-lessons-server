@@ -8,7 +8,11 @@ module.exports = (sequelize, DataTypes) => {
         autoIncrement: true,
         allowNull: false,
       },
-      tag: {
+      category: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      value: {
         type: DataTypes.STRING,
         allowNull: false,
       },

@@ -5,7 +5,7 @@ const logger = require("../../utilities/logger");
 async function resetPassword(req, res, next) {
   const { email, password, reset_password_token } = req.body;
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ where: { email } });
 
     if (!user) {
       return res

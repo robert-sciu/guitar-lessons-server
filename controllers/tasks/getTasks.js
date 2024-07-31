@@ -2,6 +2,7 @@ const Task = require("../../models").sequelize.models.Task;
 
 async function getTasks(req, res) {
   const id = req.query.id;
+
   try {
     if (id) {
       const task = await Task.findOne({ where: { id } });

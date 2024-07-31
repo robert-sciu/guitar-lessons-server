@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  const Lesson_reservation = sequelize.define("Lesson_reservation", {
+  const LessonReservation = sequelize.define("LessonReservation", {
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
@@ -44,12 +44,12 @@ module.exports = (sequelize, DataTypes) => {
     },
   });
 
-  Lesson_reservation.associate = (models) => {
-    Lesson_reservation.belongsTo(models.User, {
+  LessonReservation.associate = (models) => {
+    LessonReservation.belongsTo(models.User, {
       foreignKey: "user_id",
       allowNull: false,
     });
   };
 
-  return Lesson_reservation;
+  return LessonReservation;
 };

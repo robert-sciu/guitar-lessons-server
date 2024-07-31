@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
   const UserTask = sequelize.define(
-    "User_task",
+    "UserTask",
     {
       id: {
         type: DataTypes.INTEGER,

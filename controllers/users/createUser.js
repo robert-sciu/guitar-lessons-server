@@ -3,7 +3,7 @@ const logger = require("../../utilities/logger");
 const bcrypt = require("bcryptjs");
 
 async function createUser(req, res) {
-  const { name, email, password, role } = req.body;
+  const { username, email, password, role } = req.body;
 
   try {
     const existingUser = await User.findOne({ where: { email } });
@@ -21,7 +21,7 @@ async function createUser(req, res) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = {
-      username: name,
+      username,
       email,
       password: hashedPassword,
       role,

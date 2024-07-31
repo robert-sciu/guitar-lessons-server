@@ -1,5 +1,5 @@
 module.exports = (sequelize, DataTypes) => {
-  const Page_image = sequelize.define("Page_image", {
+  const PageImage = sequelize.define("PageImage", {
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
@@ -16,5 +16,5 @@ module.exports = (sequelize, DataTypes) => {
     },
   });
 
-  return Page_image;
+  return PageImage;
 };

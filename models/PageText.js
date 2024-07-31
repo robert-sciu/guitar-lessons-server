@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
-  const Page_text = sequelize.define(
-    "Page_text",
+  const PageText = sequelize.define(
+    "PageText",
     {
       id: {
         type: DataTypes.INTEGER,
@@ -22,5 +22,5 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
 
-  return Page_text;
+  return PageText;
 };

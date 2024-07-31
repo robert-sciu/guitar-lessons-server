@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
-  const Task_tag = sequelize.define(
-    "Task_tag",
+  const TaskTag = sequelize.define(
+    "TaskTag",
     {
       id: {
         type: DataTypes.INTEGER,
@@ -29,5 +29,5 @@ module.exports = (sequelize, DataTypes) => {
       timestamps: false,
     }
   );
-  return Task_tag;
+  return TaskTag;
 };

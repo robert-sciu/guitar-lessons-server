@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
-  const Youtube_video = sequelize.define(
-    "Youtube_video",
+  const YoutubeVideo = sequelize.define(
+    "YoutubeVideo",
     {
       id: {
         type: DataTypes.INTEGER,
@@ -22,5 +22,5 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
 
-  return Youtube_video;
+  return YoutubeVideo;
 };

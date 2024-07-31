@@ -11,11 +11,15 @@ const {
   useCommonMiddleware,
   useRateLimit,
 } = require("./utilities/middleware");
+const { sanitize } = require("./utilities/sanitization");
+
 const app = express();
 
 useHelmet(app);
 
 useCommonMiddleware(app);
+
+// app.use(sanitize);
 
 app.use(express.static(path.join(__dirname, "public")));
 

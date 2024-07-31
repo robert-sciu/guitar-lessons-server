@@ -21,13 +21,14 @@ async function updateUser(req, res) {
         .status(404)
         .json({ success: false, message: "User not found" });
     }
+
+    return res
+      .status(200)
+      .json({ success: true, message: "User updated successfully" });
   } catch (error) {
     logger.error(error);
-    return res.status(400).json({ success: false });
+    return res.status(500).json({ success: false, message: "Server error" });
   }
-  return res
-    .status(200)
-    .json({ success: true, message: "User updated successfully" });
 }
 
 module.exports = updateUser;

@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
-  const Page_video = sequelize.define(
-    "Page_video",
+  const PageVideo = sequelize.define(
+    "PageVideo",
     {
       id: {
         type: DataTypes.INTEGER,
@@ -22,5 +22,5 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
 
-  return Page_video;
+  return PageVideo;
 };

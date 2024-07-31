@@ -19,7 +19,7 @@ const validatePassword = () => {
 };
 
 const validateCreateUser = [
-  body("name")
+  body("username")
     .notEmpty()
     .withMessage("Name is required")
     .isString()
