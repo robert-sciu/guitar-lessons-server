@@ -16,6 +16,10 @@ module.exports = (sequelize, DataTypes) => {
         },
         allowNull: false,
       },
+      task_difficulty_level: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+      },
       tag_id: {
         type: DataTypes.INTEGER,
         references: {

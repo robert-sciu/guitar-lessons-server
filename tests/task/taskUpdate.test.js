@@ -65,7 +65,13 @@ describe("Task Update controller", () => {
       .field("difficulty_level", updateTaskData.valid.difficulty_level)
       .attach("file", file2Path);
 
-    const res = await request(app).get(`${apiBaseUrl}/tasks`).query({ id: 1 });
+    const res = await request(app)
+      .get(`${apiBaseUrl}/tasks`)
+      .query({ id: 1 })
+      .send({
+        difficulty_clearance_level: 10,
+      });
+
     expect(res.statusCode).toEqual(200);
     expect(res.body.success).toBe(true);
     expect(res.body.task).toStrictEqual({
@@ -85,7 +91,12 @@ describe("Task Update controller", () => {
       .query({ id: 1 })
       .field("title", updateTaskData.valid.title);
 
-    const res = await request(app).get(`${apiBaseUrl}/tasks`).query({ id: 1 });
+    const res = await request(app)
+      .get(`${apiBaseUrl}/tasks`)
+      .query({ id: 1 })
+      .send({
+        difficulty_clearance_level: 10,
+      });
 
     expect(res.statusCode).toEqual(200);
     expect(res.body.success).toBe(true);
@@ -101,7 +112,12 @@ describe("Task Update controller", () => {
       .query({ id: 1 })
       .field("artist", updateTaskData.valid.artist);
 
-    const res = await request(app).get(`${apiBaseUrl}/tasks`).query({ id: 1 });
+    const res = await request(app)
+      .get(`${apiBaseUrl}/tasks`)
+      .query({ id: 1 })
+      .send({
+        difficulty_clearance_level: 10,
+      });
     expect(res.statusCode).toEqual(200);
     expect(res.body.success).toBe(true);
     expect(res.body.task).toStrictEqual({
@@ -116,7 +132,12 @@ describe("Task Update controller", () => {
       .query({ id: 1 })
       .field("url", updateTaskData.valid.url);
 
-    const res = await request(app).get(`${apiBaseUrl}/tasks`).query({ id: 1 });
+    const res = await request(app)
+      .get(`${apiBaseUrl}/tasks`)
+      .query({ id: 1 })
+      .send({
+        difficulty_clearance_level: 10,
+      });
     expect(res.statusCode).toEqual(200);
     expect(res.body.success).toBe(true);
     expect(res.body.task).toStrictEqual({
@@ -131,7 +152,12 @@ describe("Task Update controller", () => {
       .query({ id: 1 })
       .field("notes", updateTaskData.valid.notes);
 
-    const res = await request(app).get(`${apiBaseUrl}/tasks`).query({ id: 1 });
+    const res = await request(app)
+      .get(`${apiBaseUrl}/tasks`)
+      .query({ id: 1 })
+      .send({
+        difficulty_clearance_level: 10,
+      });
     expect(res.statusCode).toEqual(200);
     expect(res.body.success).toBe(true);
     expect(res.body.task).toStrictEqual({
@@ -146,7 +172,12 @@ describe("Task Update controller", () => {
       .query({ id: 1 })
       .field("difficulty_level", updateTaskData.valid.difficulty_level);
 
-    const res = await request(app).get(`${apiBaseUrl}/tasks`).query({ id: 1 });
+    const res = await request(app)
+      .get(`${apiBaseUrl}/tasks`)
+      .query({ id: 1 })
+      .send({
+        difficulty_clearance_level: 10,
+      });
     expect(res.statusCode).toEqual(200);
     expect(res.body.success).toBe(true);
     expect(res.body.task).toStrictEqual({
@@ -162,7 +193,12 @@ describe("Task Update controller", () => {
       .field("artist", updateTaskData.valid.artist)
       .field("url", updateTaskData.valid.url);
 
-    const res = await request(app).get(`${apiBaseUrl}/tasks`).query({ id: 1 });
+    const res = await request(app)
+      .get(`${apiBaseUrl}/tasks`)
+      .query({ id: 1 })
+      .send({
+        difficulty_clearance_level: 10,
+      });
 
     expect(res.statusCode).toEqual(200);
     expect(res.body.success).toBe(true);
@@ -246,7 +282,12 @@ describe("Task Update controller", () => {
       .query({ id: 1 })
       .attach("file", file2Path);
 
-    const res = await request(app).get(`${apiBaseUrl}/tasks`).query({ id: 1 });
+    const res = await request(app)
+      .get(`${apiBaseUrl}/tasks`)
+      .query({ id: 1 })
+      .send({
+        difficulty_clearance_level: 10,
+      });
 
     expect(res.statusCode).toEqual(200);
     expect(res.body.success).toBe(true);

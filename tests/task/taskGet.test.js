@@ -16,6 +16,15 @@ describe("Get Task Controller", () => {
   });
   beforeEach(async () => {
     await sequelize.sync({ force: true });
+
+    await request(app)
+      .post(`${apiBaseUrl}/tasks`)
+      .field("title", createTaskData.valid.title)
+      .field("artist", createTaskData.valid.artist)
+      .field("url", createTaskData.valid.url)
+      .field("notes", createTaskData.valid.notes)
+      .field("difficulty_level", createTaskData.valid.difficulty_level)
+      .attach("file", filePath);
   });
 
   afterEach(async () => {
@@ -29,16 +38,9 @@ describe("Get Task Controller", () => {
   });
 
   test("GET /tasks without query parameter", async () => {
-    await request(app)
-      .post(`${apiBaseUrl}/tasks`)
-      .field("title", createTaskData.valid.title)
-      .field("artist", createTaskData.valid.artist)
-      .field("url", createTaskData.valid.url)
-      .field("notes", createTaskData.valid.notes)
-      .field("difficulty_level", createTaskData.valid.difficulty_level)
-      .attach("file", filePath);
-
-    const res = await request(app).get(`${apiBaseUrl}/tasks`);
+    const res = await request(app).get(`${apiBaseUrl}/tasks`).send({
+      difficulty_clearance_level: 10,
+    });
 
     expect(res.statusCode).toEqual(200);
     expect(res.body.tasks).toStrictEqual([
@@ -55,16 +57,12 @@ describe("Get Task Controller", () => {
   });
 
   test("GET /tasks with query parameter", async () => {
-    await request(app)
-      .post(`${apiBaseUrl}/tasks`)
-      .field("title", createTaskData.valid.title)
-      .field("artist", createTaskData.valid.artist)
-      .field("url", createTaskData.valid.url)
-      .field("notes", createTaskData.valid.notes)
-      .field("difficulty_level", createTaskData.valid.difficulty_level)
-      .attach("file", filePath);
-
-    const res = await request(app).get(`${apiBaseUrl}/tasks`).query({ id: 1 });
+    const res = await request(app)
+      .get(`${apiBaseUrl}/tasks`)
+      .query({ id: 1 })
+      .send({
+        difficulty_clearance_level: 10,
+      });
     expect(res.statusCode).toEqual(200);
     expect(res.body.task).toStrictEqual({
       id: 1,
@@ -82,7 +80,10 @@ describe("Get Task Controller", () => {
     async (id) => {
       const res = await request(app)
         .get(`${apiBaseUrl}/tasks`)
-        .query({ id: createTaskData.invalidQueryParameterList });
+        .query({ id: createTaskData.invalidQueryParameterList })
+        .send({
+          difficulty_clearance_level: 10,
+        });
       expect(res.statusCode).toEqual(400);
       expect(res.body.success).toBe(false);
     }
