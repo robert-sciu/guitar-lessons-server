@@ -12,7 +12,11 @@ describe("User Controller", () => {
     await sequelize.sync({ force: true });
   });
   afterAll(async () => {
-    await sequelize.close();
+    try {
+      await sequelize.close();
+    } catch (error) {
+      console.error("Error closing sequelize:", error);
+    }
   });
   test("POST /user with valid data", async () => {
     const res = await request(app)

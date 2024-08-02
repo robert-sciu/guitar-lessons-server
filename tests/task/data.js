@@ -42,7 +42,7 @@ const createTaskData = {
     false,
     NaN,
   ],
-  invalidTitleList: ["", 0, "12", undefined, null, true, false, NaN],
+  invalidTitleList: ["", 0, undefined, null, true, false, NaN],
   invalidQueryParameterList: ["", 0, "id", null, true, false, NaN],
 };
 

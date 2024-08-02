@@ -17,18 +17,26 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
       permanent_reservation_weekday: {
-        type: DataTypes.STRING,
+        type: DataTypes.INTEGER,
         allowNull: true,
       },
       permanent_reservation_hour: {
         type: DataTypes.STRING,
         allowNull: true,
       },
-      lessons_until_next_payment: {
+      permanent_reservation_lesson_length: {
         type: DataTypes.INTEGER,
         allowNull: true,
       },
-      discount: {
+      permanent_reservation_lesson_count: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
+      regular_discount: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+      },
+      permanent_discount: {
         type: DataTypes.INTEGER,
         allowNull: true,
       },

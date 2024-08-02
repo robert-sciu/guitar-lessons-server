@@ -23,10 +23,6 @@ const originalTaskData = {
 
 const apiBaseUrl = process.env.API_BASE_URL;
 
-async function wait(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 describe("Task Update controller", () => {
   beforeAll(async () => {
     process.env.BUCKET_NAME = "test-guitar-lessons-bucket";

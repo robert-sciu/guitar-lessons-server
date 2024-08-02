@@ -14,11 +14,11 @@ async function updateTask(req, res) {
   const filteredUrl = url ? filterURL(url) : undefined;
 
   const updateData = {
-    title: title || undefined,
-    artist: artist || undefined,
-    url: filteredUrl || undefined,
-    notes: notes || undefined,
-    difficulty_level: difficulty_level || undefined,
+    title,
+    artist,
+    url: filteredUrl,
+    notes,
+    difficulty_level,
   };
 
   const noValues = Object.values(updateData).filter(

@@ -5,6 +5,7 @@ const { Tag } = require("../../models").sequelize.models;
 async function deleteTag(req, res) {
   const id = req.query.id;
   const tag = await Tag.findByPk(id);
+
   if (!tag) {
     return res.status(404).json({ success: false, message: "Tag not found" });
   }

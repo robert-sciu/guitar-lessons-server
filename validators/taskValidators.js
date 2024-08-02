@@ -1,4 +1,5 @@
 const { body, query, validationResult } = require("express-validator");
+const { noValuesToUndefined } = require("../utilities/utilities");
 
 const validateGetTasks = [
   query("id").optional().isInt({ min: 1 }).withMessage("Valid id is required"),
@@ -39,6 +40,8 @@ const validateCreateTask = [
     if (!errors.isEmpty()) {
       return res.status(400).json({ success: false, message: errors.array() });
     }
+
+    noValuesToUndefined(req.body);
     next();
   },
 ];
@@ -73,6 +76,8 @@ const validateUpdateTask = [
     if (!errors.isEmpty()) {
       return res.status(400).json({ success: false, message: errors.array() });
     }
+
+    noValuesToUndefined(req.body);
     next();
   },
 ];

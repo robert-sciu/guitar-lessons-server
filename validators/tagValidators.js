@@ -1,5 +1,6 @@
 const { body, query, validationResult } = require("express-validator");
 const { logger } = require("../utilities/mailer");
+const { noValuesToUndefined } = require("../utilities/utilities");
 
 const validateGetTags = [
   query("id").optional().isInt({ min: 1 }).withMessage("Valid id is required"),
@@ -41,6 +42,9 @@ const validateUpdateTag = [
       logger.error(errors.array());
       return res.status(400).json({ success: false, message: errors.array() });
     }
+
+    noValuesToUndefined(req.body);
+
     next();
   },
 ];

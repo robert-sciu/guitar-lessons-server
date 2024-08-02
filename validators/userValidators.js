@@ -1,4 +1,5 @@
 const { body, query, validationResult } = require("express-validator");
+const { noValuesToUndefined } = require("../utilities/utilities");
 
 const validateEmail = () => {
   return [body("email").isEmail().withMessage("Valid email is required")];
@@ -85,6 +86,9 @@ const validateUpdateUser = [
         .status(400)
         .json({ success: false, message: "No update data provided" });
     }
+
+    noValuesToUndefined(req.body);
+
     next();
   },
 ];
