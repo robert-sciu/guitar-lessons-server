@@ -4,6 +4,8 @@ const { sequelize } = require("../../models");
 const app = require("../../app");
 const { createTaskData } = require("./data");
 const path = require("path");
+const { filterURL } = require("../../utilities/utilities");
+const { deleteTestDbEntry } = require("../utilities/utilities");
 
 const filePath = path.join(__dirname, "files", "test.txt");
 
@@ -19,13 +21,7 @@ describe("POST task controller", () => {
   });
 
   afterEach(async () => {
-    if (await sequelize.models.Task.findOne({ where: { id: 1 } })) {
-      const res = await request(app)
-        .delete(`${apiBaseUrl}/tasks`)
-        .query({ id: 1 });
-      expect(res.statusCode).toEqual(200);
-      expect(res.body.success).toBe(true);
-    }
+    await deleteTestDbEntry(sequelize.models.Task, "tasks");
   });
 
   afterAll(async () => {
@@ -38,13 +34,27 @@ describe("POST task controller", () => {
       .field("title", createTaskData.valid.title)
       .field("artist", createTaskData.valid.artist)
       .field("url", createTaskData.valid.url)
-      .field("notes", createTaskData.valid.notes)
+      .field("notes_pl", createTaskData.valid.notes_pl)
+      .field("notes_en", createTaskData.valid.notes_en)
       .field("difficulty_level", createTaskData.valid.difficulty_level)
       .attach("file", filePath);
 
     expect(res.statusCode).toEqual(201);
     expect(res.body.success).toBe(true);
     expect(res.body.message).toBe("Task created successfully");
+
+    const res2 = await request(app)
+      .get(`${apiBaseUrl}/tasks`)
+      .query({ id: 1 })
+      .send({ difficulty_clearance_level: 10 });
+    expect(res2.statusCode).toEqual(200);
+    expect(res2.body.success).toBe(true);
+    expect(res2.body.data).toStrictEqual({
+      ...createTaskData.valid,
+      url: filterURL(createTaskData.valid.url),
+      filename: "test.txt",
+      id: 1,
+    });
   });
 
   test("POST /task with valid urls", async () => {
@@ -87,7 +97,7 @@ describe("POST task controller", () => {
       .field("title", createTaskData.valid.title)
       .field("difficulty_level", createTaskData.valid.difficulty_level)
       .attach("file", filePath);
-    expect(res.statusCode).toEqual(400);
+    expect(res.statusCode).toEqual(409);
     expect(res.body.success).toBe(false);
   });
 
@@ -121,7 +131,7 @@ describe("POST task controller", () => {
     const res = await request(app)
       .post(`${apiBaseUrl}/tasks`)
       .send(createTaskData.valid);
-    expect(res.statusCode).toEqual(400);
+    expect(res.statusCode).toEqual(409);
     expect(res.body.success).toBe(false);
   });
 
@@ -164,4 +174,15 @@ describe("POST task controller", () => {
       expect(res.body.success).toBe(false);
     }
   );
+
+  test("POST /task with no url or file", async () => {
+    const res = await request(app).post(`${apiBaseUrl}/tasks`).send({
+      title: createTaskData.valid.title,
+      artist: createTaskData.valid.artist,
+      notes: createTaskData.valid.notes,
+      difficulty_level: createTaskData.valid.difficulty_level,
+    });
+    expect(res.statusCode).toEqual(400);
+    expect(res.body.success).toBe(false);
+  });
 });

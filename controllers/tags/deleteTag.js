@@ -1,22 +1,25 @@
+const {
+  findRecordByPk,
+  handleErrorResponse,
+  deleteRecord,
+  handleSuccessResponse,
+} = require("../../utilities/controllerUtilites");
 const { logger } = require("../../utilities/mailer");
 
 const { Tag } = require("../../models").sequelize.models;
 
 async function deleteTag(req, res) {
   const id = req.query.id;
-  const tag = await Tag.findByPk(id);
-
+  const tag = await findRecordByPk(Tag, id);
   if (!tag) {
-    return res.status(404).json({ success: false, message: "Tag not found" });
+    return handleErrorResponse(res, 404, "Tag not found");
   }
   try {
-    await tag.destroy();
-    return res
-      .status(200)
-      .json({ success: true, message: "Tag deleted successfully" });
+    await deleteRecord(Tag, id);
+    return handleSuccessResponse(res, 200, "Tag deleted successfully");
   } catch (error) {
     logger.error(error);
-    res.status(500).json({ success: false, message: "Server error" });
+    handleErrorResponse(res, 500, "Server error");
   }
 }
 

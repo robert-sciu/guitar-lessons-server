@@ -4,8 +4,12 @@ const { sequelize } = require("../../models");
 const app = require("../../app");
 
 const { createUserTaskData } = require("./data");
-const { createTaskData } = require("../task/data");
-const { createUserData } = require("../user/data");
+
+const {
+  createTestTask,
+  createTestUser,
+  deleteTestDbEntry,
+} = require("../utilities/utilities");
 
 const apiBaseUrl = process.env.API_BASE_URL;
 
@@ -13,26 +17,16 @@ describe("User Task PATCH Controller", () => {
   beforeEach(async () => {
     await sequelize.sync({ force: true });
 
-    await request(app)
-      .post(`${apiBaseUrl}/tasks`)
-      .field("title", createTaskData.valid.title)
-      .field("artist", createTaskData.valid.artist)
-      .field("url", createTaskData.valid.url)
-      .field("notes", createTaskData.valid.notes)
-      .field("difficulty_level", createTaskData.valid.difficulty_level);
+    await createTestTask();
 
-    await request(app)
-      .post(`${apiBaseUrl}/users`)
-      .send(createUserData.validStudent);
+    await createTestUser();
 
     await request(app)
       .post(`${apiBaseUrl}/userTasks`)
       .send(createUserTaskData.valid);
   });
   afterEach(async () => {
-    if (await sequelize.models.UserTask.findOne({ where: { id: 1 } })) {
-      await request(app).delete(`${apiBaseUrl}/userTasks`).query({ id: 1 });
-    }
+    await deleteTestDbEntry(sequelize.models.UserTask, "userTasks");
   });
   afterAll(async () => {
     await sequelize.close();

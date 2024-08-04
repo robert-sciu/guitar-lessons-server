@@ -80,12 +80,6 @@ const validateUpdateUser = [
     if (!errors.isEmpty()) {
       return res.status(400).json({ success: false, message: errors.array() });
     }
-    const { difficulty_clearance_level, is_confirmed } = req.body;
-    if (!difficulty_clearance_level && !is_confirmed) {
-      return res
-        .status(400)
-        .json({ success: false, message: "No update data provided" });
-    }
 
     noValuesToUndefined(req.body);
 

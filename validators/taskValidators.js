@@ -30,7 +30,8 @@ const validateCreateTask = [
     .optional()
     .isString()
     .withMessage("Filename must be a string"),
-  body("notes").optional().isString().withMessage("Notes must be a string"),
+  body("notes_pl").optional().isString().withMessage("Notes must be a string"),
+  body("notes_en").optional().isString().withMessage("Notes must be a string"),
   body("difficulty_level")
     .isInt({ min: 0 })
     .withMessage("Valid difficulty level is required"),
@@ -65,7 +66,8 @@ const validateUpdateTask = [
     .optional()
     .isString()
     .withMessage("Filename must be a string"),
-  body("notes").optional().isString().withMessage("Notes must be a string"),
+  body("notes_pl").optional().isString().withMessage("Notes must be a string"),
+  body("notes_en").optional().isString().withMessage("Notes must be a string"),
   body("difficulty_level")
     .optional()
     .isInt({ min: 0 })

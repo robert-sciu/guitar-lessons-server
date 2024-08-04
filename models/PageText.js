@@ -8,11 +8,23 @@ module.exports = (sequelize, DataTypes) => {
         autoIncrement: true,
         allowNull: false,
       },
-      category: {
+      section: {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      content: {
+      category: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      position: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
+      content_pl: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
+      content_en: {
         type: DataTypes.STRING,
         allowNull: false,
       },

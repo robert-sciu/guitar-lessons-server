@@ -3,6 +3,7 @@ const request = require("supertest");
 const { sequelize } = require("../../models");
 const app = require("../../app");
 const { createTagData } = require("./data");
+const { deleteTestDbEntry } = require("../utilities/utilities");
 
 const apiBaseUrl = process.env.API_BASE_URL;
 
@@ -12,9 +13,7 @@ describe("Tag Post Controller", () => {
   });
 
   afterEach(async () => {
-    if (await sequelize.models.Tag.findOne({ where: { id: 1 } })) {
-      await request(app).delete(`${apiBaseUrl}/tags`).query({ id: 1 });
-    }
+    await deleteTestDbEntry(sequelize.models.Tag, "tags");
   });
   afterAll(async () => {
     await sequelize.close();

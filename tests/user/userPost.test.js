@@ -4,12 +4,17 @@ const { sequelize } = require("../../models");
 const app = require("../../app");
 
 const { createUserData } = require("./data");
+const { deleteTestDbEntry } = require("../utilities/utilities");
 
 const apiBaseUrl = process.env.API_BASE_URL;
 
 describe("User Controller", () => {
   beforeEach(async () => {
     await sequelize.sync({ force: true });
+  });
+
+  afterEach(async () => {
+    await deleteTestDbEntry(sequelize.models.User, "users");
   });
   afterAll(async () => {
     try {
@@ -18,6 +23,7 @@ describe("User Controller", () => {
       console.error("Error closing sequelize:", error);
     }
   });
+
   test("POST /user with valid data", async () => {
     const res = await request(app)
       .post(`${apiBaseUrl}/users`)

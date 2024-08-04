@@ -6,6 +6,7 @@ const app = require("../../app");
 const apiBaseUrl = process.env.API_BASE_URL;
 
 const { createTagData } = require("./data");
+const { deleteTestDbEntry } = require("../utilities/utilities");
 
 describe("Tag Delete Controller", () => {
   beforeEach(async () => {
@@ -13,9 +14,7 @@ describe("Tag Delete Controller", () => {
     await request(app).post(`${apiBaseUrl}/tags`).send(createTagData.valid);
   });
   afterEach(async () => {
-    if (await sequelize.models.Tag.findOne({ where: { id: 1 } })) {
-      await request(app).delete(`${apiBaseUrl}/tags`).query({ id: 1 });
-    }
+    await deleteTestDbEntry(sequelize.models.Tag, "tags");
   });
 
   afterAll(async () => {

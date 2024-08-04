@@ -25,7 +25,11 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: true,
       },
-      notes: {
+      notes_pl: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      notes_en: {
         type: DataTypes.STRING,
         allowNull: true,
       },

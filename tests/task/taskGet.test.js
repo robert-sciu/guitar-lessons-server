@@ -5,6 +5,7 @@ const app = require("../../app");
 const { createTaskData } = require("./data");
 const path = require("path");
 const { filterURL } = require("../../utilities/utilities");
+const { deleteTestDbEntry } = require("../utilities/utilities");
 
 const filePath = path.join(__dirname, "files", "test.txt");
 
@@ -22,15 +23,14 @@ describe("Get Task Controller", () => {
       .field("title", createTaskData.valid.title)
       .field("artist", createTaskData.valid.artist)
       .field("url", createTaskData.valid.url)
-      .field("notes", createTaskData.valid.notes)
+      .field("notes_pl", createTaskData.valid.notes_pl)
+      .field("notes_en", createTaskData.valid.notes_en)
       .field("difficulty_level", createTaskData.valid.difficulty_level)
       .attach("file", filePath);
   });
 
   afterEach(async () => {
-    if (await sequelize.models.Task.findOne({ where: { id: 1 } })) {
-      await request(app).delete(`${apiBaseUrl}/tasks`).query({ id: 1 });
-    }
+    await deleteTestDbEntry(sequelize.models.Task, "tasks");
   });
 
   afterAll(async () => {
@@ -50,7 +50,8 @@ describe("Get Task Controller", () => {
         artist: createTaskData.valid.artist,
         url: filterURL(createTaskData.valid.url),
         filename: "test.txt",
-        notes: createTaskData.valid.notes,
+        notes_pl: createTaskData.valid.notes_pl,
+        notes_en: createTaskData.valid.notes_en,
         difficulty_level: createTaskData.valid.difficulty_level,
       },
     ]);
@@ -70,7 +71,8 @@ describe("Get Task Controller", () => {
       artist: createTaskData.valid.artist,
       url: filterURL(createTaskData.valid.url),
       filename: "test.txt",
-      notes: createTaskData.valid.notes,
+      notes_pl: createTaskData.valid.notes_pl,
+      notes_en: createTaskData.valid.notes_en,
       difficulty_level: createTaskData.valid.difficulty_level,
     });
   });
@@ -80,7 +82,7 @@ describe("Get Task Controller", () => {
     async (id) => {
       const res = await request(app)
         .get(`${apiBaseUrl}/tasks`)
-        .query({ id: createTaskData.invalidQueryParameterList })
+        .query({ id: id })
         .send({
           difficulty_clearance_level: 10,
         });

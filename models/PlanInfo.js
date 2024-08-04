@@ -21,7 +21,11 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
       },
       permanent_reservation_hour: {
-        type: DataTypes.STRING,
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
+      permanent_reservation_minute: {
+        type: DataTypes.INTEGER,
         allowNull: true,
       },
       permanent_reservation_lesson_length: {

@@ -1,5 +1,8 @@
 const User = require("../../models").sequelize.models.User;
 const logger = require("../../utilities/logger");
+const {
+  checkMissingUpdateData,
+} = require("../../utilities/controllerUtilites");
 
 async function updateUser(req, res) {
   const { user_id, difficulty_clearance_level, is_confirmed } = req.body;
@@ -8,6 +11,14 @@ async function updateUser(req, res) {
     difficulty_clearance_level,
     is_confirmed,
   };
+
+  const missingUpdateData = checkMissingUpdateData(userUpdateData);
+
+  if (missingUpdateData) {
+    return res
+      .status(400)
+      .json({ success: false, message: "No update data provided" });
+  }
 
   try {
     const update = await User.update(userUpdateData, {

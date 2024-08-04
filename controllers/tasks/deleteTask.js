@@ -1,35 +1,43 @@
 const Task = require("../../models").sequelize.models.Task;
+const { sequelize } = require("../../models");
+const {
+  findRecordByPk,
+  handleErrorResponse,
+  handleSuccessResponse,
+  deleteRecord,
+} = require("../../utilities/controllerUtilites");
 const logger = require("../../utilities/logger");
 const s3Manager = require("../../utilities/s3Manager");
 
 async function deleteTask(req, res, next) {
   const id = req.query.id;
-
+  const transaction = await sequelize.transaction();
   try {
-    const task = await Task.findOne({ where: { id } });
-
+    const task = await findRecordByPk(Task, id);
     if (!task) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Task not found" });
+      await transaction.rollback();
+      return handleErrorResponse(res, 404, "Task not found");
     }
-
     if (task.filename) {
-      await s3Manager.deleteFileFromS3(
-        process.env.BUCKET_NAME,
-        process.env.BUCKET_TASKS_PATH,
-        task.filename
-      );
+      try {
+        await s3Manager.deleteFileFromS3(
+          process.env.BUCKET_NAME,
+          process.env.BUCKET_TASKS_PATH,
+          task.filename
+        );
+      } catch (error) {
+        logger.error(error);
+        await transaction.rollback();
+        return handleErrorResponse(res, 500, "Server error");
+      }
     }
-
-    await task.destroy();
-
-    res
-      .status(200)
-      .json({ success: true, message: "Task deleted successfully" });
+    await deleteRecord(Task, id);
+    await transaction.commit();
+    return handleSuccessResponse(res, 200, "Task deleted successfully");
   } catch (error) {
+    await transaction.rollback();
     logger.error(error);
-    return res.status(400).json({ success: false, message: "Server error" });
+    return handleErrorResponse(res, 500, "Server error");
   }
 }
 

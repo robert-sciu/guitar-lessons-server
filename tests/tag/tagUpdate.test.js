@@ -6,6 +6,7 @@ const app = require("../../app");
 const apiBaseUrl = process.env.API_BASE_URL;
 
 const { createTagData } = require("./data");
+const { deleteTestDbEntry } = require("../utilities/utilities");
 
 describe("Tag Delete Controller", () => {
   beforeEach(async () => {
@@ -13,9 +14,7 @@ describe("Tag Delete Controller", () => {
     await request(app).post(`${apiBaseUrl}/tags`).send(createTagData.valid);
   });
   afterEach(async () => {
-    if (await sequelize.models.Tag.findOne({ where: { id: 1 } })) {
-      await request(app).delete(`${apiBaseUrl}/tags`).query({ id: 1 });
-    }
+    await deleteTestDbEntry(sequelize.models.Tag, "tags");
   });
 
   afterAll(async () => {
@@ -31,7 +30,7 @@ describe("Tag Delete Controller", () => {
     expect(res.body.success).toBe(true);
     expect(res.body.message).toBe("Tag updated successfully");
     const tag = await request(app).get(`${apiBaseUrl}/tags`).query({ id: 1 });
-    expect(tag.body.tag).toStrictEqual({
+    expect(tag.body.data).toStrictEqual({
       id: 1,
       ...createTagData.validUpdate,
     });
@@ -46,7 +45,7 @@ describe("Tag Delete Controller", () => {
     expect(res.body.success).toBe(true);
     expect(res.body.message).toBe("Tag updated successfully");
     const tag = await request(app).get(`${apiBaseUrl}/tags`).query({ id: 1 });
-    expect(tag.body.tag).toStrictEqual({
+    expect(tag.body.data).toStrictEqual({
       id: 1,
       category: createTagData.validUpdate.category,
       value: createTagData.valid.value,
@@ -64,7 +63,7 @@ describe("Tag Delete Controller", () => {
     expect(res.body.success).toBe(true);
     expect(res.body.message).toBe("Tag updated successfully");
     const tag = await request(app).get(`${apiBaseUrl}/tags`).query({ id: 1 });
-    expect(tag.body.tag).toStrictEqual({
+    expect(tag.body.data).toStrictEqual({
       id: 1,
       category: createTagData.valid.category,
       value: createTagData.validUpdate.value,

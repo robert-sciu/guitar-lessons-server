@@ -4,19 +4,24 @@ const { sequelize } = require("../../models");
 const app = require("../../app");
 
 const { createUserData, deleteUserData } = require("./data");
+const { deleteTestDbEntry, createTestUser } = require("../utilities/utilities");
 
 const apiBaseUrl = process.env.API_BASE_URL;
 
 describe("User Controller", () => {
   beforeEach(async () => {
     await sequelize.sync({ force: true });
-    await request(app)
-      .post(`${apiBaseUrl}/users`)
-      .send(createUserData.validStudent);
+    await createTestUser();
   });
+
+  afterEach(async () => {
+    await deleteTestDbEntry(sequelize.models.User, "users");
+  });
+
   afterAll(async () => {
     await sequelize.close();
   });
+
   test("DELETE /no user", async () => {
     await request(app)
       .post(`${apiBaseUrl}/users`)

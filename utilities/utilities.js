@@ -22,7 +22,6 @@ function noValuesToUndefined(obj) {
       req.body[key] = undefined;
     }
   });
-
   return obj;
 }
 

@@ -1,4 +1,11 @@
 const Task = require("../../models").sequelize.models.Task;
+const {
+  handleErrorResponse,
+  findRecordByValue,
+  createRecord,
+  handleSuccessResponse,
+  checkMissingUpdateData,
+} = require("../../utilities/controllerUtilites");
 const logger = require("../../utilities/logger");
 const s3Manager = require("../../utilities/s3Manager");
 const { filterURL } = require("../../utilities/utilities");
@@ -6,67 +13,40 @@ const { filterURL } = require("../../utilities/utilities");
 async function createTask(req, res) {
   const bucketName = process.env.BUCKET_NAME;
   const tasksPath = process.env.BUCKET_TASKS_PATH;
-
-  const { title, artist, url, notes, difficulty_level } = req.body;
-
+  // data = { artist, notes_pl, notes_en, difficulty_level };
+  const { url, title, ...data } = req.body;
   const file = req.file || undefined;
   const filteredUrl = url ? filterURL(url) : undefined;
-
   // validator already checks for optional and non optional values but with almost all values optional we need to check if we have
   // at least one key value for task to make sense. In this case url or file.
-
-  const optionalValues = [url, file];
-
-  const noValues = optionalValues.filter((value) => value === undefined);
-
-  if (noValues.length > optionalValues.length - 1) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Missing required fields" });
+  // if (!url && !file) {
+  if (checkMissingUpdateData({ url, file })) {
+    return handleErrorResponse(res, 400, "Missing required fields");
   }
-
   try {
     if (file) {
-      const existingFile = await s3Manager.checkIfFileExists(
-        bucketName,
-        tasksPath,
-        file
-      );
-      if (existingFile) {
-        return res
-          .status(400)
-          .json({ success: false, message: "File already exists" });
+      if (await s3Manager.checkIfFileExists(bucketName, tasksPath, file)) {
+        return handleErrorResponse(res, 409, "File already exists");
       }
     }
-    const existingTask = await Task.findOne({ where: { title } });
-
-    if (existingTask) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Task already exists" });
+    // const existingTask = await Task.findOne({ where: { title } });
+    if (await findRecordByValue(Task, { title })) {
+      return handleErrorResponse(res, 409, "Task already exists");
     }
-
     if (file) {
       await s3Manager.uploadFileToS3(bucketName, tasksPath, file);
     }
-
-    const task = await Task.create({
+    await createRecord(Task, {
       title,
-      artist,
       url: filteredUrl,
       filename: file?.originalname,
-      notes,
-      difficulty_level,
+      ...data,
     });
 
-    res.status(201).json({
-      success: true,
-      message: "Task created successfully",
-      task,
-    });
+    handleSuccessResponse(res, 201, "Task created successfully");
   } catch (error) {
     logger.error(error);
-    return res.status(500).json({ success: false, message: "server error" });
+    handleErrorResponse(res, 500, "Server error");
   }
 }
 

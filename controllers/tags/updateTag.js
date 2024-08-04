@@ -1,30 +1,33 @@
 const { Tag } = require("../../models").sequelize.models;
+const {
+  findRecordByPk,
+  handleErrorResponse,
+  updateRecord,
+  handleSuccessResponse,
+} = require("../../utilities/controllerUtilites");
 const logger = require("../../utilities/logger");
 
 async function updateTag(req, res) {
   const id = req.query.id;
-
-  const tag = await Tag.findByPk(id);
+  const updateData = req.body;
+  const availableCategories = process.env.TAG_CATEGORIES;
+  const tag = await findRecordByPk(Tag, id);
 
   if (!tag) {
-    return res.status(404).json({ success: false, message: "Tag not found" });
+    return handleErrorResponse(res, 404, "Tag not found");
   }
-  const { category } = req.body;
+  const { category } = updateData;
   if (category) {
-    if (!process.env.TAG_CATEGORIES.includes(category)) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid category" });
+    if (!availableCategories.includes(category)) {
+      return handleErrorResponse(res, 400, "Invalid category");
     }
   }
   try {
-    await tag.update(req.body);
-    return res
-      .status(200)
-      .json({ success: true, message: "Tag updated successfully" });
+    await updateRecord(Tag, updateData, id);
+    return handleSuccessResponse(res, 200, "Tag updated successfully");
   } catch (error) {
     logger.error(error);
-    res.status(500).json({ success: false, message: "Server error" });
+    handleErrorResponse(res, 500, "Server error");
   }
 }
 

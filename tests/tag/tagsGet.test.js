@@ -6,6 +6,7 @@ const app = require("../../app");
 const apiBaseUrl = process.env.API_BASE_URL;
 
 const { createTagData } = require("./data");
+const { deleteTestDbEntry } = require("../utilities/utilities");
 
 describe("Tag Get Controller", () => {
   beforeEach(async () => {
@@ -13,9 +14,7 @@ describe("Tag Get Controller", () => {
     await request(app).post(`${apiBaseUrl}/tags`).send(createTagData.valid);
   });
   afterEach(async () => {
-    if (await sequelize.models.Tag.findOne({ where: { id: 1 } })) {
-      await request(app).delete(`${apiBaseUrl}/tags`).query({ id: 1 });
-    }
+    await deleteTestDbEntry(sequelize.models.Tag, "tags");
   });
   afterAll(async () => {
     await sequelize.close();
@@ -25,7 +24,7 @@ describe("Tag Get Controller", () => {
     const res = await request(app).get(`${apiBaseUrl}/tags`).query({ id: 1 });
     expect(res.statusCode).toEqual(200);
     expect(res.body.success).toBe(true);
-    expect(res.body.tag).toStrictEqual({
+    expect(res.body.data).toStrictEqual({
       id: 1,
       ...createTagData.valid,
     });
@@ -35,7 +34,7 @@ describe("Tag Get Controller", () => {
     const res = await request(app).get(`${apiBaseUrl}/tags`);
     expect(res.statusCode).toEqual(200);
     expect(res.body.success).toBe(true);
-    expect(res.body.tags).toStrictEqual([
+    expect(res.body.data).toStrictEqual([
       {
         id: 1,
         ...createTagData.valid,

@@ -1,34 +1,36 @@
 const { Tag } = require("../../models").sequelize.models;
+const {
+  findRecordByPk,
+  handleErrorResponse,
+  handleSuccessResponse,
+  findAllRecords,
+} = require("../../utilities/controllerUtilites");
 const logger = require("../../utilities/logger");
 
 async function getTags(req, res) {
   const id = req.query.id;
   if (id) {
     try {
-      const tag = await Tag.findByPk(id);
+      const tag = await findRecordByPk(Tag, id);
       if (!tag) {
-        return res
-          .status(404)
-          .json({ success: false, message: "Tag not found" });
+        return handleErrorResponse(res, 404, "Tag not found");
       }
-      return res.status(200).json({ success: true, tag });
+      return handleSuccessResponse(res, 200, tag);
     } catch (error) {
       logger.error(error);
-      return res.status(500).json({ success: false, message: "Server error" });
+      return handleErrorResponse(res, 500, "Server error");
     }
   }
   if (!id) {
     try {
-      const tags = await Tag.findAll();
+      const tags = await findAllRecords(Tag);
       if (tags.length < 1) {
-        return res
-          .status(404)
-          .json({ success: false, message: "No tags found" });
+        return handleErrorResponse(res, 404, "No tags found");
       }
-      return res.status(200).json({ success: true, tags });
+      return handleSuccessResponse(res, 200, tags);
     } catch (error) {
       logger.error(error);
-      return res.status(500).json({ success: false, message: "Server error" });
+      return handleErrorResponse(res, 500, "Server error");
     }
   }
 }

@@ -52,6 +52,17 @@ async function attachImagePaths(paintingsDataArrayJSON, bucketName) {
   }
 }
 
+async function deleteAllFilesFromS3(bucketName, path) {
+  try {
+    const listObjects = await minioClient.listObjects(bucketName, path);
+    for (const object of listObjects) {
+      await minioClient.removeObject(bucketName, object.name);
+    }
+  } catch (error) {
+    throw new Error(error);
+  }
+}
+
 module.exports = {
   uploadFileToS3,
   checkIfFileExists,
