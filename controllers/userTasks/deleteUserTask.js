@@ -1,24 +1,25 @@
 const { UserTask } = require("../../models").sequelize.models;
+const {
+  findRecordByPk,
+  handleErrorResponse,
+  deleteRecord,
+  handleSuccessResponse,
+} = require("../../utilities/controllerUtilites");
 const logger = require("../../utilities/logger");
 
 async function deleteUserTask(req, res, next) {
   const id = req.query.id;
-
-  const userTask = await UserTask.findByPk(id);
+  const userTask = await findRecordByPk(UserTask, id);
 
   if (!userTask) {
-    return res
-      .status(404)
-      .json({ success: false, message: "User task not found" });
+    return handleErrorResponse(res, 404, "User task not found");
   }
   try {
-    await userTask.destroy();
-    return res
-      .status(200)
-      .json({ success: true, message: "User task deleted successfully" });
+    await deleteRecord(UserTask, id);
+    return handleSuccessResponse(res, 200, "User task deleted successfully");
   } catch (error) {
     logger.error(error);
-    return res.status(500).json({ success: false, message: "Server error" });
+    return handleErrorResponse(res, 500, "Server error");
   }
 }
 

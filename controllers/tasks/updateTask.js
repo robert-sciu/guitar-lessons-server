@@ -24,7 +24,7 @@ async function updateTask(req, res) {
     return handleErrorResponse(res, 400, "No update data provided");
   }
   try {
-    const task = await findRecordByPk(Task, id);
+    const task = await findRecordByPk(Task, id, transaction);
     if (!task) {
       await transaction.rollback();
       return handleErrorResponse(res, 404, "Task not found");
@@ -46,7 +46,7 @@ async function updateTask(req, res) {
         return handleErrorResponse(res, 500, "Server error");
       }
     }
-    await updateRecord(Task, { ...updateData }, id);
+    await updateRecord(Task, { ...updateData }, id, transaction);
     await transaction.commit();
     return handleSuccessResponse(res, 200, "Task updated successfully");
   } catch (error) {

@@ -52,7 +52,7 @@ describe("User Controller", () => {
     const res = await request(app)
       .post(`${apiBaseUrl}/users`)
       .send(createUserData.validStudent);
-    expect(res.statusCode).toEqual(400);
+    expect(res.statusCode).toEqual(409);
     expect(res.body.success).toBe(false);
   });
   test("POST /user creates admin when CREATE_ADMIN_USER_ENABLED is true", async () => {

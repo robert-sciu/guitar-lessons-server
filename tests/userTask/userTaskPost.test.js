@@ -40,7 +40,7 @@ describe("User Task Create Controller", () => {
       .query({ user_id: 1 });
     expect(userTask.statusCode).toEqual(200);
     expect(userTask.body.success).toBe(true);
-    expect(userTask.body.userTasks).toStrictEqual([
+    expect(userTask.body.data).toStrictEqual([
       { ...createUserTaskData.valid, id: 1, is_completed: false },
     ]);
   });
@@ -63,5 +63,17 @@ describe("User Task Create Controller", () => {
       expect(res.statusCode).toEqual(400);
       expect(res.body.success).toBe(false);
     }
+  });
+
+  test("POST /userTasks duplicate", async () => {
+    await request(app)
+      .post(`${apiBaseUrl}/userTasks`)
+      .send(createUserTaskData.valid);
+
+    const res = await request(app)
+      .post(`${apiBaseUrl}/userTasks`)
+      .send(createUserTaskData.valid);
+    expect(res.statusCode).toEqual(409);
+    expect(res.body.success).toBe(false);
   });
 });

@@ -37,7 +37,7 @@ describe("Task Tag Post Controller", () => {
 
     expect(res.statusCode).toEqual(200);
     expect(res.body.success).toBe(true);
-    expect(res.body.taskTags).toStrictEqual([
+    expect(res.body.data).toStrictEqual([
       {
         ...createTaskTagData.valid,
         id: 1,

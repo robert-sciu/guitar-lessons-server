@@ -1,22 +1,24 @@
 const { UserTask } = require("../../models").sequelize.models;
+const {
+  findRecordByFk,
+  handleErrorResponse,
+  updateRecord,
+  handleSuccessResponse,
+} = require("../../utilities/controllerUtilites");
 const logger = require("../../utilities/logger");
 
 async function updateUserTaskNotes(req, res, next) {
   const { user_id, task_id, user_notes } = req.body;
-  const userTask = await UserTask.findOne({ where: { user_id, task_id } });
-  if (!userTask) {
-    return res
-      .status(404)
-      .json({ success: false, message: "User task not found" });
-  }
   try {
-    await userTask.update({ user_notes });
-    return res
-      .status(200)
-      .json({ success: true, message: "User task updated successfully" });
+    const userTask = await findRecordByFk(UserTask, { user_id, task_id });
+    if (!userTask) {
+      return handleErrorResponse(res, 404, "User task not found");
+    }
+    await updateRecord(UserTask, user_notes, userTask.id);
+    return handleSuccessResponse(res, 200, "User task updated successfully");
   } catch (error) {
     logger.error(error);
-    return res.status(500).json({ success: false, message: "Server error" });
+    return handleErrorResponse(res, 500, "Server error");
   }
 }
 

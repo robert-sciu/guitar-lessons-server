@@ -38,7 +38,7 @@ describe("User Task Get Controller", () => {
 
     expect(res.statusCode).toEqual(200);
     expect(res.body.success).toBe(true);
-    expect(res.body.userTasks).toStrictEqual([
+    expect(res.body.data).toStrictEqual([
       {
         id: 1,
         user_id: createUserTaskData.valid.user_id,

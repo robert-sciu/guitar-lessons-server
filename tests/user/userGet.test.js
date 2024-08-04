@@ -37,7 +37,7 @@ describe("User Controller", () => {
     };
 
     expect(res.statusCode).toEqual(200);
-    expect(res.body.userData).toStrictEqual(expectedStudent);
+    expect(res.body.data).toStrictEqual(expectedStudent);
   });
 
   test("GET /user without query parameter", async () => {

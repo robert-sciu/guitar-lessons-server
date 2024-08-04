@@ -15,6 +15,7 @@ module.exports = (sequelize, DataTypes) => {
       has_permanent_reservation: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
+        defaultValue: false,
       },
       permanent_reservation_weekday: {
         type: DataTypes.INTEGER,
@@ -39,10 +40,12 @@ module.exports = (sequelize, DataTypes) => {
       regular_discount: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        defaultValue: 0,
       },
       permanent_discount: {
         type: DataTypes.INTEGER,
-        allowNull: true,
+        allowNull: false,
+        defaultValue: 0,
       },
     },
     {

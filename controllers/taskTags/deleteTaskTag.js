@@ -1,23 +1,23 @@
 const { TaskTag } = require("../../models").sequelize.models;
+const {
+  findRecordByPk,
+  deleteRecord,
+  handleSuccessResponse,
+  handleErrorResponse,
+} = require("../../utilities/controllerUtilites");
 const logger = require("../../utilities/logger");
 
 async function deleteTaskTag(req, res) {
-  const { id } = req.query;
-
+  const id = req.query.id;
   try {
-    const taskTag = await TaskTag.findOne({ where: { id } });
-    if (!taskTag) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Task tag not found" });
+    if (!(await findRecordByPk(TaskTag, id))) {
+      return handleErrorResponse(res, 404, "Task tag not found");
     }
-    await taskTag.destroy();
-    return res
-      .status(200)
-      .json({ success: true, message: "Task tag deleted successfully" });
+    await deleteRecord(TaskTag, id);
+    return handleSuccessResponse(res, 200, "Task tag deleted successfully");
   } catch (error) {
     logger.error(error);
-    res.status(500).json({ success: false, message: "Server error" });
+    return handleErrorResponse(res, 500, "Server error");
   }
 }
 

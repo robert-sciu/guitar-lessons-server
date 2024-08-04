@@ -43,7 +43,7 @@ describe("Get Task Controller", () => {
     });
 
     expect(res.statusCode).toEqual(200);
-    expect(res.body.tasks).toStrictEqual([
+    expect(res.body.data).toStrictEqual([
       {
         id: 1,
         title: createTaskData.valid.title,
@@ -65,7 +65,7 @@ describe("Get Task Controller", () => {
         difficulty_clearance_level: 10,
       });
     expect(res.statusCode).toEqual(200);
-    expect(res.body.task).toStrictEqual({
+    expect(res.body.data).toStrictEqual({
       id: 1,
       title: createTaskData.valid.title,
       artist: createTaskData.valid.artist,

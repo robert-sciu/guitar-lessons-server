@@ -1,33 +1,37 @@
 const { Task, Tag, TaskTag } = require("../../models").sequelize.models;
+const {
+  handleErrorResponse,
+  createRecord,
+  handleSuccessResponse,
+  findRecordByPk,
+  findRecordByFk,
+} = require("../../utilities/controllerUtilites");
 const logger = require("../../utilities/logger");
 
 async function createTaskTag(req, res) {
-  const { task_id: taskId, tag_id: tagId } = req.body;
+  const { task_id, tag_id } = req.body;
   try {
-    const task = await Task.findByPk(taskId);
+    const task = await findRecordByPk(Task, task_id);
     if (!task) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Task not found" });
-    }
-    const tag = await Tag.findByPk(tagId);
-    if (!tag) {
-      return res.status(404).json({ success: false, message: "Tag not found" });
+      return handleErrorResponse(res, 404, "Task not found");
     }
     const taskDifficultyLevel = task.difficulty_level;
+    if (!(await findRecordByPk(Tag, tag_id))) {
+      return handleErrorResponse(res, 404, "Tag not found");
+    }
 
-    await TaskTag.create({
-      task_id: taskId,
-      tag_id: tagId,
+    if (await findRecordByFk(TaskTag, { task_id, tag_id })) {
+      return handleErrorResponse(res, 409, "Task tag already exists");
+    }
+    await createRecord(TaskTag, {
+      task_id,
+      tag_id,
       task_difficulty_level: taskDifficultyLevel,
     });
-
-    return res
-      .status(201)
-      .json({ success: true, message: "Task tag created successfully" });
+    return handleSuccessResponse(res, 201, "Task tag created successfully");
   } catch (error) {
     logger.error(error);
-    res.status(500).json({ success: false, message: "Server error" });
+    return handleErrorResponse(res, 500, "Server error");
   }
 }
 

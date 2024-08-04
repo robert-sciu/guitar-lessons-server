@@ -1,37 +1,35 @@
 const { User, PlanInfo } = require("../../models").sequelize.models;
 const { sequelize } = require("../../models");
+const {
+  findRecordByPk,
+  handleErrorResponse,
+  findRecordByFk,
+  deleteRecord,
+  handleSuccessResponse,
+} = require("../../utilities/controllerUtilites");
 const logger = require("../../utilities/logger");
 
 async function deleteUser(req, res) {
   const id = req.query.id;
-
   const transaction = await sequelize.transaction();
-
   try {
-    const user = await User.findByPk(id);
+    const user = await findRecordByPk(User, id, transaction);
     if (!user) {
       await transaction.rollback();
-      return res
-        .status(404)
-        .json({ success: false, message: "User not found" });
+      return handleErrorResponse(res, 404, "User not found");
     }
-
-    const planInfo = await PlanInfo.findOne({ where: { user_id: id } });
-
-    if (planInfo) {
-      await planInfo.destroy();
+    if (!(await findRecordByFk(PlanInfo, user.id, transaction))) {
+      await transaction.rollback();
+      return handleErrorResponse(res, 404, "Plan info not found");
     }
-    await user.destroy();
-
+    await deleteRecord(PlanInfo, user.id, transaction);
+    await deleteRecord(User, id, transaction);
     await transaction.commit();
-
-    return res
-      .status(200)
-      .json({ success: true, message: "User deleted successfully" });
+    return handleSuccessResponse(res, 200, "User deleted successfully");
   } catch (error) {
     await transaction.rollback();
     logger.error(error);
-    return res.status(400).json({ success: false, message: "Server error" });
+    return handleErrorResponse(res, 500, "Server error");
   }
 }
 

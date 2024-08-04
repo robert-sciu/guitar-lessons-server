@@ -31,6 +31,7 @@ module.exports = (sequelize, DataTypes) => {
       is_completed: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
+        defaultValue: false,
       },
     },
     {

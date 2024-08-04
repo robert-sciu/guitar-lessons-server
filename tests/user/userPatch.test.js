@@ -51,9 +51,9 @@ describe("User Controller", () => {
       .get(`${apiBaseUrl}/users`)
       .query({ id: 1 });
 
-    expect(updatedUser.body.userData.difficulty_clearance_level).toBe(1);
+    expect(updatedUser.body.data.difficulty_clearance_level).toBe(1);
     expect(
-      updatedUser.body.userData.is_confirmed === user.body.userData.is_confirmed
+      updatedUser.body.data.is_confirmed === user.body.data.is_confirmed
     ).toBe(true);
     expect(res.statusCode).toEqual(200);
     expect(res.body.success).toBe(true);
@@ -75,10 +75,10 @@ describe("User Controller", () => {
       .get(`${apiBaseUrl}/users`)
       .query({ id: 1 });
 
-    expect(updatedUser.body.userData.is_confirmed).toBe(true);
+    expect(updatedUser.body.data.is_confirmed).toBe(true);
     expect(
-      updatedUser.body.userData.difficulty_clearance_level ===
-        user.body.userData.difficulty_clearance_level
+      updatedUser.body.data.difficulty_clearance_level ===
+        user.body.data.difficulty_clearance_level
     ).toBe(true);
     expect(res.statusCode).toEqual(200);
     expect(res.body.success).toBe(true);

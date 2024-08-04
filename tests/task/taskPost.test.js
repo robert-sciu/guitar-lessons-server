@@ -6,6 +6,7 @@ const { createTaskData } = require("./data");
 const path = require("path");
 const { filterURL } = require("../../utilities/utilities");
 const { deleteTestDbEntry } = require("../utilities/utilities");
+const s3Manager = require("../../utilities/s3Manager");
 
 const filePath = path.join(__dirname, "files", "test.txt");
 
@@ -55,6 +56,63 @@ describe("POST task controller", () => {
       filename: "test.txt",
       id: 1,
     });
+  });
+
+  test("Transaction rollback on duplicate task title", async () => {
+    // First request to create a task successfully
+    await request(app)
+      .post(`${apiBaseUrl}/tasks`)
+      .field("title", createTaskData.valid.title)
+      .field("artist", createTaskData.valid.artist)
+      .field("url", createTaskData.valid.url)
+      .field("notes_pl", createTaskData.valid.notes_pl)
+      .field("notes_en", createTaskData.valid.notes_en)
+      .field("difficulty_level", createTaskData.valid.difficulty_level)
+      .attach("file", filePath);
+
+    // Second request to create a task with the same title
+    const res = await request(app)
+      .post(`${apiBaseUrl}/tasks`)
+      .field("title", createTaskData.valid.title) // Duplicate title
+      .field("artist", createTaskData.valid.artist)
+      .field("url", createTaskData.valid.url)
+      .field("notes_pl", createTaskData.valid.notes_pl)
+      .field("notes_en", createTaskData.valid.notes_en)
+      .field("difficulty_level", createTaskData.valid.difficulty_level);
+    expect(res.statusCode).toEqual(409);
+    expect(res.body.success).toBe(false);
+    expect(res.body.message).toBe("Task already exists");
+
+    // Verify that only one task exists in the database
+    const tasks = await sequelize.models.Task.findAll({
+      where: { title: createTaskData.valid.title },
+    });
+    expect(tasks.length).toBe(1); // Should only find the first task
+  });
+
+  test("Transaction rollback when file already exists", async () => {
+    // Mock the S3 manager to simulate file existence
+    jest.spyOn(s3Manager, "checkIfFileExists").mockResolvedValueOnce(true);
+
+    const res = await request(app)
+      .post(`${apiBaseUrl}/tasks`)
+      .field("title", "Unique Title")
+      .field("artist", createTaskData.valid.artist)
+      .field("url", createTaskData.valid.url)
+      .field("notes_pl", createTaskData.valid.notes_pl)
+      .field("notes_en", createTaskData.valid.notes_en)
+      .field("difficulty_level", createTaskData.valid.difficulty_level)
+      .attach("file", filePath);
+
+    expect(res.statusCode).toEqual(409);
+    expect(res.body.success).toBe(false);
+    expect(res.body.message).toBe("File already exists");
+
+    // Verify that no task is created
+    const task = await sequelize.models.Task.findOne({
+      where: { title: "Unique Title" },
+    });
+    expect(task).toBeNull();
   });
 
   test("POST /task with valid urls", async () => {

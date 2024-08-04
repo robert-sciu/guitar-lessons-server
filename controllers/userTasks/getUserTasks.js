@@ -1,20 +1,28 @@
+const {
+  findRecordByPk,
+  handleErrorResponse,
+  findAllRecords,
+  handleSuccessResponse,
+} = require("../../utilities/controllerUtilites");
+
 const { UserTask, User } = require("../../models").sequelize.models;
 
 async function getUserTasks(req, res) {
   const id = req.query.user_id;
-  const user = await User.findByPk(id);
-  if (!user) {
-    return res.status(404).json({ success: false, message: "User not found" });
+  const user_id = id;
+  try {
+    if (!(await findRecordByPk(User, id))) {
+      return handleErrorResponse(res, 404, "User not found");
+    }
+    const userTasks = await findAllRecords(UserTask, user_id);
+    if (userTasks.length < 1) {
+      return handleErrorResponse(res, 404, "No user tasks found");
+    }
+    return handleSuccessResponse(res, 200, userTasks);
+  } catch (error) {
+    logger.error(error);
+    return handleErrorResponse(res, 500, "Server error");
   }
-  const userTasks = await UserTask.findAll({ where: { user_id: id } });
-
-  if (userTasks.length < 1) {
-    return res
-      .status(404)
-      .json({ success: false, message: "No user tasks found" });
-  }
-
-  res.json({ success: true, userTasks });
 }
 
 module.exports = getUserTasks;
