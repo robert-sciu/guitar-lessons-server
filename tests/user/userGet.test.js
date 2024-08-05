@@ -7,7 +7,7 @@ const { deleteTestDbEntry } = require("../utilities/utilities");
 
 const apiBaseUrl = process.env.API_BASE_URL;
 
-describe("User Controller", () => {
+describe("GET /users", () => {
   beforeEach(async () => {
     await sequelize.sync({ force: true });
   });

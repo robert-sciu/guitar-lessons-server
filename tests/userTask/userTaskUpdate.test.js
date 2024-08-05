@@ -13,7 +13,7 @@ const {
 
 const apiBaseUrl = process.env.API_BASE_URL;
 
-describe("User Task PATCH Controller", () => {
+describe("PATCH /userTasks", () => {
   beforeEach(async () => {
     await sequelize.sync({ force: true });
 
@@ -33,38 +33,50 @@ describe("User Task PATCH Controller", () => {
   });
 
   test("PATCH /userTasks with valid data", async () => {
-    for (const valid_user_notes of createUserTaskData.validUserNotesList) {
+    for (const valid of createUserTaskData.validIsCompletedList) {
       const res = await request(app).patch(`${apiBaseUrl}/userTasks`).send({
         user_id: 1,
         task_id: 1,
-        user_notes: valid_user_notes,
+        is_completed: valid,
       });
       expect(res.statusCode).toEqual(200);
       expect(res.body.success).toBe(true);
     }
   });
 
-  test("PATCH /userTasks with invalid user id", async () => {
-    for (const invalid of createUserTaskData.invalid.userIdList) {
+  test("PATCH /userTasks with invalid data", async () => {
+    for (const invalid of createUserTaskData.invalidIsCompletedList) {
       const res = await request(app).patch(`${apiBaseUrl}/userTasks`).send({
-        user_id: invalid,
+        user_id: 1,
         task_id: 1,
-        user_notes: "test",
+        is_completed: invalid,
       });
       expect(res.statusCode).toEqual(400);
       expect(res.body.success).toBe(false);
     }
   });
 
-  test("PATCH /userTasks with invalid task id", async () => {
-    for (const invalid of createUserTaskData.invalid.taskIdList) {
-      const res = await request(app).patch(`${apiBaseUrl}/userTasks`).send({
-        user_id: 1,
-        task_id: invalid,
-        user_notes: "test",
-      });
-      expect(res.statusCode).toEqual(400);
-      expect(res.body.success).toBe(false);
-    }
+  test("PATCH /userTasks to the same data", async () => {
+    const res = await request(app).patch(`${apiBaseUrl}/userTasks`).send({
+      user_id: 1,
+      task_id: 1,
+      is_completed: true,
+    });
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.success).toBe(true);
+    const res2 = await request(app).patch(`${apiBaseUrl}/userTasks`).send({
+      user_id: 1,
+      task_id: 1,
+      is_completed: "true",
+    });
+    expect(res2.statusCode).toEqual(409);
+    expect(res2.body.success).toBe(false);
+    expect(res2.body.message).toBe("Cannot update to same value");
+  });
+
+  test("PATCH /userTasks with no data", async () => {
+    const res = await request(app).patch(`${apiBaseUrl}/userTasks`).send({});
+    expect(res.statusCode).toEqual(400);
+    expect(res.body.success).toBe(false);
   });
 });

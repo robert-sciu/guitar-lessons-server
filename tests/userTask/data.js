@@ -8,7 +8,9 @@ const createUserTaskData = {
     userIdList: ["", undefined, null, 0, NaN, "string", true, false],
     taskIdList: ["", undefined, null, 0, NaN, "string", true, false],
   },
-  validUserNotesList: ["", "Test", undefined],
+  validUserNotesList: ["", "Test"],
+  validIsCompletedList: [true, false, "true", "false"],
+  invalidIsCompletedList: ["", undefined, null, NaN, "string", 21, 0, 1],
   invalidQueryList: ["", undefined, null, 0, NaN, "string", true, false],
 };
 

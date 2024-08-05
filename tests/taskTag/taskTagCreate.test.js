@@ -9,7 +9,7 @@ const { createTaskTagData } = require("./data");
 const { createTagData } = require("../tag/data");
 const { createTestTask, deleteTestDbEntry } = require("../utilities/utilities");
 
-describe("Task Tag Post Controller", () => {
+describe("POST /taskTags", () => {
   beforeEach(async () => {
     await sequelize.sync({ force: true });
     await createTestTask();

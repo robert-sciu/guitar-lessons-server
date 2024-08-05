@@ -9,7 +9,7 @@ const { createTaskTagData, deleteTaskTagData } = require("./data");
 const { createTagData } = require("../tag/data");
 const { createTestTask, deleteTestDbEntry } = require("../utilities/utilities");
 
-describe("Task Tag Delete Controller", () => {
+describe("DELETE /taskTags", () => {
   beforeEach(async () => {
     await sequelize.sync({ force: true });
     await createTestTask();

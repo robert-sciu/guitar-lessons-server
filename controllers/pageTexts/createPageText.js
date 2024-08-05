@@ -3,14 +3,23 @@ const {
   createRecord,
   handleSuccessResponse,
   handleErrorResponse,
+  findRecordByPk,
+  removeEmptyValues,
+  destructureData,
 } = require("../../utilities/controllerUtilites");
 const { logger } = require("../../utilities/mailer");
 
 async function createPageText(req, res, next) {
-  // data = { section, category, position, content_pl, content_en };
-  const data = req.body;
+  const data = destructureData(req.body, [
+    "section",
+    "category",
+    "position",
+    "content_pl",
+    "content_en",
+  ]);
+  const filteredData = removeEmptyValues(data);
   try {
-    await createRecord(PageText, data);
+    await createRecord(PageText, filteredData);
     return handleSuccessResponse(res, 201, "Page text created successfully");
   } catch (error) {
     logger.error(error);

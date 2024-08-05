@@ -43,7 +43,7 @@ const validateUpdateTag = [
       return res.status(400).json({ success: false, message: errors.array() });
     }
 
-    noValuesToUndefined(req.body);
+    noValuesToUndefined(req);
 
     next();
   },

@@ -25,7 +25,7 @@ const originalTaskData = {
 
 const apiBaseUrl = process.env.API_BASE_URL;
 
-describe("Task Update controller", () => {
+describe("UPDATE /tasks", () => {
   beforeAll(async () => {
     process.env.BUCKET_NAME = "test-guitar-lessons-bucket";
   });

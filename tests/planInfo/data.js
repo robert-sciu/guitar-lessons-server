@@ -16,12 +16,12 @@ const updatePlanInfoData = {
   },
 
   invalidIdList: ["string", undefined, null, 0, NaN, true, false],
-  invalidDiscountList: ["string", undefined, null, NaN, true, false, 0.4],
-  invalidHourList: ["string", undefined, null, NaN, true, false],
-  invalidWeekdayList: ["string", undefined, null, NaN, true, false],
+  invalidDiscountList: ["string", null, NaN, true, false, 0.4],
+  invalidHourList: ["string", null, NaN, true, false],
+  invalidWeekdayList: ["string", null, NaN, true, false],
   invalidLengthList: ["string", undefined, null, NaN, true, false],
   invalidCountList: ["string", undefined, null, NaN, true, false],
-  invalidHasPermanentReservationList: ["string", undefined, null, NaN],
+  invalidHasPermanentReservationList: ["string", null, NaN],
 };
 
 module.exports = { planInfoData, updatePlanInfoData };

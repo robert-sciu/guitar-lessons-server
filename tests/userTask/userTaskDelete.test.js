@@ -12,7 +12,7 @@ const {
 
 const apiBaseUrl = process.env.API_BASE_URL;
 
-describe("User Task Delete Controller", () => {
+describe("DELETE /userTasks", () => {
   beforeEach(async () => {
     await sequelize.sync({ force: true });
 

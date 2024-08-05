@@ -8,7 +8,7 @@ const apiBaseUrl = process.env.API_BASE_URL;
 const { createTagData } = require("./data");
 const { deleteTestDbEntry } = require("../utilities/utilities");
 
-describe("Tag Get Controller", () => {
+describe("GET /tags", () => {
   beforeEach(async () => {
     await sequelize.sync({ force: true });
     await request(app).post(`${apiBaseUrl}/tags`).send(createTagData.valid);

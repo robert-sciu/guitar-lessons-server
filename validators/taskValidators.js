@@ -42,7 +42,7 @@ const validateCreateTask = [
       return res.status(400).json({ success: false, message: errors.array() });
     }
 
-    noValuesToUndefined(req.body);
+    noValuesToUndefined(req);
     next();
   },
 ];
@@ -79,7 +79,7 @@ const validateUpdateTask = [
       return res.status(400).json({ success: false, message: errors.array() });
     }
 
-    noValuesToUndefined(req.body);
+    noValuesToUndefined(req);
     next();
   },
 ];

@@ -23,7 +23,10 @@ async function updateTag(req, res) {
     }
   }
   try {
-    await updateRecord(Tag, updateData, id);
+    const updatedRowsCount = await updateRecord(Tag, updateData, id);
+    if (updatedRowsCount === 0) {
+      return handleErrorResponse(res, 409, "Tag not updated");
+    }
     return handleSuccessResponse(res, 200, "Tag updated successfully");
   } catch (error) {
     logger.error(error);

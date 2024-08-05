@@ -12,7 +12,7 @@ const {
 
 const apiBaseUrl = process.env.API_BASE_URL;
 
-describe("User Task Create Controller", () => {
+describe("POST /userTasks", () => {
   beforeEach(async () => {
     await sequelize.sync({ force: true });
 

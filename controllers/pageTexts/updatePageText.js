@@ -6,21 +6,31 @@ const {
   updateRecord,
   handleSuccessResponse,
   findRecordByPk,
+  removeEmptyValues,
+  destructureData,
 } = require("../../utilities/controllerUtilites");
 
 async function updatePageText(req, res) {
   const id = req.query.id;
-  const updateData = req.body;
-  // updateData = { position, content_pl, content_en };
+  const updateData = destructureData(req.body, [
+    "position",
+    "content_pl",
+    "content_en",
+  ]);
+  const filteredUpdateData = removeEmptyValues(updateData);
+
   if (checkMissingUpdateData(updateData)) {
     return handleErrorResponse(res, 400, "No update data provided");
   }
   try {
-    const pageText = await findRecordByPk(PageText, id);
-    if (!pageText) {
+    if (!(await findRecordByPk(PageText, id))) {
       return handleErrorResponse(res, 404, "Page text not found");
     }
-    const updatedRowsCount = await updateRecord(PageText, updateData, id);
+    const updatedRowsCount = await updateRecord(
+      PageText,
+      filteredUpdateData,
+      id
+    );
     if (updatedRowsCount === 0) {
       return handleErrorResponse(res, 409, "Page text not updated");
     }

@@ -46,7 +46,16 @@ async function updateTask(req, res) {
         return handleErrorResponse(res, 500, "Server error");
       }
     }
-    await updateRecord(Task, { ...updateData }, id, transaction);
+    const updatedRowsCount = await updateRecord(
+      Task,
+      updateData,
+      id,
+      transaction
+    );
+    if (updatedRowsCount === 0) {
+      await transaction.rollback();
+      return handleErrorResponse(res, 409, "Task not updated");
+    }
     await transaction.commit();
     return handleSuccessResponse(res, 200, "Task updated successfully");
   } catch (error) {

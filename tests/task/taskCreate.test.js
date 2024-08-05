@@ -12,7 +12,7 @@ const filePath = path.join(__dirname, "files", "test.txt");
 
 const apiBaseUrl = process.env.API_BASE_URL;
 
-describe("POST task controller", () => {
+describe("POST /tasks", () => {
   beforeAll(async () => {
     process.env.BUCKET_NAME = "test-guitar-lessons-bucket";
   });

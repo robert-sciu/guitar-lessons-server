@@ -10,8 +10,7 @@ const logger = require("../../utilities/logger");
 async function deletePageText(req, res) {
   const id = req.query.id;
   try {
-    const pageText = await findRecordByPk(PageText, id);
-    if (!pageText) {
+    if (!(await findRecordByPk(PageText, id))) {
       return handleErrorResponse(res, 404, "Page text not found");
     }
     await deleteRecord(PageText, id);

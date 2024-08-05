@@ -8,7 +8,7 @@ const apiBaseUrl = process.env.API_BASE_URL;
 const { updatePlanInfoData } = require("./data");
 const { createTestUser, deleteTestDbEntry } = require("../utilities/utilities");
 
-describe("Plan Info Update Controller", () => {
+describe("PATCH /planInfo", () => {
   beforeEach(async () => {
     await sequelize.sync({ force: true });
     await createTestUser();

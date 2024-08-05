@@ -9,12 +9,10 @@ const logger = require("../../utilities/logger");
 
 async function deleteUserTask(req, res, next) {
   const id = req.query.id;
-  const userTask = await findRecordByPk(UserTask, id);
-
-  if (!userTask) {
-    return handleErrorResponse(res, 404, "User task not found");
-  }
   try {
+    if (!(await findRecordByPk(UserTask, id))) {
+      return handleErrorResponse(res, 404, "User task not found");
+    }
     await deleteRecord(UserTask, id);
     return handleSuccessResponse(res, 200, "User task deleted successfully");
   } catch (error) {

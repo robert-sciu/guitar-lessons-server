@@ -1,22 +1,25 @@
-const { UserTask } = require("../../models").sequelize.models;
 const {
   findRecordByFk,
   handleErrorResponse,
-  updateRecord,
   handleSuccessResponse,
+  updateRecord,
 } = require("../../utilities/controllerUtilites");
+const { UserTask } = require("../../models").sequelize.models;
 const logger = require("../../utilities/logger");
 
-async function updateUserTaskNotes(req, res, next) {
-  const { user_id, task_id, user_notes } = req.body;
+async function updateUserTask(req, res) {
+  const { user_id, task_id, is_completed } = req.body;
   try {
     const userTask = await findRecordByFk(UserTask, { user_id, task_id });
     if (!userTask) {
       return handleErrorResponse(res, 404, "User task not found");
     }
+    if (String(userTask.is_completed) === String(is_completed)) {
+      return handleErrorResponse(res, 409, "Cannot update to same value");
+    }
     const updatedRecordCount = await updateRecord(
       UserTask,
-      { user_notes },
+      { is_completed },
       userTask.id
     );
     if (updatedRecordCount === 0) {
@@ -29,4 +32,4 @@ async function updateUserTaskNotes(req, res, next) {
   }
 }
 
-module.exports = updateUserTaskNotes;
+module.exports = updateUserTask;

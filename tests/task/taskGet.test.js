@@ -11,7 +11,7 @@ const filePath = path.join(__dirname, "files", "test.txt");
 
 const apiBaseUrl = process.env.API_BASE_URL;
 
-describe("Get Task Controller", () => {
+describe("GET /tasks", () => {
   beforeAll(async () => {
     process.env.BUCKET_NAME = "test-guitar-lessons-bucket";
   });

@@ -2,7 +2,8 @@ function filterURL(url) {
   return url.replace("https://", "").replace("http://", "").replace("www.", "");
 }
 
-function noValuesToUndefined(obj) {
+function noValuesToUndefined(req) {
+  const obj = req.body;
   Object.keys(obj).forEach((key) => {
     const value = obj[key];
 

@@ -10,7 +10,7 @@ const filePath = path.join(__dirname, "files", "test.txt");
 
 const apiBaseUrl = process.env.API_BASE_URL;
 
-describe("Delete Task Controller", () => {
+describe("DELETE /tasks", () => {
   beforeAll(async () => {
     process.env.BUCKET_NAME = "test-guitar-lessons-bucket";
   });
