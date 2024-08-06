@@ -2,6 +2,7 @@ const {
   handleErrorResponse,
   handleSuccessResponse,
   createRecord,
+  destructureData,
 } = require("../../utilities/controllerUtilites");
 const { logger } = require("../../utilities/mailer");
 
@@ -9,7 +10,7 @@ const { Tag } = require("../../models").sequelize.models;
 
 async function createTag(req, res) {
   const categories = process.env.TAG_CATEGORIES;
-  const data = req.body;
+  const data = destructureData(req.body, ["category", "value"]);
   const { category } = data;
 
   if (!categories.includes(category)) {

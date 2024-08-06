@@ -25,7 +25,7 @@ describe("GET /planInfo", () => {
     const user_id = userRes.dataValues.id;
     const res = await request(app)
       .get(`${apiBaseUrl}/planInfo`)
-      .send({ user_id });
+      .query({ user_id });
     expect(res.statusCode).toEqual(200);
     expect(res.body.success).toBe(true);
   });
@@ -34,7 +34,7 @@ describe("GET /planInfo", () => {
     for (const invalid of planInfoData.invalidIdList) {
       const res = await request(app)
         .get(`${apiBaseUrl}/planInfo`)
-        .send({ user_id: invalid });
+        .query({ user_id: invalid });
       expect(res.statusCode).toEqual(400);
       expect(res.body.success).toBe(false);
     }
@@ -47,7 +47,7 @@ describe("GET /planInfo", () => {
   });
 
   test("GET /planInfo with valid query parameter and no user", async () => {
-    const res = await request(app).get(`${apiBaseUrl}/planInfo`).send({
+    const res = await request(app).get(`${apiBaseUrl}/planInfo`).query({
       user_id: 999,
     });
     expect(res.statusCode).toEqual(404);

@@ -3,12 +3,18 @@ const {
   handleErrorResponse,
   handleSuccessResponse,
   updateRecord,
+  destructureData,
 } = require("../../utilities/controllerUtilites");
 const { UserTask } = require("../../models").sequelize.models;
 const logger = require("../../utilities/logger");
 
 async function updateUserTask(req, res) {
-  const { user_id, task_id, is_completed } = req.body;
+  const updateData = destructureData(req.body, [
+    "user_id",
+    "task_id",
+    "is_completed",
+  ]);
+  const { user_id, task_id, is_completed } = updateData;
   try {
     const userTask = await findRecordByFk(UserTask, { user_id, task_id });
     if (!userTask) {

@@ -4,11 +4,17 @@ const {
   handleErrorResponse,
   updateRecord,
   handleSuccessResponse,
+  destructureData,
 } = require("../../utilities/controllerUtilites");
 const logger = require("../../utilities/logger");
 
 async function updateUserTaskNotes(req, res, next) {
-  const { user_id, task_id, user_notes } = req.body;
+  const updateData = destructureData(req.body, [
+    "user_id",
+    "task_id",
+    "user_notes",
+  ]);
+  const { user_id, task_id, user_notes } = updateData;
   try {
     const userTask = await findRecordByFk(UserTask, { user_id, task_id });
     if (!userTask) {

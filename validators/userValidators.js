@@ -62,10 +62,7 @@ const validateGetUser = [
 ];
 
 const validateUpdateUser = [
-  body("user_id")
-    .notEmpty()
-    .isInt({ min: 1 })
-    .withMessage("Valid id is required"),
+  query("id").notEmpty().isInt({ min: 1 }).withMessage("Valid id is required"),
   body("difficulty_clearance_level")
     .optional()
     .isInt({ min: 0 })

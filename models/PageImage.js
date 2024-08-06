@@ -6,9 +6,21 @@ module.exports = (sequelize, DataTypes) => {
       autoIncrement: true,
       allowNull: false,
     },
-    category: {
+    title: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    section: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    category: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    position: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
     },
     filename: {
       type: DataTypes.STRING,

@@ -8,16 +8,28 @@ const {
   findRecordByPk,
   updateRecord,
   handleSuccessResponse,
+  destructureData,
 } = require("../../utilities/controllerUtilites");
 
 async function updateTask(req, res) {
   const bucketName = process.env.BUCKET_NAME;
   const tasksPath = process.env.BUCKET_TASKS_PATH;
   const id = req.query.id;
-  const { url, ...updateData } = req.body;
+  const updateData = destructureData(req.body, [
+    "title",
+    "artist",
+    "url",
+    "notes_pl",
+    "notes_en",
+    "difficulty_level",
+  ]);
+  const { url } = updateData;
   const file = req.file || undefined;
   const filteredUrl = url ? filterURL(url) : undefined;
-  updateData.url = filteredUrl;
+  if (filteredUrl) {
+    updateData.url = filteredUrl;
+  }
+
   const transaction = await sequelize.transaction();
   if (checkMissingUpdateData(updateData) && file === undefined) {
     await transaction.rollback();

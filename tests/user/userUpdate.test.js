@@ -11,6 +11,9 @@ const apiBaseUrl = process.env.API_BASE_URL;
 describe("UPDATE /users", () => {
   beforeEach(async () => {
     await sequelize.sync({ force: true });
+    await request(app)
+      .post(`${apiBaseUrl}/users`)
+      .send(createUserData.validStudent);
   });
 
   afterEach(async () => {
@@ -22,12 +25,9 @@ describe("UPDATE /users", () => {
   });
 
   test("PATCH /user with valid parameters", async () => {
-    await request(app)
-      .post(`${apiBaseUrl}/users`)
-      .send(createUserData.validStudent);
-
     const res = await request(app)
       .patch(`${apiBaseUrl}/users`)
+      .query({ id: updateUserData.valid.id })
       .send(updateUserData.valid);
 
     expect(res.statusCode).toEqual(200);
@@ -36,20 +36,20 @@ describe("UPDATE /users", () => {
   });
 
   test("PATCH /user with difficulty clearance level parameter only", async () => {
-    await request(app)
-      .post(`${apiBaseUrl}/users`)
-      .send(createUserData.validStudent);
+    const user = await request(app)
+      .get(`${apiBaseUrl}/users`)
+      .query({ id: updateUserData.valid.id });
 
-    const user = await request(app).get(`${apiBaseUrl}/users`).query({ id: 1 });
-
-    const res = await request(app).patch(`${apiBaseUrl}/users`).send({
-      user_id: updateUserData.valid.user_id,
-      difficulty_clearance_level: 1,
-    });
+    const res = await request(app)
+      .patch(`${apiBaseUrl}/users`)
+      .query({ id: updateUserData.valid.id })
+      .send({
+        difficulty_clearance_level: 1,
+      });
 
     const updatedUser = await request(app)
       .get(`${apiBaseUrl}/users`)
-      .query({ id: 1 });
+      .query({ id: updateUserData.valid.id });
 
     expect(updatedUser.body.data.difficulty_clearance_level).toBe(1);
     expect(
@@ -61,19 +61,18 @@ describe("UPDATE /users", () => {
   });
 
   test("PATCH /user with confirmed parameter only", async () => {
-    await request(app)
-      .post(`${apiBaseUrl}/users`)
-      .send(createUserData.validStudent);
-
-    const user = await request(app).get(`${apiBaseUrl}/users`).query({ id: 1 });
+    const user = await request(app)
+      .get(`${apiBaseUrl}/users`)
+      .query({ id: updateUserData.valid.id });
 
     const res = await request(app)
       .patch(`${apiBaseUrl}/users`)
-      .send({ user_id: updateUserData.valid.user_id, is_confirmed: true });
+      .query({ id: updateUserData.valid.id })
+      .send({ is_confirmed: true });
 
     const updatedUser = await request(app)
       .get(`${apiBaseUrl}/users`)
-      .query({ id: 1 });
+      .query({ id: updateUserData.valid.id });
 
     expect(updatedUser.body.data.is_confirmed).toBe(true);
     expect(
@@ -86,23 +85,19 @@ describe("UPDATE /users", () => {
   });
 
   test("PATCH / user with invalid id parameter", async () => {
-    await request(app)
-      .post(`${apiBaseUrl}/users`)
-      .send(createUserData.validStudent);
     const res = await request(app)
       .patch(`${apiBaseUrl}/users`)
-      .send({ ...updateUserData.valid, user_id: "invalid" });
+      .query({ id: "invalid" })
+      .send({ ...updateUserData.valid });
     expect(res.statusCode).toEqual(400);
     expect(res.body.success).toBe(false);
   });
 
   test("PATCH /user with invalid clearance parameter", async () => {
-    await request(app)
-      .post(`${apiBaseUrl}/users`)
-      .send(createUserData.validStudent);
     for (const invalid of updateUserData.invalidDifficultyClearanceList) {
       const res = await request(app)
         .patch(`${apiBaseUrl}/users`)
+        .query({ id: updateUserData.valid.id })
         .send({ ...updateUserData.valid, difficulty_clearance_level: invalid });
       expect(res.statusCode).toEqual(400);
       expect(res.body.success).toBe(false);
@@ -110,12 +105,10 @@ describe("UPDATE /users", () => {
   });
 
   test("PATCH /user with invalid confirmed parameter", async () => {
-    await request(app)
-      .post(`${apiBaseUrl}/users`)
-      .send(createUserData.validStudent);
     for (const invalid of updateUserData.invalidConfirmedList) {
       const res = await request(app)
         .patch(`${apiBaseUrl}/users`)
+        .query({ id: updateUserData.valid.id })
         .send({ ...updateUserData.valid, is_confirmed: invalid });
       expect(res.statusCode).toEqual(400);
       expect(res.body.success).toBe(false);
@@ -125,7 +118,7 @@ describe("UPDATE /users", () => {
   test("PATCH /user with no parameters", async () => {
     const res = await request(app)
       .patch(`${apiBaseUrl}/users`)
-      .send({ user_id: 1 });
+      .query({ id: updateUserData.valid.id });
     expect(res.statusCode).toEqual(400);
     expect(res.body.success).toBe(false);
     expect(res.body.message).toBe("No update data provided");
@@ -134,7 +127,8 @@ describe("UPDATE /users", () => {
   test("PATCH /no user", async () => {
     const res = await request(app)
       .patch(`${apiBaseUrl}/users`)
-      .send({ ...updateUserData.valid, user_id: 9999 });
+      .query({ id: 999 })
+      .send({ ...updateUserData.valid });
 
     expect(res.statusCode).toEqual(404);
     expect(res.body.success).toBe(false);
@@ -142,10 +136,6 @@ describe("UPDATE /users", () => {
   });
 
   test("PATCH /reset_password with valid parameters", async () => {
-    await request(app)
-      .post(`${apiBaseUrl}/users`)
-      .send(createUserData.validStudent);
-
     await request(app).post(`${apiBaseUrl}/users/reset_password`).send({
       email: createUserData.validStudent.email,
     });
@@ -173,10 +163,6 @@ describe("UPDATE /users", () => {
   });
 
   test("PATCH /reset_password with invalid token", async () => {
-    await request(app)
-      .post(`${apiBaseUrl}/users`)
-      .send(createUserData.validStudent);
-
     const res = await request(app)
       .patch(`${apiBaseUrl}/users/reset_password`)
       .send({

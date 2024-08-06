@@ -6,6 +6,7 @@ const {
   createRecord,
   handleSuccessResponse,
   checkMissingUpdateData,
+  destructureData,
 } = require("../../utilities/controllerUtilites");
 const logger = require("../../utilities/logger");
 const s3Manager = require("../../utilities/s3Manager");
@@ -14,10 +15,20 @@ const { filterURL } = require("../../utilities/utilities");
 async function createTask(req, res) {
   const bucketName = process.env.BUCKET_NAME;
   const tasksPath = process.env.BUCKET_TASKS_PATH;
-  // data = { artist, notes_pl, notes_en, difficulty_level };
-  const { url, title, ...data } = req.body;
+  const data = destructureData(req.body, [
+    "artist",
+    "title",
+    "url",
+    "notes_pl",
+    "notes_en",
+    "difficulty_level",
+  ]);
+  const { url, title } = data;
   const file = req.file || undefined;
   const filteredUrl = url ? filterURL(url) : undefined;
+  if (filteredUrl) {
+    data.url = filteredUrl;
+  }
   const transaction = await sequelize.transaction();
 
   // validator already checks for optional and non optional values but with almost all values optional we need to check if we have
@@ -45,14 +56,11 @@ async function createTask(req, res) {
     await createRecord(
       Task,
       {
-        title,
-        url: filteredUrl,
-        filename: file?.originalname,
         ...data,
+        filename: file?.originalname,
       },
       transaction
     );
-
     await transaction.commit();
 
     return handleSuccessResponse(res, 201, "Task created successfully");

@@ -5,23 +5,29 @@ const {
   handleErrorResponse,
   handleSuccessResponse,
   createRecord,
+  destructureData,
 } = require("../../utilities/controllerUtilites");
 const logger = require("../../utilities/logger");
 const bcrypt = require("bcryptjs");
 
 async function createUser(req, res) {
-  const { username, email, password, role } = req.body;
+  const data = destructureData(req.body, [
+    "username",
+    "email",
+    "password",
+    "role",
+  ]);
+  const { email, password, role } = data;
   const transaction = await sequelize.transaction();
   try {
     if (await findRecordByValue(User, { email }, transaction)) {
       await transaction.rollback();
       return handleErrorResponse(res, 409, "User already exists");
     }
+    const hashedPassword = await bcrypt.hash(password, 10);
     const userData = {
-      username,
-      email,
-      password: await bcrypt.hash(password, 10),
-      role,
+      ...data,
+      password: hashedPassword,
       difficulty_clearance_level: role === "admin" ? 999 : 0,
       is_confirmed: role === "admin" ? true : false,
     };

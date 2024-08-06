@@ -63,9 +63,65 @@ async function deleteAllFilesFromS3(bucketName, path) {
   }
 }
 
+async function bulkCheckIfFilesExist(fileObjectsArray) {
+  try {
+    for (const fileObject of fileObjectsArray) {
+      const exists = await checkIfFileExists(
+        fileObject.bucketName,
+        fileObject.path,
+        fileObject.file
+      );
+      if (!exists) {
+        return false;
+      }
+    }
+    return true;
+  } catch (error) {
+    throw new Error(error);
+  }
+}
+
+async function bulkUploadFiles(fileObjectsArray) {
+  const uploadedFiles = [];
+  try {
+    for (const fileObject of fileObjectsArray) {
+      await uploadFileToS3(
+        fileObject.bucketName,
+        fileObject.path,
+        fileObject.file
+      );
+      uploadedFiles.push({
+        bucketName: fileObject.bucketName,
+        path: `${fileObject.path}/${fileObject.file.originalname}`,
+      });
+    }
+  } catch (error) {
+    // Rollback: Delete any files that were uploaded before the error
+    await Promise.all(
+      uploadedFiles.map(async (file) => {
+        try {
+          await deleteFileFromS3(file.bucketName, file.path);
+        } catch (deleteError) {
+          console.error(
+            `Failed to delete file during rollback: ${file.path}`,
+            deleteError
+          );
+        }
+      })
+    );
+
+    throw new Error(
+      `Error uploading files, rolled back successfully uploaded files: ${error.message}`
+    );
+  }
+}
+
 module.exports = {
   uploadFileToS3,
   checkIfFileExists,
   deleteFileFromS3,
   attachImagePaths,
+  deleteAllFilesFromS3,
+  bulkCheckIfFilesExist,
+  bulkUploadFiles,
 };

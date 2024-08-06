@@ -77,7 +77,7 @@ function removeEmptyValues(updateData) {
  */
 function destructureData(data, keys) {
   const newData = keys.reduce((acc, key) => {
-    if (data[key]) {
+    if (data[key] !== undefined) {
       acc[key] = data[key];
     }
     return acc;
@@ -182,7 +182,7 @@ async function findRecordByPk(model, id, transaction) {
  */
 async function findRecordByFk(model, id, transaction) {
   if (transaction) {
-    if (Object.keys(id).length > 1) {
+    if (!Number(id) && Object.keys(id).length > 1) {
       return await model.findOne({
         where: { ...id },
         transaction: transaction,
@@ -190,7 +190,7 @@ async function findRecordByFk(model, id, transaction) {
     }
     return await model.findOne({ where: { id }, transaction: transaction });
   }
-  if (Object.keys(id).length > 1) {
+  if (!Number(id) && Object.keys(id).length > 1) {
     return await model.findOne({ where: { ...id } });
   }
   return await model.findOne({ where: { id } });
@@ -205,7 +205,9 @@ async function findRecordByFk(model, id, transaction) {
  * @return {Promise<Object>} A promise that resolves to the found record.
  */
 async function findRecordByValue(model, value, transaction) {
+  console.log("kurwa");
   if (transaction) {
+    console.log("mać");
     return await model.findOne({
       where: { ...value },
       transaction: transaction,
@@ -254,6 +256,6 @@ module.exports = {
   createRecord,
   deleteRecord,
   findAllRecords,
-  removeEmptyValues,
+  // removeEmptyValues,
   destructureData,
 };

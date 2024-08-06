@@ -6,11 +6,11 @@ const {
   findRecordByFk,
   updateRecord,
   handleSuccessResponse,
-  removeEmptyValues,
   destructureData,
 } = require("../../utilities/controllerUtilites");
 
 async function updatePlanInfo(req, res) {
+  const user_id = req.query.user_id;
   const updateData = destructureData(req.body, [
     "has_permanent_reservation",
     "permanent_reservation_weekday",
@@ -21,8 +21,7 @@ async function updatePlanInfo(req, res) {
     "regular_discount",
     "permanent_discount",
   ]);
-  const { user_id } = req.body;
-  const filteredUpdateData = removeEmptyValues(updateData);
+
   if (checkMissingUpdateData(updateData)) {
     return handleErrorResponse(res, 400, "No update data provided");
   }
@@ -31,7 +30,7 @@ async function updatePlanInfo(req, res) {
     if (!planInfo) {
       return handleErrorResponse(res, 404, "Plan info not found");
     }
-    const updateRowsCount = updateRecord(PlanInfo, filteredUpdateData, user_id);
+    const updateRowsCount = updateRecord(PlanInfo, updateData, user_id);
     if (updateRowsCount === 0) {
       return handleErrorResponse(res, 409, "Update failed");
     }

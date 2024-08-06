@@ -5,11 +5,13 @@ const {
   handleSuccessResponse,
   findRecordByPk,
   findRecordByFk,
+  destructureData,
 } = require("../../utilities/controllerUtilites");
 const logger = require("../../utilities/logger");
 
 async function createTaskTag(req, res) {
-  const { task_id, tag_id } = req.body;
+  const data = destructureData(req.body, ["task_id", "tag_id"]);
+  const { task_id, tag_id } = data;
   try {
     const task = await findRecordByPk(Task, task_id);
     if (!task) {

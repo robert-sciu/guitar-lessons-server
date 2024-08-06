@@ -38,7 +38,7 @@ const createUserData = {
 
 const updateUserData = {
   valid: {
-    user_id: 1,
+    id: 1,
     difficulty_clearance_level: 1,
     is_confirmed: true,
   },

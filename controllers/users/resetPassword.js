@@ -6,10 +6,16 @@ const {
   handleErrorResponse,
   updateRecord,
   handleSuccessResponse,
+  destructureData,
 } = require("../../utilities/controllerUtilites");
 
 async function resetPassword(req, res) {
-  const { email, password, reset_password_token } = req.body;
+  const data = destructureData(req.body, [
+    "email",
+    "password",
+    "reset_password_token",
+  ]);
+  const { email, password, reset_password_token } = data;
   try {
     const user = await findRecordByValue(User, { email });
     if (!user) {

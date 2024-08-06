@@ -2,7 +2,7 @@ const { body, query, validationResult } = require("express-validator");
 const { noValuesToUndefined } = require("../utilities/utilities");
 
 const validateGetPlanInfo = [
-  body("user_id")
+  query("user_id")
     .notEmpty()
     .isInt({ min: 1 })
     .withMessage("Valid id is required"),
@@ -17,7 +17,7 @@ const validateGetPlanInfo = [
 ];
 
 const validateUpdatePlanInfo = [
-  body("user_id")
+  query("user_id")
     .notEmpty()
     .isInt({ min: 1 })
     .withMessage("Valid id is required"),
