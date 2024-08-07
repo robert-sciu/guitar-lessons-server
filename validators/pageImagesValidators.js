@@ -2,6 +2,7 @@ const { body, query, validationResult } = require("express-validator");
 const { noValuesToUndefined } = require("../utilities/utilities");
 
 const validateCreatePageImages = [
+  body("title").notEmpty().isString().withMessage("Title is required"),
   body("section").notEmpty().isString().withMessage("Section is required"),
   body("category")
     .optional()

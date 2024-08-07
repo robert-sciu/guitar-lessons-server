@@ -8,10 +8,12 @@ const {
 
 router
   .route("/")
+  .get(pageImagesController.getPageImages)
   .post(
     uploadFile,
     validateCreatePageImages,
     pageImagesController.createPageImage
-  );
+  )
+  .delete(pageImagesController.deletePageImage);
 
 module.exports = router;

@@ -1,3 +1,5 @@
+const fileCompressor = require("./sharpCompressor");
+
 /**
  * Checks if all values in the data object are missing (i.e., undefined).
  *
@@ -205,9 +207,7 @@ async function findRecordByFk(model, id, transaction) {
  * @return {Promise<Object>} A promise that resolves to the found record.
  */
 async function findRecordByValue(model, value, transaction) {
-  console.log("kurwa");
   if (transaction) {
-    console.log("mać");
     return await model.findOne({
       where: { ...value },
       transaction: transaction,
@@ -245,6 +245,73 @@ async function deleteRecord(model, id, transaction) {
   return await model.destroy({ where: { id } });
 }
 
+/**
+ * Generates compressed image objects based on the provided parameters.
+ *
+ * @param {Object} options - The options object.
+ * @param {string} options.bucketName - The name of the bucket.
+ * @param {string} options.imgPath - The path of the image.
+ * @param {Object} options.inputFile - The input file object.
+ * @param {Array<Object>} options.compressionSizes - The array of compression sizes.
+ * @param {string} options.compressionSizes[].sizePath - The path of the size.
+ * @param {string} options.compressionSizes[].compressionType - The type of compression.
+ * @param {string} options.compressionSizes[].filePrefix - The prefix of the file.
+ * @return {Promise<Array<Object>>} A promise that resolves to an array of compressed image objects.
+ */
+async function generateCompressedImageObjects({
+  bucketName,
+  imgPath,
+  inputFile,
+  compressionSizes,
+}) {
+  const objects = await Promise.all(
+    compressionSizes.map(async (params) => {
+      return {
+        bucketName,
+        path: `${imgPath}/${params.sizePath}`,
+        file: await fileCompressor(
+          params.compressionType,
+          inputFile,
+          `${params.filePrefix}-${inputFile.originalname}`
+        ),
+      };
+    })
+  );
+  return objects;
+}
+
+function createStandardImageSizesConfig(sizeOnPage) {
+  return {
+    desktop: {
+      compressionType: sizeOnPage,
+      sizePath: process.env.DESKTOP_IMG_PATH,
+      filePrefix: "desktop",
+    },
+    mobile: {
+      compressionType: "mobile",
+      sizePath: process.env.MOBILE_IMG_PATH,
+      filePrefix: "mobile",
+    },
+    lazy: {
+      compressionType: "lazy",
+      sizePath: process.env.LAZY_IMG_PATH,
+      filePrefix: "lazy",
+    },
+  };
+}
+function createFilenamePropertiesFromSizeList(
+  object,
+  sizesObject,
+  originalname
+) {
+  const sizeTypes = Object.keys(sizesObject);
+  sizeTypes.forEach((size) => {
+    object[
+      `filename${size.slice(0, 1).toUpperCase()}${size.slice(1)}`
+    ] = `${sizesObject[size].filePrefix}-${originalname}`;
+  });
+  return object;
+}
 module.exports = {
   checkMissingUpdateData,
   handleSuccessResponse,
@@ -258,4 +325,7 @@ module.exports = {
   findAllRecords,
   // removeEmptyValues,
   destructureData,
+  generateCompressedImageObjects,
+  createStandardImageSizesConfig,
+  createFilenamePropertiesFromSizeList,
 };

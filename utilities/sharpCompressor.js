@@ -32,9 +32,10 @@ function sharpCompressor(size, buffer) {
   }
 }
 
-async function fileCompressor(size, file) {
+async function fileCompressor(size, file, filename) {
   try {
     const compressedImage = await sharpCompressor(size, file.buffer);
+    filename && (file.originalname = filename);
     const data = {
       ...file,
       buffer: compressedImage,

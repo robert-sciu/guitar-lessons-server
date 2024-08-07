@@ -1,11 +1,11 @@
 const minioClient = require("../config/minioClient");
+const logger = require("../utilities/logger");
 
 async function uploadFileToS3(bucketName, path, file) {
   try {
-    // const metadata = { "Content-Type": file.mimetype };
     await minioClient.putObject(
       bucketName,
-      path + "/" + file.originalname,
+      `${path}/${file.originalname}`,
       file.buffer,
       {
         "Content-Type": file.mimetype,
@@ -13,53 +13,78 @@ async function uploadFileToS3(bucketName, path, file) {
       }
     );
   } catch (error) {
-    throw new Error(error);
+    logger.error(error);
+    throw new Error(`Error uploading file: ${file.originalname}`);
   }
 }
 
 async function checkIfFileExists(bucketName, path, file) {
   try {
-    await minioClient.statObject(bucketName, path + "/" + file.originalname);
+    await minioClient.statObject(bucketName, `${path}/${file.originalname}`);
     return true;
   } catch (error) {
     if (error.code === "NotFound") {
       return false;
     }
-    throw new Error(error);
+    logger.error(error);
+    throw new Error(`Error checking existence of file ${file.originalname}`);
   }
 }
 
-async function deleteFileFromS3(bucketName, path, filename) {
+async function deleteFileFromS3(bucketName, path) {
   try {
-    await minioClient.removeObject(bucketName, path + "/" + filename);
+    await minioClient.removeObject(bucketName, path);
   } catch (error) {
-    throw new Error(error);
+    logger.error(error);
+    throw new Error(`Error deleting file: ${path}`);
   }
 }
 
-async function attachImagePaths(paintingsDataArrayJSON, bucketName) {
+async function attachImagePaths(imagesDataArrayJSON, bucketName) {
   try {
-    for (const imageData of paintingsDataArrayJSON) {
-      imageData.url = await minioClient.presignedGetObject(
-        bucketName,
-        imageData.fileName,
-        24 * 60 * 60
-      );
-    }
-    return paintingsDataArrayJSON;
+    await Promise.all(
+      imagesDataArrayJSON.map(async (imageData) => {
+        imageData.urlDesktop = await minioClient.presignedGetObject(
+          bucketName,
+          imageData.filenameDesktop,
+          24 * 60 * 60
+        );
+        imageData.urlMobile = await minioClient.presignedGetObject(
+          bucketName,
+          imageData?.filenameMobile,
+          24 * 60 * 60
+        );
+        imageData.urlLazy = await minioClient.presignedGetObject(
+          bucketName,
+          imageData?.filenameLazy,
+          24 * 60 * 60
+        );
+        return imageData;
+      })
+    );
+    return imagesDataArrayJSON;
   } catch (error) {
-    throw new Error(error.message);
+    logger.error(error);
+    throw new Error(`Error attaching image paths`);
   }
 }
 
 async function deleteAllFilesFromS3(bucketName, path) {
   try {
     const listObjects = await minioClient.listObjects(bucketName, path);
-    for (const object of listObjects) {
-      await minioClient.removeObject(bucketName, object.name);
-    }
+    await Promise.all(
+      listObjects.map(async (object) => {
+        try {
+          await minioClient.removeObject(bucketName, object.name);
+        } catch (error) {
+          logger.error(error);
+          throw new Error(`Error deleting file: ${object.name}`);
+        }
+      })
+    );
   } catch (error) {
-    throw new Error(error);
+    logger.error(error);
+    throw new Error(`Error deleting files`);
   }
 }
 
@@ -71,13 +96,14 @@ async function bulkCheckIfFilesExist(fileObjectsArray) {
         fileObject.path,
         fileObject.file
       );
-      if (!exists) {
-        return false;
+      if (exists) {
+        return true;
       }
     }
-    return true;
+    return false;
   } catch (error) {
-    throw new Error(error);
+    logger.error(error);
+    throw new Error(`Error checking existence of files`);
   }
 }
 
@@ -96,16 +122,15 @@ async function bulkUploadFiles(fileObjectsArray) {
       });
     }
   } catch (error) {
+    logger.error(error);
     // Rollback: Delete any files that were uploaded before the error
     await Promise.all(
       uploadedFiles.map(async (file) => {
         try {
           await deleteFileFromS3(file.bucketName, file.path);
-        } catch (deleteError) {
-          console.error(
-            `Failed to delete file during rollback: ${file.path}`,
-            deleteError
-          );
+        } catch (error) {
+          logger.error(error);
+          console.error(`Failed to delete file during rollback: ${file.path}`);
         }
       })
     );
