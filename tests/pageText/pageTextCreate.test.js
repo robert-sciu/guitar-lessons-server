@@ -29,6 +29,7 @@ describe("POST /pageTexts", () => {
     expect(res.statusCode).toEqual(201);
     expect(res.body.success).toBe(true);
     expect(res.body.message).toBe("Page text created successfully");
+
     const res2 = await request(app).get(`${apiBaseUrl}/pageTexts`).send();
     expect(res2.statusCode).toEqual(200);
     expect(res2.body.success).toBe(true);

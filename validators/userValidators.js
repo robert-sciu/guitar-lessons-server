@@ -1,14 +1,23 @@
 const { body, query, validationResult } = require("express-validator");
-const { noValuesToUndefined } = require("../utilities/utilities");
+const {
+  formatValidationErrors,
+  noValuesToUndefined,
+  customNotEmpty,
+} = require("../utilities/validatorsUtilities");
+const { handleErrorResponse } = require("../utilities/controllerUtilites");
+const allowList =
+  require("../config/config")[process.env.NODE_ENV]["allowList"];
 
 const validateEmail = () => {
-  return [body("email").isEmail().withMessage("Valid email is required")];
+  return [
+    body("email").notEmpty().isEmail().withMessage("Valid email is required"),
+  ];
 };
 
 const validatePassword = () => {
   return [
     body("password")
-      .notEmpty()
+      .custom(customNotEmpty())
       .withMessage("Password is required")
       .matches(/[a-zA-Z]/)
       .withMessage("Password must contain at least one letter")
@@ -21,7 +30,7 @@ const validatePassword = () => {
 
 const validateCreateUser = [
   body("username")
-    .notEmpty()
+    .custom(customNotEmpty())
     .withMessage("Name is required")
     .isString()
     .withMessage("Name must be a string")
@@ -31,41 +40,54 @@ const validateCreateUser = [
     .withMessage(
       "Name must contain only letters, spaces, hyphens, or apostrophes"
     ),
-
   ...validateEmail(),
-
   ...validatePassword(),
-
   body("role")
-    .notEmpty()
-    .isIn(["admin", "student"])
+    .custom(customNotEmpty())
+    .isIn(allowList.user.roles)
     .withMessage('Role must be "admin" or "student"'),
 
   (req, res, next) => {
+    req.body = noValuesToUndefined(req.body);
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ success: false, message: errors.array() });
+      return handleErrorResponse(
+        res,
+        400,
+        formatValidationErrors(errors.array())
+      );
     }
     next();
   },
 ];
 
 const validateGetUser = [
-  query("id").notEmpty().isInt({ min: 1 }).withMessage("Valid id is required"),
+  query("id")
+    .custom(customNotEmpty())
+    .isInt({ min: 1 })
+    .withMessage("Valid id is required"),
+
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ success: false, message: errors.array() });
+      return handleErrorResponse(
+        res,
+        400,
+        formatValidationErrors(errors.array())
+      );
     }
     next();
   },
 ];
 
 const validateUpdateUser = [
-  query("id").notEmpty().isInt({ min: 1 }).withMessage("Valid id is required"),
+  query("id")
+    .custom(customNotEmpty())
+    .isInt({ min: 1 })
+    .withMessage("Valid id is required"),
   body("difficulty_clearance_level")
     .optional()
-    .isInt({ min: 0 })
+    .isInt({ min: 1 })
     .withMessage("Valid difficulty clearance level is required"),
   body("is_confirmed")
     .optional()
@@ -75,32 +97,47 @@ const validateUpdateUser = [
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ success: false, message: errors.array() });
+      return handleErrorResponse(
+        res,
+        400,
+        formatValidationErrors(errors.array())
+      );
     }
-
-    noValuesToUndefined(req);
-
+    req.body = noValuesToUndefined(req.body);
     next();
   },
 ];
 
 const validateDeleteUser = [
-  query("id").notEmpty().isInt({ min: 1 }).withMessage("Valid id is required"),
+  query("id")
+    .custom(customNotEmpty())
+    .isInt({ min: 1 })
+    .withMessage("Valid id is required"),
+
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ success: false, message: errors.array() });
+      return handleErrorResponse(
+        res,
+        400,
+        formatValidationErrors(errors.array())
+      );
     }
     next();
   },
 ];
 
 const validateResetPasswordRequest = [
-  body("email").isEmail().withMessage("Valid email is required"),
+  ...validateEmail(),
+  
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ success: false, message: errors.array() });
+      return handleErrorResponse(
+        res,
+        400,
+        formatValidationErrors(errors.array())
+      );
     }
     next();
   },
@@ -108,17 +145,19 @@ const validateResetPasswordRequest = [
 
 const validateResetPassword = [
   ...validateEmail(),
-
   ...validatePassword(),
-
   body("reset_password_token")
-    .notEmpty()
+    .custom(customNotEmpty())
     .withMessage("Valid token is required"),
 
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ success: false, message: errors.array() });
+      return handleErrorResponse(
+        res,
+        400,
+        formatValidationErrors(errors.array())
+      );
     }
     next();
   },

@@ -10,6 +10,8 @@ const logger = require("../../utilities/logger");
 const s3Manager = require("../../utilities/s3Manager");
 
 async function deleteTask(req, res, next) {
+  const bucketName = process.env.BUCKET_NAME;
+  const tasksPath = process.env.BUCKET_TASKS_PATH;
   const id = req.query.id;
   const transaction = await sequelize.transaction();
   try {
@@ -18,20 +20,11 @@ async function deleteTask(req, res, next) {
       await transaction.rollback();
       return handleErrorResponse(res, 404, "Task not found");
     }
-    if (task.filename) {
-      try {
-        await s3Manager.deleteFileFromS3(
-          process.env.BUCKET_NAME,
-          process.env.BUCKET_TASKS_PATH,
-          task.filename
-        );
-      } catch (error) {
-        logger.error(error);
-        await transaction.rollback();
-        return handleErrorResponse(res, 500, "Server error");
-      }
-    }
     await deleteRecord(Task, id);
+    if (task.filename) {
+      const filePath = `${tasksPath}/${task.filename}`;
+      await s3Manager.deleteFileFromS3(bucketName, filePath);
+    }
     await transaction.commit();
     return handleSuccessResponse(res, 200, "Task deleted successfully");
   } catch (error) {

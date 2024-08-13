@@ -32,6 +32,7 @@ describe("UPDATE /tasks", () => {
 
   beforeEach(async () => {
     await sequelize.sync({ force: true });
+
     await request(app)
       .post(`${apiBaseUrl}/tasks`)
       .field("title", createTaskData.valid.title)
@@ -52,6 +53,8 @@ describe("UPDATE /tasks", () => {
   });
 
   test("PATCH /task with valid parameters", async () => {
+    await request(app).get(`${apiBaseUrl}/tasks`).query({ id: 1 });
+
     await request(app)
       .patch(`${apiBaseUrl}/tasks`)
       .query({ id: 1 })

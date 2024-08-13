@@ -6,29 +6,27 @@ const {
   handleSuccessResponse,
   destructureData,
   checkMissingUpdateData,
+  unchangedDataToUndefined,
 } = require("../../utilities/controllerUtilites");
 const logger = require("../../utilities/logger");
 
 async function updateTag(req, res) {
-  const availableCategories = process.env.TAG_CATEGORIES;
   const id = req.query.id;
   const updateData = destructureData(req.body, ["category", "value"]);
-
-  const tag = await findRecordByPk(Tag, id);
-  if (!tag) {
-    return handleErrorResponse(res, 404, "Tag not found");
-  }
-  if (checkMissingUpdateData(updateData)) {
-    return handleErrorResponse(res, 400, "No update data provided");
-  }
-  const { category } = updateData;
-  if (category) {
-    if (!availableCategories.includes(category)) {
-      return handleErrorResponse(res, 400, "Invalid category");
-    }
-  }
   try {
-    const updatedRowsCount = await updateRecord(Tag, updateData, id);
+    const tag = await findRecordByPk(Tag, id);
+    if (!tag) {
+      return handleErrorResponse(res, 404, "Tag not found");
+    }
+    const updateDataNoDuplicates = unchangedDataToUndefined(tag, updateData);
+    if (checkMissingUpdateData(updateDataNoDuplicates)) {
+      return handleErrorResponse(res, 400, "No update data provided");
+    }
+    const updatedRowsCount = await updateRecord(
+      Tag,
+      updateDataNoDuplicates,
+      id
+    );
     if (updatedRowsCount === 0) {
       return handleErrorResponse(res, 409, "Tag not updated");
     }

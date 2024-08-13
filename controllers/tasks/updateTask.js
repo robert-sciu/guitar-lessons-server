@@ -9,6 +9,7 @@ const {
   updateRecord,
   handleSuccessResponse,
   destructureData,
+  unchangedDataToUndefined,
 } = require("../../utilities/controllerUtilites");
 
 async function updateTask(req, res) {
@@ -24,39 +25,24 @@ async function updateTask(req, res) {
     "difficulty_level",
   ]);
   const { url } = updateData;
-  const file = req.file || undefined;
-  const filteredUrl = url ? filterURL(url) : undefined;
-  if (filteredUrl) {
-    updateData.url = filteredUrl;
+  const file = req.file;
+  if (url) {
+    updateData.url = filterURL(url);
   }
-
+  if (file) {
+    updateData.filename = file.originalname;
+  }
   const transaction = await sequelize.transaction();
-  if (checkMissingUpdateData(updateData) && file === undefined) {
-    await transaction.rollback();
-    return handleErrorResponse(res, 400, "No update data provided");
-  }
   try {
     const task = await findRecordByPk(Task, id, transaction);
     if (!task) {
       await transaction.rollback();
       return handleErrorResponse(res, 404, "Task not found");
     }
-    if (file) {
-      try {
-        if (task?.filename) {
-          await s3Manager.deleteFileFromS3(
-            bucketName,
-            tasksPath,
-            task.filename
-          );
-        }
-        await s3Manager.uploadFileToS3(bucketName, tasksPath, file);
-        updateData.filename = file.originalname;
-      } catch (error) {
-        await transaction.rollback();
-        logger.error(error);
-        return handleErrorResponse(res, 500, "Server error");
-      }
+    const updateDataNoDuplicates = unchangedDataToUndefined(task, updateData);
+    if (checkMissingUpdateData(updateDataNoDuplicates) && file === undefined) {
+      await transaction.rollback();
+      return handleErrorResponse(res, 400, "No update data provided");
     }
     const updatedRowsCount = await updateRecord(
       Task,
@@ -67,6 +53,13 @@ async function updateTask(req, res) {
     if (updatedRowsCount === 0) {
       await transaction.rollback();
       return handleErrorResponse(res, 409, "Task not updated");
+    }
+    if (file) {
+      if (task.filename) {
+        const filePath = `${tasksPath}/${task.filename}`;
+        await s3Manager.deleteFileFromS3(bucketName, filePath);
+      }
+      await s3Manager.uploadFileToS3(bucketName, tasksPath, file);
     }
     await transaction.commit();
     return handleSuccessResponse(res, 200, "Task updated successfully");

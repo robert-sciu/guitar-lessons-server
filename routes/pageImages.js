@@ -3,7 +3,9 @@ const router = express.Router();
 const uploadFile = require("../utilities/multer");
 const pageImagesController = require("../controllers/pageImages");
 const {
-  validateCreatePageImages,
+  validateCreatePageImage,
+  validateUpdatePageImage,
+  validateDeletePageImage,
 } = require("../validators/pageImagesValidators");
 
 router
@@ -11,9 +13,14 @@ router
   .get(pageImagesController.getPageImages)
   .post(
     uploadFile,
-    validateCreatePageImages,
+    validateCreatePageImage,
     pageImagesController.createPageImage
   )
-  .delete(pageImagesController.deletePageImage);
+  .patch(
+    uploadFile,
+    validateUpdatePageImage,
+    pageImagesController.updatePageImage
+  )
+  .delete(validateDeletePageImage, pageImagesController.deletePageImage);
 
 module.exports = router;

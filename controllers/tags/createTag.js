@@ -9,13 +9,7 @@ const { logger } = require("../../utilities/mailer");
 const { Tag } = require("../../models").sequelize.models;
 
 async function createTag(req, res) {
-  const categories = process.env.TAG_CATEGORIES;
   const data = destructureData(req.body, ["category", "value"]);
-  const { category } = data;
-
-  if (!categories.includes(category)) {
-    return handleErrorResponse(res, 400, "Invalid category");
-  }
   try {
     await createRecord(Tag, data);
     return handleSuccessResponse(res, 201, "Tag created successfully");

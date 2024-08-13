@@ -14,7 +14,8 @@ async function updateUserTaskNotes(req, res, next) {
     "task_id",
     "user_notes",
   ]);
-  const { user_id, task_id, user_notes } = updateData;
+  const { user_id, task_id } = updateData;
+  const user_notes = updateData.user_notes ? updateData.user_notes : "";
   try {
     const userTask = await findRecordByFk(UserTask, { user_id, task_id });
     if (!userTask) {

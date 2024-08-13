@@ -8,29 +8,33 @@ const { handleErrorResponse } = require("../utilities/controllerUtilites");
 const allowList =
   require("../config/config")[process.env.NODE_ENV]["allowList"];
 
-const validateCreatePageText = [
-  body("section")
+const validateCreateYouTubeVideo = [
+  body("title")
     .custom(customNotEmpty())
     .isString()
-    .isIn(allowList.pageText.sections)
+    .withMessage("Title is required"),
+  body("section")
+    .notEmpty()
+    .isString()
+    .isIn(allowList.youTubeVideo.sections)
     .withMessage("Section is required"),
   body("category")
     .optional()
     .isString()
-    .isIn(allowList.pageText.categories)
+    .isIn(allowList.youTubeVideo.categories)
     .withMessage("Category must be a string"),
   body("position")
     .optional()
     .isInt({ min: 0 })
     .withMessage("Position must be a number"),
-  body("content_pl")
+  body("url")
     .custom(customNotEmpty())
-    .isString()
-    .withMessage("Value is required"),
-  body("content_en")
-    .custom(customNotEmpty())
-    .isString()
-    .withMessage("Value is required"),
+    .isURL()
+    .withMessage("Valid URL is required"),
+  body("user_id")
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage("Valid id is required"),
 
   (req, res, next) => {
     req.body = noValuesToUndefined(req.body);
@@ -46,46 +50,69 @@ const validateCreatePageText = [
   },
 ];
 
-const validateDeletePageText = [
+const validateUpdateYouTubeVideo = [
   query("id")
     .custom(customNotEmpty())
-    .withMessage("Valid id is required")
     .isInt({ min: 1 })
     .withMessage("Valid id is required"),
-
-  (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return handleErrorResponse(
-        res,
-        400,
-        formatValidationErrors(errors.array())
-      );
-    }
-    next();
-  },
-];
-
-const validateUpdatePageText = [
-  query("id")
-    .custom(customNotEmpty())
-    .withMessage("Valid id is required")
-    .isInt({ min: 1 })
-    .withMessage("Valid id is required"),
-  body("position")
+  body("title").optional().isString().withMessage("Title is required"),
+  body("section")
     .optional()
-    .isInt({ min: 0 })
-    .withMessage("Position must be a number"),
+    .isString()
+    .isIn(allowList.youTubeVideo.sections)
+    .withMessage("Section is required"),
   body("category")
     .optional()
     .isString()
-    .isIn(allowList.pageText.categories)
+    .isIn(allowList.youTubeVideo.categories)
     .withMessage("Category must be a string"),
-  body("content_pl").notEmpty().isString().withMessage("Value is required"),
-  body("content_en").notEmpty().isString().withMessage("Value is required"),
+  body("position")
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage("Position must be a number"),
+  body("url").optional().isURL().withMessage("Valid URL is required"),
+  body("user_id")
+    .optional()
+    .isInt({ min: 1 })
+    .withMessage("Valid id is required"),
 
   (req, res, next) => {
     req.body = noValuesToUndefined(req.body);
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return handleErrorResponse(
+        res,
+        400,
+        formatValidationErrors(errors.array())
+      );
+    }
+    next();
+  },
+];
+
+const validateGetYouTubeVideos = [
+  query("id").optional().isInt({ min: 1 }).withMessage("Valid id is required"),
+
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return handleErrorResponse(
+        res,
+        400,
+        formatValidationErrors(errors.array())
+      );
+    }
+    next();
+  },
+];
+
+const validateDeleteYouTubeVideo = [
+  query("id")
+    .custom(customNotEmpty())
+    .isInt({ min: 1 })
+    .withMessage("Valid id is required"),
+
+  (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return handleErrorResponse(
@@ -99,7 +126,8 @@ const validateUpdatePageText = [
 ];
 
 module.exports = {
-  validateCreatePageText,
-  validateDeletePageText,
-  validateUpdatePageText,
+  validateGetYouTubeVideos,
+  validateCreateYouTubeVideo,
+  validateUpdateYouTubeVideo,
+  validateDeleteYouTubeVideo,
 };

@@ -7,8 +7,7 @@ const {
   destructureData,
   findRecordByValue,
   generateCompressedImageObjects,
-  createStandardImageSizesConfig,
-  createFilenamePropertiesFromSizeList,
+  addFilePathsToImageData,
 } = require("../../utilities/controllerUtilites");
 const logger = require("../../utilities/logger");
 
@@ -18,7 +17,6 @@ async function createPageImage(req, res) {
   const bucketName = process.env.BUCKET_NAME;
   const pageImagesBucketEnpoint = process.env.BUCKET_PAGE_IMAGES;
 
-  const availableImageSizes = process.env.AVAILABLE_IMAGE_SIZES;
   const data = destructureData(req.body, [
     "title",
     "section",
@@ -26,20 +24,11 @@ async function createPageImage(req, res) {
     "position",
     "size_on_page",
   ]);
-  const { size_on_page: sizeOnPage } = data;
+  const { size_on_page } = data;
   const file = req.file;
-  const sizes = createStandardImageSizesConfig(sizeOnPage);
-
+  data.filename = file.originalname;
   const transaction = await sequelize.transaction();
 
-  if (!availableImageSizes.includes(sizeOnPage)) {
-    await transaction.rollback();
-    return handleErrorResponse(res, 400, "Invalid sizeOnPage");
-  }
-  if (!file) {
-    await transaction.rollback();
-    return handleErrorResponse(res, 400, "No image provided");
-  }
   try {
     if (
       await findRecordByValue(PageImage, { title: data.title }, transaction)
@@ -48,30 +37,28 @@ async function createPageImage(req, res) {
       return handleErrorResponse(
         res,
         409,
-        `Page image named ${data.title} already exists. Please choose a different name.`
+        `Page image record named ${data.title} already exists. Please choose a different name.`
       );
     }
-    const dataWithFilenameProperties = createFilenamePropertiesFromSizeList(
-      data,
-      sizes,
-      file.originalname
-    );
-
+    const dataWithFilePaths = addFilePathsToImageData(data, size_on_page);
     const pageImageRecord = await createRecord(
       PageImage,
-      dataWithFilenameProperties,
+      dataWithFilePaths,
       transaction
     );
     if (!pageImageRecord) {
       await transaction.rollback();
       return handleErrorResponse(res, 500, "Error creating page image");
     }
+    // generateCompressedImageObjects generates compressed image objects based on the provided parameters
+    // and returns three objects: desktopImageData, mobileImageData and lazyImageData with the compressed images
+    // ready to be uploaded to S3
     [desktopImageData, mobileImageData, lazyImageData] =
       await generateCompressedImageObjects({
         bucketName,
         imgPath: pageImagesBucketEnpoint,
         inputFile: file,
-        compressionSizes: [sizes.desktop, sizes.mobile, sizes.lazy],
+        desktopSize: size_on_page,
       });
     if (
       await s3Manager.bulkCheckIfFilesExist([
@@ -80,17 +67,16 @@ async function createPageImage(req, res) {
         lazyImageData,
       ])
     ) {
+      await transaction.rollback();
       return handleErrorResponse(res, 409, "Image already exists");
     }
-
     await s3Manager.bulkUploadFiles([
       desktopImageData,
       mobileImageData,
       lazyImageData,
     ]);
     await transaction.commit();
-
-    return handleSuccessResponse(res, 201, "Image created successfully");
+    return handleSuccessResponse(res, 201, "Page image created successfully");
   } catch (error) {
     await transaction.rollback();
     logger.error(error);

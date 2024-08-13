@@ -15,7 +15,6 @@ async function createPageText(req, res, next) {
     "content_pl",
     "content_en",
   ]);
-
   try {
     await createRecord(PageText, data);
     return handleSuccessResponse(res, 201, "Page text created successfully");

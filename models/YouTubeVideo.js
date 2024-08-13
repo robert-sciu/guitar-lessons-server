@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
-  const PageImage = sequelize.define(
-    "PageImage",
+  const YouTubeVideo = sequelize.define(
+    "YouTubeVideo",
     {
       id: {
         type: DataTypes.INTEGER,
@@ -25,28 +25,19 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: true,
       },
-      filename_desktop: {
+      url: {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      size_on_page: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      filename_mobile: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      filename_lazy: {
-        type: DataTypes.STRING,
-        allowNull: false,
+      user_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
       },
     },
     {
       timestamps: false,
-      createAt: false,
     }
   );
 
-  return PageImage;
+  return YouTubeVideo;
 };

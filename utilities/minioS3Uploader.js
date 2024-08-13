@@ -2,67 +2,73 @@ const minioClient = require("../config/minioClient");
 const logger = require("../utilities/logger");
 
 async function uploadFileToS3(bucketName, path, file) {
+  const filePath = `${path}/${file.originalname}`;
   try {
-    await minioClient.putObject(
-      bucketName,
-      `${path}/${file.originalname}`,
-      file.buffer,
-      {
-        "Content-Type": file.mimetype,
-        "Encoding-Type": file.encoding,
-      }
-    );
+    await minioClient.putObject(bucketName, filePath, file.buffer, {
+      "Content-Type": file.mimetype,
+      "Encoding-Type": file.encoding,
+    });
+    if (!(await checkIfFileExists(bucketName, filePath))) {
+      throw new Error(`Error uploading file: ${file.originalname}`);
+    }
   } catch (error) {
     logger.error(error);
     throw new Error(`Error uploading file: ${file.originalname}`);
   }
 }
 
-async function checkIfFileExists(bucketName, path, file) {
+async function checkIfFileExists(bucketName, filePath) {
   try {
-    await minioClient.statObject(bucketName, `${path}/${file.originalname}`);
+    await minioClient.statObject(bucketName, filePath);
     return true;
   } catch (error) {
     if (error.code === "NotFound") {
       return false;
     }
     logger.error(error);
-    throw new Error(`Error checking existence of file ${file.originalname}`);
+    throw new Error(`Error checking existence of file : ${filePath}`);
   }
 }
 
-async function deleteFileFromS3(bucketName, path) {
+async function deleteFileFromS3(bucketName, filePath) {
   try {
-    await minioClient.removeObject(bucketName, path);
+    await minioClient.removeObject(bucketName, filePath);
+    if (await checkIfFileExists(bucketName, filePath)) {
+      throw new Error(`Error deleting file: ${filePath}`);
+    }
   } catch (error) {
     logger.error(error);
-    throw new Error(`Error deleting file: ${path}`);
+    throw new Error(`Error deleting file: ${filePath}`);
   }
 }
 
-async function attachImagePaths(imagesDataArrayJSON, bucketName) {
+async function attachImageURLs(pageImages, bucketName) {
+  const dataArray = pageImages.map((imageData) =>
+    imageData.get({ plain: true })
+  );
+
   try {
-    await Promise.all(
-      imagesDataArrayJSON.map(async (imageData) => {
-        imageData.urlDesktop = await minioClient.presignedGetObject(
+    const updatedArray = await Promise.all(
+      dataArray.map(async (imageData) => {
+        imageData.url_desktop = await minioClient.presignedGetObject(
           bucketName,
-          imageData.filenameDesktop,
+          imageData.filename_desktop,
           24 * 60 * 60
         );
-        imageData.urlMobile = await minioClient.presignedGetObject(
+        imageData.url_mobile = await minioClient.presignedGetObject(
           bucketName,
-          imageData?.filenameMobile,
+          imageData?.filename_mobile,
           24 * 60 * 60
         );
-        imageData.urlLazy = await minioClient.presignedGetObject(
+        imageData.url_lazy = await minioClient.presignedGetObject(
           bucketName,
-          imageData?.filenameLazy,
+          imageData?.filename_lazy,
           24 * 60 * 60
         );
         return imageData;
       })
     );
-    return imagesDataArrayJSON;
+    return updatedArray;
   } catch (error) {
     logger.error(error);
     throw new Error(`Error attaching image paths`);
@@ -91,11 +97,8 @@ async function deleteAllFilesFromS3(bucketName, path) {
 async function bulkCheckIfFilesExist(fileObjectsArray) {
   try {
     for (const fileObject of fileObjectsArray) {
-      const exists = await checkIfFileExists(
-        fileObject.bucketName,
-        fileObject.path,
-        fileObject.file
-      );
+      const path = `${fileObject.path}/${fileObject.file.originalname}`;
+      const exists = await checkIfFileExists(fileObject.bucketName, path);
       if (exists) {
         return true;
       }
@@ -107,6 +110,19 @@ async function bulkCheckIfFilesExist(fileObjectsArray) {
   }
 }
 
+/**
+ * Uploads multiple files to S3 in a bulk manner. If any error occurs during the upload process,
+ * it rolls back by deleting any successfully uploaded files.
+ *
+ * @param {Array<Object>} fileObjectsArray - An array of objects containing the necessary information
+ *                                            to upload each file. Each object should have the following properties:
+ *                                            - bucketName: The name of the S3 bucket to upload the file to.
+ *                                            - path: The path within the bucket to upload the file to.
+ *                                            - file: The file object to upload.
+ * @return {Promise<void>} - A promise that resolves when all files have been successfully uploaded, or rejects
+ *                           with an error if any error occurs during the upload process.
+ * @throws {Error} - If any error occurs during the upload process, including during the rollback process.
+ */
 async function bulkUploadFiles(fileObjectsArray) {
   const uploadedFiles = [];
   try {
@@ -145,7 +161,7 @@ module.exports = {
   uploadFileToS3,
   checkIfFileExists,
   deleteFileFromS3,
-  attachImagePaths,
+  attachImageURLs,
   deleteAllFilesFromS3,
   bulkCheckIfFilesExist,
   bulkUploadFiles,

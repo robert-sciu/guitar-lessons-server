@@ -1,17 +1,24 @@
 const { body, query, validationResult } = require("express-validator");
-const { logger } = require("../utilities/mailer");
+const {
+  formatValidationErrors,
+  customNotEmpty,
+} = require("../utilities/validatorsUtilities");
+const { handleErrorResponse } = require("../utilities/controllerUtilites");
 
 const validateGetTaskTags = [
   body("difficulty_clearance_level")
-    .notEmpty()
-    .isInt({ min: 0 })
+    .custom(customNotEmpty())
+    .isInt({ min: 1 })
     .withMessage("Valid difficulty clearance level is required"),
 
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      logger.error(errors.array());
-      return res.status(400).json({ success: false, message: errors.array() });
+      return handleErrorResponse(
+        res,
+        400,
+        formatValidationErrors(errors.array())
+      );
     }
     next();
   },
@@ -19,29 +26,41 @@ const validateGetTaskTags = [
 
 const validateCreateTaskTag = [
   body("task_id")
-    .notEmpty()
+    .custom(customNotEmpty())
     .isInt({ min: 1 })
     .withMessage("Task id is required"),
-  body("tag_id").notEmpty().isInt({ min: 1 }).withMessage("Tag id is required"),
+  body("tag_id")
+    .custom(customNotEmpty())
+    .isInt({ min: 1 })
+    .withMessage("Tag id is required"),
 
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      logger.error(errors.array());
-      return res.status(400).json({ success: false, message: errors.array() });
+      return handleErrorResponse(
+        res,
+        400,
+        formatValidationErrors(errors.array())
+      );
     }
     next();
   },
 ];
 
 const validateDeleteTaskTag = [
-  query("id").notEmpty().isInt({ min: 1 }).withMessage("Valid id is required"),
+  query("id")
+    .custom(customNotEmpty())
+    .isInt({ min: 1 })
+    .withMessage("Valid id is required"),
 
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      logger.error(errors.array());
-      return res.status(400).json({ success: false, message: errors.array() });
+      return handleErrorResponse(
+        res,
+        400,
+        formatValidationErrors(errors.array())
+      );
     }
     next();
   },

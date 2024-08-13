@@ -1,13 +1,13 @@
 const pageTextData = {
   valid: {
-    section: "test",
-    category: "test",
+    section: "hero",
+    category: "main",
     position: 1,
     content_pl: "test pl",
     content_en: "test en",
   },
   validUpdate: {
-    category: "update test",
+    category: "secondary",
     position: 2,
     content_pl: "update pl",
     content_en: "update en",

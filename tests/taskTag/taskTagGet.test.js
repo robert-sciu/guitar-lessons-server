@@ -66,8 +66,7 @@ describe("GET /taskTags", () => {
     const res = await request(app).get(`${apiBaseUrl}/taskTags`).send({
       difficulty_clearance_level: 0,
     });
-    expect(res.statusCode).toEqual(404);
+    expect(res.statusCode).toEqual(400);
     expect(res.body.success).toBe(false);
-    expect(res.body.message).toBe("No task tags found");
   });
 });

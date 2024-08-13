@@ -10,11 +10,11 @@ const { Tag } = require("../../models").sequelize.models;
 
 async function deleteTag(req, res) {
   const id = req.query.id;
-  const tag = await findRecordByPk(Tag, id);
-  if (!tag) {
-    return handleErrorResponse(res, 404, "Tag not found");
-  }
   try {
+    const tag = await findRecordByPk(Tag, id);
+    if (!tag) {
+      return handleErrorResponse(res, 404, "Tag not found");
+    }
     await deleteRecord(Tag, id);
     return handleSuccessResponse(res, 200, "Tag deleted successfully");
   } catch (error) {

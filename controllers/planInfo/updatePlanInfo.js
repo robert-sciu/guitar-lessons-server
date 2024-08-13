@@ -7,6 +7,7 @@ const {
   updateRecord,
   handleSuccessResponse,
   destructureData,
+  unchangedDataToUndefined,
 } = require("../../utilities/controllerUtilites");
 
 async function updatePlanInfo(req, res) {
@@ -22,13 +23,17 @@ async function updatePlanInfo(req, res) {
     "permanent_discount",
   ]);
 
-  if (checkMissingUpdateData(updateData)) {
-    return handleErrorResponse(res, 400, "No update data provided");
-  }
   try {
     const planInfo = await findRecordByFk(PlanInfo, user_id);
     if (!planInfo) {
       return handleErrorResponse(res, 404, "Plan info not found");
+    }
+    const updateDataNoDuplicates = unchangedDataToUndefined(
+      planInfo,
+      updateData
+    );
+    if (checkMissingUpdateData(updateDataNoDuplicates)) {
+      return handleErrorResponse(res, 400, "No update data provided");
     }
     const updateRowsCount = updateRecord(PlanInfo, updateData, user_id);
     if (updateRowsCount === 0) {

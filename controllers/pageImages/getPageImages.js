@@ -1,15 +1,12 @@
 const { PageImage } = require("../../models").sequelize.models;
 const logger = require("../../utilities/logger");
 const {
-  createRecord,
   handleSuccessResponse,
   handleErrorResponse,
-  destructureData,
-  findRecordByValue,
   findAllRecords,
 } = require("../../utilities/controllerUtilites");
 const s3Manager = require("../../utilities/s3Manager");
-const { attachImagePaths } = require("../../utilities/minioS3Uploader");
+const { attachImageURLs } = require("../../utilities/minioS3Uploader");
 
 async function getPageImages(req, res) {
   try {
@@ -17,12 +14,12 @@ async function getPageImages(req, res) {
     if (pageImages.length < 1) {
       return handleErrorResponse(res, 404, "No page images found");
     }
-    const imagesDataArrayJSON = pageImages.map((imageData) =>
-      imageData.toJSON()
+    const pageImagesWithUrls = await attachImageURLs(
+      pageImages,
+      process.env.BUCKET_NAME
     );
-    await attachImagePaths(imagesDataArrayJSON, process.env.BUCKET_NAME);
 
-    return handleSuccessResponse(res, 200, imagesDataArrayJSON);
+    return handleSuccessResponse(res, 200, pageImagesWithUrls);
   } catch (error) {
     logger.error(error);
     return handleErrorResponse(res, 500, "Server error");

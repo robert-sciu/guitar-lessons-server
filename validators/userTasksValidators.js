@@ -1,4 +1,9 @@
 const { body, query, validationResult } = require("express-validator");
+const {
+  formatValidationErrors,
+  noValuesToUndefined,
+} = require("../utilities/validatorsUtilities");
+const { handleErrorResponse } = require("../utilities/controllerUtilites");
 
 const validateGetUserTasks = [
   query("user_id")
@@ -9,7 +14,11 @@ const validateGetUserTasks = [
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ success: false, message: errors.array() });
+      return handleErrorResponse(
+        res,
+        400,
+        formatValidationErrors(errors.array())
+      );
     }
     next();
   },
@@ -28,11 +37,17 @@ const validateCreateUserTask = [
     .optional()
     .isString()
     .withMessage("User notes is required"),
+    
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ success: false, message: errors.array() });
+      return handleErrorResponse(
+        res,
+        400,
+        formatValidationErrors(errors.array())
+      );
     }
+    req.body = noValuesToUndefined(req.body);
     next();
   },
 ];
@@ -56,8 +71,14 @@ const validateUpdateUserTask = [
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ success: false, message: errors.array() });
+      return handleErrorResponse(
+        res,
+        400,
+        formatValidationErrors(errors.array())
+      );
     }
+
+    req.body = noValuesToUndefined(req.body);
     next();
   },
 ];
@@ -76,9 +97,13 @@ const validateUpdateUserTaskNotes = [
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ success: false, message: errors.array() });
+      return handleErrorResponse(
+        res,
+        400,
+        formatValidationErrors(errors.array())
+      );
     }
-
+    req.body = noValuesToUndefined(req.body);
     next();
   },
 ];
@@ -89,7 +114,11 @@ const validateDeleteUserTask = [
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ success: false, message: errors.array() });
+      return handleErrorResponse(
+        res,
+        400,
+        formatValidationErrors(errors.array())
+      );
     }
     next();
   },

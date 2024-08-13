@@ -1,3 +1,29 @@
+const pageImage = {
+  sections: ["hero", "about", "contact"],
+  categories: ["main", "secondary", "tertiary"],
+  sizesOnPage: ["large", "medium", "small"],
+  fileTypes: ["image/png", "image/jpg", "image/jpeg", "image/webp"],
+};
+
+const pageText = {
+  sections: ["hero", "about", "contact"],
+  categories: ["main", "secondary", "tertiary"],
+  sizesOnPage: ["large", "medium", "small"],
+};
+
+const tag = {
+  categories: ["genre", "instrument", "type", "artist", "difficulty"],
+};
+
+const user = {
+  roles: ["admin", "user"],
+};
+
+const youTubeVideo = {
+  sections: ["hero", "about", "contact"],
+  categories: ["main", "secondary", "tertiary"],
+};
+
 module.exports = {
   development: {
     postgres: {
@@ -10,6 +36,13 @@ module.exports = {
         dialect: "postgres",
       },
     },
+    allowList: {
+      pageImage: pageImage,
+      pageText: pageText,
+      tag: tag,
+      user: user,
+      youTubeVideo: youTubeVideo,
+    },
   },
   test: {
     postgres: {
@@ -21,6 +54,26 @@ module.exports = {
         // host: process.env.DB_HOST,
         dialect: "postgres",
         logging: false,
+      },
+    },
+    allowList: {
+      pageImage: {
+        sections: ["hero", "about"],
+        categories: ["main", "secondary"],
+        sizesOnPage: ["large", "medium", "small"],
+        fileTypes: ["image/png", "image/jpg", "image/jpeg", "image/webp"],
+      },
+      pageText: {
+        sections: ["hero", "about"],
+        categories: ["main", "secondary"],
+      },
+      tag: {
+        categories: ["genre", "instrument", "type", "artist"],
+      },
+      user: { roles: ["admin", "student"] },
+      youTubeVideo: {
+        sections: ["hero", "about"],
+        categories: ["main", "secondary"],
       },
     },
   },

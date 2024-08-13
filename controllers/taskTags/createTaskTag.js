@@ -21,7 +21,6 @@ async function createTaskTag(req, res) {
     if (!(await findRecordByPk(Tag, tag_id))) {
       return handleErrorResponse(res, 404, "Tag not found");
     }
-
     if (await findRecordByFk(TaskTag, { task_id, tag_id })) {
       return handleErrorResponse(res, 409, "Task tag already exists");
     }

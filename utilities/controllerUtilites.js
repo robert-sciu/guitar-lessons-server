@@ -1,4 +1,5 @@
 const fileCompressor = require("./sharpCompressor");
+const s3Manager = require("./s3Manager");
 
 /**
  * Checks if all values in the data object are missing (i.e., undefined).
@@ -28,35 +29,6 @@ function checkMissingUpdateData(updateData) {
   } else {
     return false;
   }
-}
-
-/**
- * Removes empty values from an object.
- *
- * @param {Object} data - The object to remove empty values from.
- * @return {Object} A new object with empty values removed.
- * @example
- * // Example usage:
- * const data = {
- *   name: 'Alice',
- *   age: undefined,
- *   email: 'alice@example.com',
- * };
- * const result = removeEmptyValues(data);
- * // result will be: { name: 'Alice', email: 'alice@example.com' }
- */
-function removeEmptyValues(updateData) {
-  const newUpdateData = Object.entries(updateData).reduce(
-    (acc, [key, value]) => {
-      if (value !== undefined) {
-        acc[key] = value;
-      }
-      return acc;
-    },
-    {}
-  );
-
-  return newUpdateData;
 }
 
 /**
@@ -132,10 +104,8 @@ async function updateRecord(model, updateData, id, transaction) {
       },
       transaction: transaction,
     });
-
     return updatedRowsCount;
   }
-  // console.log(model, updateData, id);
   const [updatedRowsCount] = await model.update(updateData, {
     where: {
       id,
@@ -153,10 +123,14 @@ async function updateRecord(model, updateData, id, transaction) {
  * @return {Promise<Object>} The created record.
  */
 async function createRecord(model, data, transaction) {
-  if (transaction) {
-    return await model.create(data, { transaction: transaction });
+  try {
+    if (transaction) {
+      return model.create(data, { transaction: transaction });
+    }
+    return model.create(data);
+  } catch (error) {
+    throw error;
   }
-  return await model.create(data);
 }
 
 /**
@@ -262,10 +236,11 @@ async function generateCompressedImageObjects({
   bucketName,
   imgPath,
   inputFile,
-  compressionSizes,
+  desktopSize,
 }) {
+  const compressionSizes = createImageSizesConfigObject(desktopSize);
   const objects = await Promise.all(
-    compressionSizes.map(async (params) => {
+    Object.values(compressionSizes).map(async (params) => {
       return {
         bucketName,
         path: `${imgPath}/${params.sizePath}`,
@@ -280,7 +255,7 @@ async function generateCompressedImageObjects({
   return objects;
 }
 
-function createStandardImageSizesConfig(sizeOnPage) {
+function createImageSizesConfigObject(sizeOnPage) {
   return {
     desktop: {
       compressionType: sizeOnPage,
@@ -299,20 +274,93 @@ function createStandardImageSizesConfig(sizeOnPage) {
     },
   };
 }
-function createFilenamePropertiesFromSizeList(
-  object,
-  sizesObject,
-  originalname
-) {
+function createPathsObjectForAllSizes(data, sizesObject) {
   const sizeTypes = Object.keys(sizesObject);
+  const pathsData = {};
   sizeTypes.forEach((size) => {
-    object[
-      `filename${size.slice(0, 1).toUpperCase()}${size.slice(1)}`
-    ] = `${sizesObject[size].filePrefix}-${originalname}`;
+    pathsData[
+      `filename_${size}`
+    ] = `${sizesObject[size].filePrefix}-${data.filename}`;
   });
-  return object;
+  return pathsData;
 }
+
+function addFilePathsToImageData(data, sizeOnPage) {
+  // createImageSizesConfigObject returns three objects with compression type, size path and file prefix
+  //for desktop, mobile and lazy image sizes
+  // compression type is used by sharp, sizePath and filePrefix are used by s3Manager to prepare the file names
+  // and put them in respective folders
+  // size on page is the only property that can be changed, lazy and mobile image sizes are always the same
+  // sizeOnPage is the compression type for desktop image
+  const sizes = sizeOnPage
+    ? createImageSizesConfigObject(sizeOnPage)
+    : createImageSizesConfigObject(data.sizeOnPage);
+  // createPathsObjectForAllSizes gets the sizes objects and the file original name and returns
+  // data object with three properties: desktop, mobile and lazy, each containing paths to the compressed images
+  // it does not compress the original image, it just adds paths based on the compression type and original name.
+  const pathsData = createPathsObjectForAllSizes(data, sizes);
+  const dataWithPaths = {
+    ...data,
+    ...pathsData,
+  };
+  dataWithPaths.sizeOnPage = sizeOnPage ? sizeOnPage : data.sizeOnPage;
+  return dataWithPaths;
+}
+
+async function deleteAllPageImageFiles(imgObject) {
+  const pageImagesBucketEnpoint = process.env.BUCKET_PAGE_IMAGES;
+  const bucketName = process.env.BUCKET_NAME;
+  const { filename_desktop, filename_mobile, filename_lazy } = imgObject;
+  const filenames = [filename_desktop, filename_mobile, filename_lazy];
+  try {
+    await Promise.all(
+      filenames.map(async (filename) => {
+        const imgTypeEndpoint = filename.split("-")[0];
+        const fullPath = `${pageImagesBucketEnpoint}/${imgTypeEndpoint}/${filename}`;
+        await s3Manager.deleteFileFromS3(bucketName, fullPath);
+      })
+    );
+    const existingFiles = [];
+    await Promise.all(
+      filenames.map(async (filename) => {
+        const imgTypeEndpoint = filename.split("-")[0];
+        const fullPath = `${pageImagesBucketEnpoint}/${imgTypeEndpoint}/${filename}`;
+        const exists = await s3Manager.checkIfFileExists(bucketName, fullPath);
+        if (exists) {
+          existingFiles.push(filename);
+        }
+      })
+    );
+    if (existingFiles.length > 0) {
+      throw new Error(`Error deleting files: ${existingFiles.join(", ")}`);
+    }
+  } catch (error) {
+    throw new Error(error);
+  }
+}
+
+function unchangedDataToUndefined(originalData, updateData) {
+  /**
+   * Updates the given update data object by setting the values that are the same as the original values to undefined.
+   *
+   * @param {object} originalData - The original data object.
+   * @param {object} updateData - The update data object.
+   * @return {object} The updated update data object.
+   */
+  const updateDataFiltered = {};
+  const keys = Object.keys(updateData);
+  for (const key of keys) {
+    if (originalData[key] === updateData[key]) {
+      updateDataFiltered[key] = undefined;
+    } else {
+      updateDataFiltered[key] = updateData[key];
+    }
+  }
+  return updateDataFiltered;
+}
+
 module.exports = {
+  addFilePathsToImageData,
   checkMissingUpdateData,
   handleSuccessResponse,
   handleErrorResponse,
@@ -323,9 +371,10 @@ module.exports = {
   createRecord,
   deleteRecord,
   findAllRecords,
-  // removeEmptyValues,
+  unchangedDataToUndefined,
   destructureData,
   generateCompressedImageObjects,
-  createStandardImageSizesConfig,
-  createFilenamePropertiesFromSizeList,
+  createImageSizesConfigObject,
+  createPathsObjectForAllSizes,
+  deleteAllPageImageFiles,
 };
