@@ -45,7 +45,7 @@ const validateCreateUser = [
   body("role")
     .custom(customNotEmpty())
     .isIn(allowList.user.roles)
-    .withMessage('Role must be "admin" or "student"'),
+    .withMessage('Role must be "admin" or "user"'),
 
   (req, res, next) => {
     req.body = noValuesToUndefined(req.body);

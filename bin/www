@@ -37,6 +37,7 @@ async function initApp() {
   } catch (error) {
     console.log(error);
   }
+  const dailyTask = require("../cron/dailyTasks");
 
   server.listen(port);
   server.on("error", onError);

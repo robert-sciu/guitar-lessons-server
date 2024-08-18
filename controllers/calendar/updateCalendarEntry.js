@@ -1,6 +1,8 @@
 const {
   updateRecord,
   destructureData,
+  unchangedDataToUndefined,
+  checkMissingUpdateData,
 } = require("../../utilities/controllerUtilites");
 const {
   findRecordByPk,
@@ -54,7 +56,15 @@ async function updateCalendarEntry(req, res) {
     }
     updateData.availability_from = integerToTime(availability_from);
     updateData.availability_to = integerToTime(availability_to);
-    const updatedRowsCount = await updateRecord(Calendar, updateData, id);
+    const updateDataNoDuplicates = unchangedDataToUndefined(entry, updateData);
+    if (checkMissingUpdateData(updateDataNoDuplicates)) {
+      return handleErrorResponse(res, 400, "No update data provided");
+    }
+    const updatedRowsCount = await updateRecord(
+      Calendar,
+      updateDataNoDuplicates,
+      id
+    );
     if (updatedRowsCount === 0) {
       return handleErrorResponse(res, 409, "Calendar entry not updated");
     }

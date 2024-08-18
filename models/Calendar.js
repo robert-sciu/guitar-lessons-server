@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
       weekday: {
-        type: DataTypes.STRING,
+        type: DataTypes.INTEGER,
         allowNull: true,
       },
       date: {

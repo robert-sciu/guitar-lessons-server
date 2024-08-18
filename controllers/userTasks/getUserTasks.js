@@ -6,6 +6,7 @@ const {
 } = require("../../utilities/controllerUtilites");
 
 const { UserTask, User } = require("../../models").sequelize.models;
+const logger = require("../../utilities/logger");
 
 async function getUserTasks(req, res) {
   const id = req.query.user_id;
@@ -14,7 +15,7 @@ async function getUserTasks(req, res) {
     if (!(await findRecordByPk(User, id))) {
       return handleErrorResponse(res, 404, "User not found");
     }
-    const userTasks = await findAllRecords(UserTask, user_id);
+    const userTasks = await findAllRecords(UserTask, { user_id });
     if (userTasks.length < 1) {
       return handleErrorResponse(res, 404, "No user tasks found");
     }

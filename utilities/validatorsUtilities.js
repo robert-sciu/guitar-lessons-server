@@ -44,7 +44,7 @@ function customNotEmpty() {
 }
 
 function integerToTime(int) {
-  const time = `${int}:00`;
+  const time = `${int}:00:00`;
   return time;
 }
 

@@ -10,20 +10,24 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    // no_account_reservation: {
-    //   type: DataTypes.BOOLEAN,
-    //   allowNull: false,
-    // },
-    username: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
     date: {
       type: DataTypes.DATEONLY,
       allowNull: false,
     },
-    time: {
-      type: DataTypes.TIME,
+    hour: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    minute: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    duration: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    is_permanent: {
+      type: DataTypes.BOOLEAN,
       allowNull: false,
     },
     rescheduled_by_user: {
