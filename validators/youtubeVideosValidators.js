@@ -12,17 +12,21 @@ const validateCreateYouTubeVideo = [
   body("title")
     .custom(customNotEmpty())
     .isString()
+    .not()
+    .isNumeric()
+    .not()
+    .isBoolean()
     .withMessage("Title is required"),
   body("section")
     .notEmpty()
     .isString()
     .isIn(allowList.youTubeVideo.sections)
-    .withMessage("Section is required"),
+    .withMessage("Valid section is required"),
   body("category")
     .optional()
     .isString()
     .isIn(allowList.youTubeVideo.categories)
-    .withMessage("Category must be a string"),
+    .withMessage("Valid category is required"),
   body("position")
     .optional()
     .isInt({ min: 0 })
@@ -55,7 +59,14 @@ const validateUpdateYouTubeVideo = [
     .custom(customNotEmpty())
     .isInt({ min: 1 })
     .withMessage("Valid id is required"),
-  body("title").optional().isString().withMessage("Title is required"),
+  body("title")
+    .optional()
+    .isString()
+    .not()
+    .isNumeric()
+    .not()
+    .isBoolean()
+    .withMessage("Title is required"),
   body("section")
     .optional()
     .isString()

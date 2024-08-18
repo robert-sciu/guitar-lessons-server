@@ -22,7 +22,7 @@ async function updateYouTubeVideo(req, res) {
   try {
     const youTubeVideo = await findRecordByPk(YouTubeVideo, id);
     if (!youTubeVideo) {
-      return handleErrorResponse(res, 404, "Video not found");
+      return handleErrorResponse(res, 404, "YouTube video not found");
     }
     if (
       updateData.user_id &&
@@ -37,7 +37,11 @@ async function updateYouTubeVideo(req, res) {
     if (updatedRowsCount === 0) {
       return handleErrorResponse(res, 409, "Video not updated");
     }
-    return handleSuccessResponse(res, 201, "Video updated successfully");
+    return handleSuccessResponse(
+      res,
+      201,
+      "YouTube video updated successfully"
+    );
   } catch (error) {
     logger.error(error);
     return handleErrorResponse(res, 500, "Server error");

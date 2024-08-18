@@ -25,7 +25,7 @@ function noValuesToUndefined(input) {
     } else if (typeof value === "number" && isNaN(value)) {
       result[key] = undefined;
     } else if (typeof value === "object") {
-      noValuesToUndefined(value);
+      restult[key] = noValuesToUndefined(value);
     } else {
       result[key] = value;
     }
@@ -36,15 +36,27 @@ function noValuesToUndefined(input) {
 function customNotEmpty() {
   return (value) => {
     const checkedValue = noValuesToUndefined({ value });
-    if (!checkedValue.value) {
+    if (checkedValue.value === undefined) {
       throw new Error("Value is required");
     }
     return true;
   };
 }
 
+function integerToTime(int) {
+  const time = `${int}:00`;
+  return time;
+}
+
+function timeToInteger(time) {
+  const int = parseInt(time.split(":")[0]);
+  return int;
+}
+
 module.exports = {
   formatValidationErrors,
   noValuesToUndefined,
   customNotEmpty,
+  integerToTime,
+  timeToInteger,
 };

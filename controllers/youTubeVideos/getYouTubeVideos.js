@@ -13,7 +13,7 @@ async function getYouTubeVideos(req, res) {
     try {
       const video = await findRecordByPk(YouTubeVideo, id);
       if (!video) {
-        return handleErrorResponse(res, 404, "Video not found");
+        return handleErrorResponse(res, 404, "YouTube video not found");
       }
       return handleSuccessResponse(res, 200, video);
     } catch (error) {

@@ -7,6 +7,7 @@ const {
   findRecordByPk,
   handleSuccessResponse,
   destructureData,
+  unchangedDataToUndefined,
 } = require("../../utilities/controllerUtilites");
 
 async function updateUser(req, res) {
@@ -15,14 +16,21 @@ async function updateUser(req, res) {
     "difficulty_clearance_level",
     "is_confirmed",
   ]);
-  if (checkMissingUpdateData(updateData)) {
-    return handleErrorResponse(res, 400, "No update data provided");
-  }
   try {
-    if (!(await findRecordByPk(User, id))) {
+    const user = await findRecordByPk(User, id);
+    if (!user) {
       return handleErrorResponse(res, 404, "User not found");
     }
-    const updatedRecordCount = await updateRecord(User, updateData, id);
+    const updateDataNoDuplicates = unchangedDataToUndefined(user, updateData);
+    if (checkMissingUpdateData(updateDataNoDuplicates)) {
+      return handleErrorResponse(res, 400, "No update data provided");
+    }
+
+    const updatedRecordCount = await updateRecord(
+      User,
+      updateDataNoDuplicates,
+      id
+    );
     if (updatedRecordCount === 0) {
       return handleErrorResponse(res, 409, "Update failed");
     }

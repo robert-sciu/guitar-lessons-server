@@ -10,13 +10,13 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    no_account_reservation: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-    },
+    // no_account_reservation: {
+    //   type: DataTypes.BOOLEAN,
+    //   allowNull: false,
+    // },
     username: {
       type: DataTypes.STRING,
-      allowNull: true,
+      allowNull: false,
     },
     date: {
       type: DataTypes.DATEONLY,
@@ -28,19 +28,19 @@ module.exports = (sequelize, DataTypes) => {
     },
     rescheduled_by_user: {
       type: DataTypes.BOOLEAN,
-      allowNull: false,
+      allowNull: true,
     },
     canceled_by_user: {
       type: DataTypes.BOOLEAN,
-      allowNull: false,
+      allowNull: true,
     },
     rescheduled_by_teacher: {
       type: DataTypes.BOOLEAN,
-      allowNull: false,
+      allowNull: true,
     },
     canceled_by_teacher: {
       type: DataTypes.BOOLEAN,
-      allowNull: false,
+      allowNull: true,
     },
   });
 

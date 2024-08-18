@@ -24,6 +24,13 @@ async function createTestUser() {
     .send(createUserData.validStudent);
 }
 
+/**
+ * Deletes a test database entry if it exists.
+ *
+ * @param {Object} model - The database model to query.
+ * @param {string} endpoint - The API endpoint to delete from.
+ * @return {Promise} A promise resolving to the delete request result, or undefined if no entry was found.
+ */
 async function deleteTestDbEntry(model, endpoint) {
   if (await model.findOne({ where: { id: 1 } })) {
     return request(app).delete(`${apiBaseUrl}/${endpoint}`).query({ id: 1 });

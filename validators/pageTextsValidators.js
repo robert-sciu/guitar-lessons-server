@@ -81,8 +81,14 @@ const validateUpdatePageText = [
     .isString()
     .isIn(allowList.pageText.categories)
     .withMessage("Category must be a string"),
-  body("content_pl").notEmpty().isString().withMessage("Value is required"),
-  body("content_en").notEmpty().isString().withMessage("Value is required"),
+  body("content_pl")
+    .custom(customNotEmpty())
+    .isString()
+    .withMessage("Value is required"),
+  body("content_en")
+    .custom(customNotEmpty())
+    .isString()
+    .withMessage("Value is required"),
 
   (req, res, next) => {
     req.body = noValuesToUndefined(req.body);
