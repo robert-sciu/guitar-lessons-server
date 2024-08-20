@@ -7,11 +7,13 @@ const planInfoRouter = require("./planInfo");
 const pageTextsRouter = require("./pageTexts");
 const pageImagesRouter = require("./pageImages");
 const youTubeVideosRouter = require("./youTubeVideos");
-const calendar = require("./calendar");
+const calendarRouter = require("./calendar");
+const lessonReservationRouter = require("./lessonReservation");
+
 const { sanitize } = require("../utilities/sanitization");
 
 const apiBaseUrl = process.env.API_BASE_URL;
-
+//prettier-ignore
 module.exports = (app) => {
   app.use(`${apiBaseUrl}/users`, sanitize, usersRouter);
   app.use(`${apiBaseUrl}/tasks`, sanitize, tasksRouter);
@@ -22,5 +24,6 @@ module.exports = (app) => {
   app.use(`${apiBaseUrl}/pageTexts`, sanitize, pageTextsRouter);
   app.use(`${apiBaseUrl}/pageImages`, sanitize, pageImagesRouter);
   app.use(`${apiBaseUrl}/youTubeVideos`, sanitize, youTubeVideosRouter);
-  app.use(`${apiBaseUrl}/calendar`, sanitize, calendar);
+  app.use(`${apiBaseUrl}/calendar`, sanitize, calendarRouter);
+  app.use(`${apiBaseUrl}/lessonReservations`, sanitize, lessonReservationRouter);
 };

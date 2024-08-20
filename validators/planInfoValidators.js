@@ -4,7 +4,12 @@ const {
   noValuesToUndefined,
   customNotEmpty,
 } = require("../utilities/validatorsUtilities");
-const { handleErrorResponse } = require("../utilities/controllerUtilites");
+const {
+  handleErrorResponse,
+  destructureData,
+} = require("../utilities/controllerUtilites");
+const allowLists =
+  require("../config/config")[process.env.NODE_ENV]["allowList"];
 
 const validateGetPlanInfo = [
   query("user_id")
@@ -39,6 +44,7 @@ const validateUpdatePlanInfo = [
     .isInt({ min: 0, max: 6 })
     .withMessage("Valid weekday is required"),
   body("permanent_reservation_hour").optional().isInt({ min: 0, max: 23 }),
+  body("permanent_reservation_minute").optional().isInt({ min: 0, max: 59 }),
   body("permanent_reservation_lesson_length").optional().isInt({ min: 60 }),
   body("permanent_reservation_lesson_count").optional().isInt({ min: 0 }),
   body("regular_discount").optional().isInt({ min: 0 }),
@@ -46,6 +52,59 @@ const validateUpdatePlanInfo = [
 
   (req, res, next) => {
     req.body = noValuesToUndefined(req.body);
+    const {
+      has_permanent_reservation,
+      permanent_reservation_weekday,
+      permanent_reservation_hour,
+      permanent_reservation_minute,
+      permanent_reservation_lesson_length,
+    } = destructureData(req.body, [
+      "has_permanent_reservation",
+      "permanent_reservation_weekday",
+      "permanent_reservation_hour",
+      "permanent_reservation_minute",
+      "permanent_reservation_lesson_length",
+    ]);
+    const permanent_reservation_data = [
+      has_permanent_reservation,
+      permanent_reservation_weekday,
+      permanent_reservation_hour,
+      permanent_reservation_minute,
+      permanent_reservation_lesson_length,
+    ];
+    if (permanent_reservation_data.some((data) => data !== undefined)) {
+      if (has_permanent_reservation !== false) {
+        if (
+          !allowLists.lessonReservation.minutes.includes(
+            permanent_reservation_minute
+          )
+        ) {
+          return handleErrorResponse(
+            res,
+            400,
+            "Invalid minute for permanent reservation"
+          );
+        }
+        if (
+          !allowLists.lessonReservation.lengths.includes(
+            permanent_reservation_lesson_length
+          )
+        ) {
+          return handleErrorResponse(
+            res,
+            400,
+            "Invalid length for permanent reservation"
+          );
+        }
+        if (permanent_reservation_data.some((data) => data === undefined)) {
+          return handleErrorResponse(
+            res,
+            400,
+            "When updating permanent reservation, all data is required"
+          );
+        }
+      }
+    }
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return handleErrorResponse(

@@ -24,6 +24,11 @@ const youTubeVideo = {
   categories: ["main", "secondary", "tertiary"],
 };
 
+const lessonReservation = {
+  minutes: [0, 15, 30, 45],
+  lengths: [60, 90, 120],
+};
+
 module.exports = {
   development: {
     postgres: {
@@ -42,6 +47,7 @@ module.exports = {
       tag: tag,
       user: user,
       youTubeVideo: youTubeVideo,
+      lessonReservation: lessonReservation,
     },
   },
   test: {
@@ -75,6 +81,7 @@ module.exports = {
         sections: ["hero", "about"],
         categories: ["main", "secondary"],
       },
+      lessonReservation: { minutes: [0, 15, 30, 45] },
     },
   },
 };

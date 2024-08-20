@@ -1,4 +1,5 @@
 const { PlanInfo } = require("../../models").sequelize.models;
+const { Op } = require("sequelize");
 const logger = require("../../utilities/logger");
 const {
   checkMissingUpdateData,
@@ -8,7 +9,11 @@ const {
   handleSuccessResponse,
   destructureData,
   unchangedDataToUndefined,
+  findAllRecords,
 } = require("../../utilities/controllerUtilites");
+const {
+  planInfoOverlap,
+} = require("../../utilities/planInfoControllerUtilities");
 
 async function updatePlanInfo(req, res) {
   const user_id = req.query.user_id;
@@ -27,6 +32,29 @@ async function updatePlanInfo(req, res) {
     const planInfo = await findRecordByFk(PlanInfo, user_id);
     if (!planInfo) {
       return handleErrorResponse(res, 404, "Plan info not found");
+    }
+    const otherPlanInfos = await findAllRecords(PlanInfo, {
+      user_id: { [Op.ne]: user_id },
+    });
+    if (otherPlanInfos.length === 0) return;
+    const conflicts = [];
+    otherPlanInfos.forEach(async (planInfo) => {
+      if (
+        planInfo.permanent_reservation_weekday !==
+        updateData.permanent_reservation_weekday
+      ) {
+        return;
+      }
+      if (planInfoOverlap(updateData, planInfo)) {
+        conflicts.push(planInfo.user_id);
+      }
+    });
+    if (conflicts.length > 0) {
+      return handleErrorResponse(
+        res,
+        409,
+        `Plan info conflicts with user ${conflicts.join(", ")}`
+      );
     }
     const updateDataNoDuplicates = unchangedDataToUndefined(
       planInfo,
