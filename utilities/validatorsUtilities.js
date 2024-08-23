@@ -1,6 +1,7 @@
 function formatValidationErrors(errors) {
+  console.log(errors);
   return errors.map((error) => {
-    if (error.msg === "Invalid value") return;
+    // if (error.msg === "Invalid value") return;
     return `${error.msg}`;
   });
 }

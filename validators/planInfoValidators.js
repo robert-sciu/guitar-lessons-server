@@ -43,12 +43,26 @@ const validateUpdatePlanInfo = [
     .optional()
     .isInt({ min: 0, max: 6 })
     .withMessage("Valid weekday is required"),
-  body("permanent_reservation_hour").optional().isInt({ min: 0, max: 23 }),
-  body("permanent_reservation_minute").optional().isInt({ min: 0, max: 59 }),
-  body("permanent_reservation_lesson_length").optional().isInt({ min: 60 }),
-  body("permanent_reservation_lesson_count").optional().isInt({ min: 0 }),
-  body("regular_discount").optional().isInt({ min: 0 }),
-  body("permanent_discount").optional().isInt({ min: 0 }),
+  body("permanent_reservation_hour")
+    .optional()
+    .isInt({ min: 0, max: 23 })
+    .withMessage("must be a number between 0 and 23"),
+  body("permanent_reservation_minute")
+    .optional()
+    .isInt({ min: 0, max: 59 })
+    .withMessage("must be a number"),
+  body("permanent_reservation_lesson_length")
+    .optional()
+    .isInt({ min: 60 })
+    .withMessage("must be a number between 60 and 120"),
+  body("permanent_reservation_lesson_count")
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage("must be a number greater than or equal to 0"),
+  body("special_discount")
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage("must be a number greater than or equal to 0"),
 
   (req, res, next) => {
     req.body = noValuesToUndefined(req.body);

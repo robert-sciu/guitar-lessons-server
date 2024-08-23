@@ -42,7 +42,12 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: 0,
       },
-      permanent_discount: {
+      plan_discount: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+      },
+      special_discount: {
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: 0,

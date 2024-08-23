@@ -29,6 +29,11 @@ const lessonReservation = {
   lengths: [60, 90, 120],
 };
 
+const planInfo = {
+  maxDiscountPercent: 20,
+  permanentPlanDiscountPercent: 10,
+};
+
 module.exports = {
   development: {
     postgres: {
@@ -48,6 +53,9 @@ module.exports = {
       user: user,
       youTubeVideo: youTubeVideo,
       lessonReservation: lessonReservation,
+    },
+    config: {
+      planInfo: planInfo,
     },
   },
   test: {
@@ -82,6 +90,9 @@ module.exports = {
         categories: ["main", "secondary"],
       },
       lessonReservation: { minutes: [0, 15, 30, 45] },
+    },
+    config: {
+      planInfo: planInfo,
     },
   },
 };

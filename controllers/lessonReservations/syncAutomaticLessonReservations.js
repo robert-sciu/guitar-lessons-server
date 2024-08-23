@@ -1,23 +1,17 @@
 const {
   findAllRecords,
-  handleErrorResponse,
   destructureData,
-  createRecord,
-  findRecordByPk,
-  updateRecord,
-  deleteRecord,
-  unchangedDataToUndefined,
 } = require("../../utilities/controllerUtilites");
 
-const { User, PlanInfo, LessonReservation } =
+const { PlanInfo, LessonReservation } =
   require("../../models").sequelize.models;
 const { Op } = require("sequelize");
 const logger = require("../../utilities/logger");
 const {
-  checkForChangedPermanentReservation,
-  weekdayToDate,
-  dateToWeekday,
-  checkIfDateIsNextWeek,
+  handleNoAssociatedReservations,
+  handleOneAssociatedReservation,
+  handleTwoAssociatedReservations,
+  checkReservationsConsistency,
 } = require("../../utilities/lessonReservationControllerUtilities");
 
 /**
@@ -72,52 +66,10 @@ async function syncAutomaticLessonReservations() {
       // if there are two associated reservations we need to check if the data has changed
       // if the data has not changed we don't need to update the reservation
       if (associatedReservations.length === 2) {
-        for (const associatedReservation of associatedReservations) {
-          const { id, date, hour, minute, duration } = destructureData(
-            associatedReservation.dataValues,
-            ["id", "date", "hour", "minute", "duration"]
-          );
-          const associatedReservationData = {
-            weekday: dateToWeekday(date),
-            hour,
-            minute,
-            duration,
-          };
-          // check if the associated reservation is consistent with the plan info
-          // if the planInfo was not changed we don't need to update the reservation
-          if (
-            !checkForChangedPermanentReservation(
-              planInfoReservationData,
-              associatedReservationData
-            )
-          ) {
-            continue;
-          }
-          // previous if statement breaks the loop if the data has not changed
-          // now we need to update the reservation with the new data
-          // but drop the data that has not changed
-          const updateDataNoDuplicates = unchangedDataToUndefined(
-            associatedReservationData,
-            planInfoReservationData
-          );
-          // this will only do something if the permanent weekday was changed
-          // in planInfo. As the idea is that we always have two db entries for
-          // a permanent lesson reservation we need to update both of them
-          // there are two cases: the date is the same or the date is the next week
-          // if the date is the next week we need to update the next week entry
-          // if the date is the same week we need to update the same week entry
-          if (updateDataNoDuplicates.weekday !== undefined) {
-            updateDataNoDuplicates.date = weekdayToDate({
-              weekday: updateDataNoDuplicates.weekday,
-              nextWeek: checkIfDateIsNextWeek(date),
-            });
-          }
-          try {
-            await updateRecord(LessonReservation, updateDataNoDuplicates, id);
-          } catch (error) {
-            logger.error(error);
-          }
-        }
+        await handleTwoAssociatedReservations(
+          associatedReservations,
+          planInfoReservationData
+        );
       }
       // this is the case where there is one associated reservation
       // the most typical scenario is that the day of the lesson reservation has passed
@@ -130,21 +82,20 @@ async function syncAutomaticLessonReservations() {
       // but this seems to be virtually impossible to happen and even if it does
       // it will be corrected in the next sync
       if (associatedReservations.length === 1) {
-        const { date } = destructureData(associatedReservations[0].dataValues, [
-          "date",
-        ]);
-        try {
-          await createRecord(LessonReservation, {
-            ...planInfoReservationData,
-            user_id,
-            date: weekdayToDate({
-              weekday: permanent_reservation_weekday,
-              nextWeek: checkIfDateIsNextWeek(date),
-            }),
-            is_permanent: true,
-          });
-        } catch (error) {
-          logger.error(error);
+        await handleOneAssociatedReservation(
+          planInfoReservationData,
+          associatedReservations,
+          user_id,
+          permanent_reservation_weekday
+        );
+        // I imagine this as very rare scenario but in case the plan info was changed
+        // while there's only one reservation in the database, the handleOneAssociatedReservation would not
+        // update the existing reservation. So after the handleOneAssociatedReservation we'd
+        // be left with two different reservations for each week. That's why we need to sync
+        // the reservations again. This time we have two reservations so the handleTwoAssociatedReservations
+        // will update both. As this should be very rare I do not worry about performance too much.
+        if (!(await checkReservationsConsistency(user_id, today))) {
+          await syncAutomaticLessonReservations();
         }
       }
 
@@ -152,23 +103,11 @@ async function syncAutomaticLessonReservations() {
       // the typical scenario is that the user had no permanent lesson reservations
       // and now they have. We need to create two entries for the next week and the same week.
       if (associatedReservations.length === 0) {
-        const weekdayToDateOptions = [{ nextWeek: true }, { nextWeek: false }];
-
-        for (const isNextWeek of weekdayToDateOptions) {
-          try {
-            await createRecord(LessonReservation, {
-              ...planInfoReservationData,
-              user_id,
-              date: weekdayToDate({
-                weekday: permanent_reservation_weekday,
-                nextWeek: isNextWeek.nextWeek,
-              }),
-              is_permanent: true,
-            });
-          } catch (error) {
-            logger.error(error);
-          }
-        }
+        await handleNoAssociatedReservations(
+          planInfoReservationData,
+          user_id,
+          permanent_reservation_weekday
+        );
       }
     }
   } catch (error) {

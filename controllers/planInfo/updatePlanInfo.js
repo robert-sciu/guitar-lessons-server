@@ -1,4 +1,5 @@
-const { PlanInfo } = require("../../models").sequelize.models;
+const { PlanInfo, LessonReservation } =
+  require("../../models").sequelize.models;
 const { Op } = require("sequelize");
 const logger = require("../../utilities/logger");
 const {
@@ -10,10 +11,13 @@ const {
   destructureData,
   unchangedDataToUndefined,
   findAllRecords,
+  deleteRecord,
 } = require("../../utilities/controllerUtilites");
 const {
   planInfoOverlap,
 } = require("../../utilities/planInfoControllerUtilities");
+const syncAutomaticLessonReservations = require("../lessonReservations/syncAutomaticLessonReservations");
+const config = require("../../config/config")[process.env.NODE_ENV];
 
 async function updatePlanInfo(req, res) {
   const user_id = req.query.user_id;
@@ -24,8 +28,7 @@ async function updatePlanInfo(req, res) {
     "permanent_reservation_minute",
     "permanent_reservation_lesson_length",
     "permanent_reservation_lesson_count",
-    "regular_discount",
-    "permanent_discount",
+    "special_discount",
   ]);
 
   try {
@@ -33,28 +36,53 @@ async function updatePlanInfo(req, res) {
     if (!planInfo) {
       return handleErrorResponse(res, 404, "Plan info not found");
     }
-    const otherPlanInfos = await findAllRecords(PlanInfo, {
-      user_id: { [Op.ne]: user_id },
-    });
-    if (otherPlanInfos.length === 0) return;
-    const conflicts = [];
-    otherPlanInfos.forEach(async (planInfo) => {
-      if (
-        planInfo.permanent_reservation_weekday !==
-        updateData.permanent_reservation_weekday
-      ) {
-        return;
-      }
-      if (planInfoOverlap(updateData, planInfo)) {
-        conflicts.push(planInfo.user_id);
-      }
-    });
-    if (conflicts.length > 0) {
-      return handleErrorResponse(
-        res,
-        409,
-        `Plan info conflicts with user ${conflicts.join(", ")}`
+    // if has_permanent_reservation is false during update it means the user
+    // could be changing from a permanent reservation to a regular reservation
+    // so we need to delete all future lesson reservations that were automatically
+    // created by the system based on the plan info
+    if (updateData.has_permanent_reservation === false) {
+      const futureLessonReservations = await findAllRecords(LessonReservation, {
+        user_id,
+        date: { [Op.gt]: new Date() },
+      });
+      await Promise.all(
+        futureLessonReservations.map(async (futureLessonReservation) => {
+          await deleteRecord(LessonReservation, futureLessonReservation.id);
+        })
       );
+      updateData.permanent_reservation_weekday = null;
+      updateData.permanent_reservation_hour = null;
+      updateData.permanent_reservation_minute = null;
+      updateData.permanent_reservation_lesson_length = null;
+
+      // if has_permanent_reservation is true during update it means the user
+      // could be changing from a regular reservation to a permanent reservation
+      // or could be updating the existing permanent reservation time or length
+      // so we have to check for conflicts with other plan infos
+    } else if (updateData.has_permanent_reservation === true) {
+      const otherPlanInfos = await findAllRecords(PlanInfo, {
+        user_id: { [Op.ne]: user_id },
+      });
+      if (otherPlanInfos.length === 0) return;
+      const conflicts = await Promise.all(
+        otherPlanInfos.map(async (otherPlanInfo) => {
+          if (
+            otherPlanInfo.permanent_reservation_weekday !==
+            updateData.permanent_reservation_weekday
+          )
+            return null;
+          if (planInfoOverlap(updateData, otherPlanInfo))
+            return otherPlanInfo.user_id;
+          return null;
+        })
+      );
+      if (conflicts.filter((conflict) => conflict !== null).length > 0) {
+        return handleErrorResponse(
+          res,
+          409,
+          `Plan info conflicts with user ${conflicts.join(", ")}`
+        );
+      }
     }
     const updateDataNoDuplicates = unchangedDataToUndefined(
       planInfo,
@@ -63,14 +91,33 @@ async function updatePlanInfo(req, res) {
     if (checkMissingUpdateData(updateDataNoDuplicates)) {
       return handleErrorResponse(res, 400, "No update data provided");
     }
-    const updateRowsCount = updateRecord(PlanInfo, updateData, user_id);
+    if (updateDataNoDuplicates.has_permanent_reservation === true) {
+      updateDataNoDuplicates.plan_discount =
+        config.config.planInfo.permanentPlanDiscountPercent;
+    } else if (updateDataNoDuplicates.has_permanent_reservation === false) {
+      updateDataNoDuplicates.plan_discount = 0;
+    }
+    const updateRowsCount = await updateRecord(
+      PlanInfo,
+      updateDataNoDuplicates,
+      user_id
+    );
     if (updateRowsCount === 0) {
       return handleErrorResponse(res, 409, "Update failed");
     }
+    // if has_permanent_reservation is true during update and the update wasn't
+    // stopped by conflicts or duplicates it must mean that the user is changing from a regular
+    // reservation to a permanent reservation or adjusting the permanent reservation
+    // time which means we need to sync the automatic lesson reservations based on
+    // the new plan info to see the changes in the database
+    if (updateData.has_permanent_reservation === true) {
+      await syncAutomaticLessonReservations();
+    }
+
     return handleSuccessResponse(res, 200, "Plan info updated successfully");
   } catch (error) {
     logger.error(error);
-    handleErrorResponse(res, 500, "Server error");
+    return handleErrorResponse(res, 500, "Server error");
   }
 }
 
