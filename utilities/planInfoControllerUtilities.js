@@ -1,4 +1,4 @@
-function planInfoLessonStartAndEndAsIntegers(data) {
+function planInfoLessonStartAndEndAsFloats(data) {
   const lessonStart =
     data.permanent_reservation_hour + data.permanent_reservation_minute / 60;
   const lessonEnd =
@@ -8,22 +8,22 @@ function planInfoLessonStartAndEndAsIntegers(data) {
   return { lessonStart, lessonEnd };
 }
 
-function planInfoOverlap(updateData, existingPlanInfo) {
-  const {
-    lessonStart: existingPlanInfoLessonStart,
-    lessonEnd: existingPlanInfoLessonEnd,
-  } = planInfoLessonStartAndEndAsIntegers(existingPlanInfo);
-  const {
-    lessonStart: updatePlanInfoLessonStart,
-    lessonEnd: updatePlanInfoLessonEnd,
-  } = planInfoLessonStartAndEndAsIntegers(updateData);
+function regularReservationStartAndEndAsFloats(data) {
+  const lessonStart = data.hour + data.minute / 60;
+  const lessonEnd = data.hour + data.minute / 60 + data.duration / 60;
+  return { lessonStart, lessonEnd };
+}
+
+function checkForOverlapingHours(
+  lessonStart1,
+  lessonEnd1,
+  lessonStart2,
+  lessonEnd2
+) {
   if (
-    (updatePlanInfoLessonStart <= existingPlanInfoLessonStart &&
-      updatePlanInfoLessonEnd > existingPlanInfoLessonStart) ||
-    (updatePlanInfoLessonStart < existingPlanInfoLessonEnd &&
-      updatePlanInfoLessonEnd >= existingPlanInfoLessonEnd) ||
-    (updatePlanInfoLessonStart >= existingPlanInfoLessonStart &&
-      updatePlanInfoLessonEnd <= existingPlanInfoLessonEnd)
+    (lessonStart1 <= lessonStart2 && lessonEnd1 > lessonStart2) ||
+    (lessonStart1 < lessonEnd2 && lessonEnd1 >= lessonEnd2) ||
+    (lessonStart1 >= lessonStart2 && lessonEnd1 <= lessonEnd2)
   ) {
     return true;
   } else {
@@ -31,6 +31,34 @@ function planInfoOverlap(updateData, existingPlanInfo) {
   }
 }
 
+function planInfoOverlap(updateData, existingPlanInfo) {
+  const { lessonStart: lessonStart1, lessonEnd: lessonEnd1 } =
+    planInfoLessonStartAndEndAsFloats(existingPlanInfo);
+  const { lessonStart: lessonStart2, lessonEnd: lessonEnd2 } =
+    planInfoLessonStartAndEndAsFloats(updateData);
+
+  return checkForOverlapingHours(
+    lessonStart1,
+    lessonEnd1,
+    lessonStart2,
+    lessonEnd2
+  );
+}
+
+function reservationsOverlap(newReservation, existingReservation) {
+  const { lessonStart: lessonStart1, lessonEnd: lessonEnd1 } =
+    regularReservationStartAndEndAsFloats(newReservation);
+  const { lessonStart: lessonStart2, lessonEnd: lessonEnd2 } =
+    regularReservationStartAndEndAsFloats(existingReservation);
+  return checkForOverlapingHours(
+    lessonStart1,
+    lessonEnd1,
+    lessonStart2,
+    lessonEnd2
+  );
+}
+
 module.exports = {
   planInfoOverlap,
+  reservationsOverlap,
 };

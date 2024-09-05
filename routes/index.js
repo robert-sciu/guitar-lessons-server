@@ -9,6 +9,7 @@ const pageImagesRouter = require("./pageImages");
 const youTubeVideosRouter = require("./youTubeVideos");
 const calendarRouter = require("./calendar");
 const lessonReservationRouter = require("./lessonReservation");
+const loginRouter = require("./login");
 
 const { sanitize } = require("../utilities/sanitization");
 
@@ -26,4 +27,5 @@ module.exports = (app) => {
   app.use(`${apiBaseUrl}/youTubeVideos`, sanitize, youTubeVideosRouter);
   app.use(`${apiBaseUrl}/calendar`, sanitize, calendarRouter);
   app.use(`${apiBaseUrl}/lessonReservations`, sanitize, lessonReservationRouter);
+  app.use(`${apiBaseUrl}/login`, sanitize, loginRouter);
 };

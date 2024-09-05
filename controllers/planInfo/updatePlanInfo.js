@@ -62,26 +62,23 @@ async function updatePlanInfo(req, res) {
     } else if (updateData.has_permanent_reservation === true) {
       const otherPlanInfos = await findAllRecords(PlanInfo, {
         user_id: { [Op.ne]: user_id },
+        permanent_reservation_weekday: {
+          [Op.eq]: updateData.permanent_reservation_weekday,
+        },
       });
-      if (otherPlanInfos.length === 0) return;
-      const conflicts = await Promise.all(
-        otherPlanInfos.map(async (otherPlanInfo) => {
-          if (
-            otherPlanInfo.permanent_reservation_weekday !==
-            updateData.permanent_reservation_weekday
-          )
-            return null;
+      if (otherPlanInfos.length !== 0) {
+        const conflicts = otherPlanInfos.map((otherPlanInfo) => {
           if (planInfoOverlap(updateData, otherPlanInfo))
             return otherPlanInfo.user_id;
           return null;
-        })
-      );
-      if (conflicts.filter((conflict) => conflict !== null).length > 0) {
-        return handleErrorResponse(
-          res,
-          409,
-          `Plan info conflicts with user ${conflicts.join(", ")}`
-        );
+        });
+        if (conflicts.filter((conflict) => conflict !== null).length > 0) {
+          return handleErrorResponse(
+            res,
+            409,
+            `Plan info conflicts with user ${conflicts.join(", ")}`
+          );
+        }
       }
     }
     const updateDataNoDuplicates = unchangedDataToUndefined(

@@ -89,7 +89,7 @@ module.exports = {
         sections: ["hero", "about"],
         categories: ["main", "secondary"],
       },
-      lessonReservation: { minutes: [0, 15, 30, 45] },
+      lessonReservation: { minutes: [0, 15, 30, 45], lengths: [60, 90, 120] },
     },
     config: {
       planInfo: planInfo,

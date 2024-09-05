@@ -11,8 +11,15 @@ const updatePlanInfoData = {
     permanent_reservation_minute: 30,
     permanent_reservation_lesson_length: 60,
     permanent_reservation_lesson_count: 4,
-    regular_discount: 5,
-    permanent_discount: 10,
+  },
+  validUpdate: {
+    user_id: 1,
+    has_permanent_reservation: true,
+    permanent_reservation_weekday: 3,
+    permanent_reservation_hour: 14,
+    permanent_reservation_minute: 30,
+    permanent_reservation_lesson_length: 60,
+    permanent_reservation_lesson_count: 4,
   },
 
   invalidIdList: ["string", undefined, null, 0, NaN, true, false],

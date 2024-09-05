@@ -52,6 +52,7 @@ function useCors(app) {
         "Content-Type",
         "Authorization",
         "X-Requested-With",
+        "X-auth-token",
         "Origin",
       ],
     })

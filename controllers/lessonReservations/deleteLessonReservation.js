@@ -10,8 +10,16 @@ const logger = require("../../utilities/logger");
 async function deleteLessonReservation(req, res) {
   const id = req.query.id;
   try {
-    if (!(await findRecordByPk(LessonReservation, id))) {
+    const lessonReservation = await findRecordByPk(LessonReservation, id);
+    if (!lessonReservation) {
       return handleErrorResponse(res, 404, "Lesson reservation not found");
+    }
+    if (lessonReservation.is_permanent) {
+      return handleErrorResponse(
+        res,
+        400,
+        "Cannot delete permanent reservation, you need to update Plan Info instead"
+      );
     }
     await deleteRecord(LessonReservation, id);
     return handleSuccessResponse(
