@@ -1,4 +1,4 @@
-const { body, query, validationResult } = require("express-validator");
+const { body, query, param, validationResult } = require("express-validator");
 const {
   formatValidationErrors,
   noValuesToUndefined,
@@ -6,30 +6,30 @@ const {
 } = require("../utilities/validatorsUtilities");
 const { handleErrorResponse } = require("../utilities/controllerUtilites");
 
-const validateGetUserTasks = [
-  query("user_id")
-    .custom(customNotEmpty())
-    .isInt({ min: 1 })
-    .withMessage("Valid id is required"),
+// const validateGetUserTasks = [
+//   query("user_id")
+//     .custom(customNotEmpty())
+//     .isInt({ min: 1 })
+//     .withMessage("Valid id is required"),
 
-  (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return handleErrorResponse(
-        res,
-        400,
-        formatValidationErrors(errors.array())
-      );
-    }
-    next();
-  },
-];
+//   (req, res, next) => {
+//     const errors = validationResult(req);
+//     if (!errors.isEmpty()) {
+//       return handleErrorResponse(
+//         res,
+//         400,
+//         formatValidationErrors(errors.array())
+//       );
+//     }
+//     next();
+//   },
+// ];
 
 const validateCreateUserTask = [
-  body("user_id")
-    .custom(customNotEmpty())
-    .isInt({ min: 1 })
-    .withMessage("User id is required"),
+  // body("user_id")
+  //   .custom(customNotEmpty())
+  //   .isInt({ min: 1 })
+  //   .withMessage("User id is required"),
   body("task_id")
     .custom(customNotEmpty())
     .isInt({ min: 1 })
@@ -83,11 +83,11 @@ const validateUpdateUserTask = [
 ];
 
 const validateUpdateUserTaskNotes = [
-  body("user_id")
-    .custom(customNotEmpty())
-    .isInt({ min: 1 })
-    .withMessage("User id is required"),
-  body("task_id")
+  // body("user_id")
+  //   .custom(customNotEmpty())
+  //   .isInt({ min: 1 })
+  //   .withMessage("User id is required"),
+  body("id")
     .custom(customNotEmpty())
     .isInt({ min: 1 })
     .withMessage("Task id is required"),
@@ -108,7 +108,7 @@ const validateUpdateUserTaskNotes = [
 ];
 
 const validateDeleteUserTask = [
-  query("id")
+  param("id")
     .custom(customNotEmpty())
     .isInt({ min: 1 })
     .withMessage("Valid id is required"),
@@ -127,7 +127,7 @@ const validateDeleteUserTask = [
 ];
 
 module.exports = {
-  validateGetUserTasks,
+  // validateGetUserTasks,
   validateCreateUserTask,
   validateUpdateUserTaskNotes,
   validateDeleteUserTask,

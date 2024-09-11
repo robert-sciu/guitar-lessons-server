@@ -10,23 +10,30 @@ const {
 const logger = require("../../utilities/logger");
 
 async function createUserTask(req, res) {
-  const data = destructureData(req.body, ["user_id", "task_id", "user_notes"]);
-  const { user_id, task_id } = data;
+  const data = destructureData(req.body, ["task_id", "user_notes"]);
+  data.user_id = req.user.id;
+  const { task_id, user_id } = data;
   try {
-    if (!(await findRecordByPk(User, user_id))) {
+    const user = await findRecordByPk(User, user_id);
+    if (!user) {
       return handleErrorResponse(res, 404, "User not found");
     }
-    if (!(await findRecordByPk(Task, task_id))) {
+    const task = await findRecordByPk(Task, task_id);
+    if (!task) {
       return handleErrorResponse(res, 404, "Task not found");
     }
-    if (await findRecordByFk(UserTask, { user_id, task_id })) {
+    const existingUserTask = await findRecordByFk(UserTask, {
+      user_id,
+      task_id,
+    });
+    if (existingUserTask) {
       return handleErrorResponse(res, 409, "User task already exists");
     }
-    await createRecord(UserTask, {
-      ...data,
-    });
+    const userTask = await createRecord(UserTask, data);
 
-    return handleSuccessResponse(res, 201, "User task created successfully");
+    const sendData = { ...task.dataValues, UserTask: userTask };
+
+    return handleSuccessResponse(res, 201, sendData);
   } catch (error) {
     logger.error(error);
     return handleErrorResponse(res, 500, "Server error");

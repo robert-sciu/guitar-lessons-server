@@ -50,14 +50,14 @@ module.exports = (sequelize, DataTypes) => {
   );
 
   User.associate = (models) => {
-    User.hasOne(models.PlanInfo, {
-      foreignKey: "user_id",
-      allowNull: false,
-    });
     User.belongsToMany(models.Task, {
-      through: "UserTask",
+      through: models.UserTask,
       foreignKey: "user_id",
       otherKey: "task_id",
+      allowNull: false,
+    });
+    User.hasOne(models.PlanInfo, {
+      foreignKey: "user_id",
       allowNull: false,
     });
     User.hasMany(models.LessonReservation, {

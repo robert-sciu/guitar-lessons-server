@@ -2,8 +2,9 @@ const {
   handleErrorResponse,
   handleSuccessResponse,
   findRecordByValue,
+  createRecord,
 } = require("../../utilities/controllerUtilites");
-const { User } = require("../../models").sequelize.models;
+const { User, RefreshToken } = require("../../models").sequelize.models;
 const bcrypt = require("bcryptjs");
 const logger = require("../../utilities/logger");
 const {
@@ -29,6 +30,13 @@ async function login(req, res) {
     }
     const accessToken = generateJWT(user);
     const refreshToken = generateRefreshJWT(user);
+
+    await createRecord(RefreshToken, {
+      token: refreshToken,
+      user_id: user.id,
+      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      revoked: false,
+    });
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,

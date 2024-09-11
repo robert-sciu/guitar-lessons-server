@@ -8,10 +8,11 @@ const {
   validateUpdateTask,
   validateDeleteTask,
 } = require("../validators/taskValidators");
+const { authenticateJWT } = require("../utilities/authenticationMiddleware");
 
 router
   .route("/")
-  .get(validateGetTasks, tasksController.getTasks)
+  .get(validateGetTasks, authenticateJWT, tasksController.getTasks)
   .post(uploadFile, validateCreateTask, tasksController.createTask)
   .patch(uploadFile, validateUpdateTask, tasksController.updateTask)
   .delete(validateDeleteTask, tasksController.deleteTask);

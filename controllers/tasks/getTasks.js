@@ -1,4 +1,4 @@
-const Task = require("../../models").sequelize.models.Task;
+const { Task, Tag } = require("../../models").sequelize.models;
 const { Op } = require("sequelize");
 const logger = require("../../utilities/logger");
 const {
@@ -9,7 +9,9 @@ const {
 
 async function getTasks(req, res) {
   const id = req.query.id;
-  const { difficulty_clearance_level } = req.body;
+
+  const { difficulty_clearance_level } = req.user;
+
   try {
     if (id) {
       const task = await findRecordByPk(Task, id);
@@ -23,7 +25,14 @@ async function getTasks(req, res) {
     }
     const tasks = await Task.findAll({
       where: { difficulty_level: { [Op.lte]: difficulty_clearance_level } },
+      include: [
+        {
+          model: Tag,
+          through: { attributes: [] },
+        },
+      ],
     });
+
     if (tasks.length < 1) {
       return handleErrorResponse(res, 404, "No tasks found");
     }

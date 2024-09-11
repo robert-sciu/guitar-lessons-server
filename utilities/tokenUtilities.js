@@ -1,23 +1,13 @@
 const jwt = require("jsonwebtoken");
-const { handleErrorResponse } = require("./controllerUtilites");
-
-function authenticateJWT(req, res, next) {
-  const token = req.header("x-auth-token");
-  if (!token) {
-    return handleErrorResponse(res, 401, "No token, authorization denied");
-  }
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
-    next();
-  } catch (error) {
-    handleErrorResponse(res, 400, "Token is not valid");
-  }
-}
 
 function generateJWT(user) {
   return jwt.sign(
-    { id: user.id, username: user.username },
+    {
+      id: user.id,
+      username: user.username,
+      difficulty_clearance_level: user.difficulty_clearance_level,
+      role: user.role,
+    },
     process.env.JWT_SECRET,
     {
       expiresIn: "15m",
@@ -27,7 +17,12 @@ function generateJWT(user) {
 
 function generateRefreshJWT(user) {
   return jwt.sign(
-    { id: user.id, username: user.username },
+    {
+      id: user.id,
+      username: user.username,
+      difficulty_clearance_level: user.difficulty_clearance_level,
+      role: user.role,
+    },
     process.env.JWT_REFRESH_SECRET,
     {
       expiresIn: "7d",
@@ -35,4 +30,4 @@ function generateRefreshJWT(user) {
   );
 }
 
-module.exports = { authenticateJWT, generateJWT, generateRefreshJWT };
+module.exports = { generateJWT, generateRefreshJWT };

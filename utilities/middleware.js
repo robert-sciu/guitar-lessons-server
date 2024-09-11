@@ -4,6 +4,8 @@ const rateLimit = require("express-rate-limit");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const express = require("express");
+const { handleErrorResponse } = require("./controllerUtilites");
+const jwt = require("jsonwebtoken");
 
 function useCommonMiddleware(app) {
   app.set("view engine", "ejs");
@@ -39,7 +41,7 @@ function useCors(app) {
   app.use(
     cors({
       origin: function (origin, callback) {
-        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+        if (!origin || allowedOrigins.includes(origin)) {
           callback(null, true);
         } else {
           callback(new Error("Not allowed by CORS"));
@@ -95,10 +97,20 @@ function useRateLimit(app) {
   app.use(limiter);
 }
 
+function attachIdParam(req, res, next) {
+  const { id } = req.params;
+  if (!id) {
+    return handleErrorResponse(res, 400, "No id provided");
+  }
+  req.id = id;
+  next();
+}
+
 module.exports = {
   useCors,
   useHelmet,
   useCommonMiddleware,
   useSecureConnection,
   useRateLimit,
+  attachIdParam,
 };

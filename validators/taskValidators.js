@@ -8,11 +8,6 @@ const { handleErrorResponse } = require("../utilities/controllerUtilites");
 
 const validateGetTasks = [
   query("id").optional().isInt({ min: 1 }).withMessage("Valid id is required"),
-  body("difficulty_clearance_level")
-    .custom(customNotEmpty())
-    .isInt({ min: 0 })
-    .withMessage("Valid level is required"),
-
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

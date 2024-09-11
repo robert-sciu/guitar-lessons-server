@@ -8,15 +8,36 @@ const {
   validateDeleteUserTask,
   validateUpdateUserTaskNotes,
 } = require("../validators/userTasksValidators");
+const { authenticateJWT } = require("../utilities/authenticationMiddleware");
+const { attachIdParam } = require("../utilities/middleware");
 
 router
   .route("/")
-  .get(validateGetUserTasks, userTasksController.getUserTasks)
-  .post(validateCreateUserTask, userTasksController.createUserTask)
-  .patch(validateUpdateUserTask, userTasksController.updateUserTask)
-  .delete(validateDeleteUserTask, userTasksController.deleteUserTask);
+  .get(authenticateJWT, userTasksController.getUserTasks)
+  .post(
+    validateCreateUserTask,
+    authenticateJWT,
+    userTasksController.createUserTask
+  )
+  .patch(
+    validateUpdateUserTask,
+    authenticateJWT,
+    userTasksController.updateUserTask
+  );
+
+router.delete(
+  "/:id",
+  authenticateJWT,
+  attachIdParam,
+  userTasksController.deleteUserTask
+);
+
 router
   .route("/userNotes")
-  .patch(validateUpdateUserTaskNotes, userTasksController.updateUserTaskNotes);
+  .patch(
+    validateUpdateUserTaskNotes,
+    authenticateJWT,
+    userTasksController.updateUserTaskNotes
+  );
 
 module.exports = router;
