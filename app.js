@@ -11,7 +11,7 @@ const {
   useCommonMiddleware,
   useRateLimit,
 } = require("./utilities/middleware");
-const { sanitize } = require("./utilities/sanitization");
+// const { sanitize } = require("./utilities/sanitization");
 
 const app = express();
 
