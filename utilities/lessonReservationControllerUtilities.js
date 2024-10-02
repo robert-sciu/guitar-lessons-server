@@ -9,6 +9,7 @@ const {
 const { LessonReservation } = require("../models").sequelize.models;
 const logger = require("../utilities/logger");
 const { Op } = require("sequelize");
+const { checkForOverlapingHours } = require("./planInfoControllerUtilities");
 
 function dateToWeekday(date) {
   return new Date(date).getDay();
@@ -39,6 +40,7 @@ function checkForChangedPermanentReservation(
   const inconsistent = Object.keys(dataFromPlanInfo).some(
     (key) => dataFromPlanInfo[key] !== dataFromCalendar[key]
   );
+
   return inconsistent;
 }
 
@@ -58,18 +60,35 @@ async function handleTwoAssociatedReservations(
   try {
     await Promise.all(
       associatedReservations.map(async (associatedReservation) => {
-        const { id, date, hour, minute, duration } = destructureData(
-          associatedReservation.dataValues,
-          ["id", "date", "hour", "minute", "duration"]
-        );
+        const {
+          id,
+          date,
+          hour,
+          minute,
+          duration,
+          rescheduled_by_user,
+          rescheduled_by_teacher,
+        } = destructureData(associatedReservation.dataValues, [
+          "id",
+          "date",
+          "hour",
+          "minute",
+          "duration",
+          "rescheduled_by_user",
+          "rescheduled_by_teacher",
+        ]);
         const associatedReservationData = {
           weekday: dateToWeekday(date),
           hour,
           minute,
           duration,
+          rescheduled: rescheduled_by_teacher || rescheduled_by_user,
         };
         // check if the associated reservation is consistent with the plan info
         // if the planInfo was not changed we don't need to update the reservation
+        if (associatedReservationData.rescheduled) {
+          return;
+        }
         if (
           !checkForChangedPermanentReservation(
             planInfoReservationData,
@@ -85,6 +104,7 @@ async function handleTwoAssociatedReservations(
           associatedReservationData,
           planInfoReservationData
         );
+
         // this will only do something if the permanent weekday was changed
         // in planInfo. As the idea is that we always have two db entries for
         // a permanent lesson reservation we need to update both of them
@@ -193,6 +213,73 @@ async function handleNoAssociatedReservations(
   );
 }
 
+function checkIfReservationDateIsAllowed(reservationDate) {
+  const today = new Date().toISOString().split("T")[0];
+  let error;
+  if (reservationDate < today) {
+    error = "Date cannot be in the past";
+  }
+  if (reservationDate === today) {
+    error = "Date cannot be today";
+  }
+  if (new Date(today) + new Date(reservationDate) / 24 / 60 / 60 / 1000 >= 14) {
+    error = "Date cannot be more than 14 days in the future";
+  }
+  return {
+    error: error ? true : false,
+    errorMsg: error,
+  };
+}
+
+function regularReservationStartAndEndAsFloats(data) {
+  const lessonStart = data.hour + data.minute / 60;
+  const lessonEnd = data.hour + data.minute / 60 + data.duration / 60;
+  return { lessonStart, lessonEnd };
+}
+
+function reservationsOverlap(newReservation, existingReservation) {
+  const { lessonStart: lessonStart1, lessonEnd: lessonEnd1 } =
+    regularReservationStartAndEndAsFloats(newReservation);
+  const { lessonStart: lessonStart2, lessonEnd: lessonEnd2 } =
+    regularReservationStartAndEndAsFloats(existingReservation);
+  return checkForOverlapingHours(
+    lessonStart1,
+    lessonEnd1,
+    lessonStart2,
+    lessonEnd2
+  );
+}
+
+async function checkForOverlapingReservations(newReservationData) {
+  let overlap;
+  const existingReservationsForDate = await findAllRecords(LessonReservation, {
+    date: newReservationData.date,
+  });
+  if (existingReservationsForDate.length > 0) {
+    const conflicts = existingReservationsForDate
+      .map((reservation) => {
+        if (reservationsOverlap(newReservationData, reservation.dataValues)) {
+          return `conflict with another reservation at ${
+            reservation.dataValues.hour
+          }:${reservation.dataValues.minute}${
+            reservation.dataValues.minute === 0 ? "0" : ""
+          }`;
+        } else {
+          return null;
+        }
+      })
+      .filter((conflict) => conflict !== null);
+
+    if (conflicts.length > 0) {
+      overlap = conflicts;
+    }
+  }
+  return {
+    error: overlap ? true : false,
+    errorMsg: overlap ? overlap.join(", ") : null,
+  };
+}
+
 module.exports = {
   dateToWeekday,
   weekdayToDate,
@@ -202,4 +289,6 @@ module.exports = {
   handleOneAssociatedReservation,
   checkReservationsConsistency,
   handleNoAssociatedReservations,
+  checkIfReservationDateIsAllowed,
+  checkForOverlapingReservations,
 };

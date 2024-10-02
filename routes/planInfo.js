@@ -5,10 +5,19 @@ const {
   validateGetPlanInfo,
   validateUpdatePlanInfo,
 } = require("../validators/planInfoValidators");
+const {
+  verifyUserIsAdmin,
+  authenticateJWT,
+} = require("../utilities/authenticationMiddleware");
 
 router
   .route("/")
   .get(validateGetPlanInfo, planInfoController.getPlanInfo)
-  .patch(validateUpdatePlanInfo, planInfoController.updatePlanInfo);
+  .patch(
+    validateUpdatePlanInfo,
+    authenticateJWT,
+    verifyUserIsAdmin,
+    planInfoController.updatePlanInfo
+  );
 
 module.exports = router;

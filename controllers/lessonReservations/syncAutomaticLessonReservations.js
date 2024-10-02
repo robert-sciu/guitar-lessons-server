@@ -63,6 +63,7 @@ async function syncAutomaticLessonReservations() {
           [Op.or]: [{ [Op.gt]: today }, { [Op.eq]: today }],
         },
       });
+
       // if there are two associated reservations we need to check if the data has changed
       // if the data has not changed we don't need to update the reservation
       if (associatedReservations.length === 2) {

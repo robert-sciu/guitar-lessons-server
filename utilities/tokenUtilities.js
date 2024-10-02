@@ -5,8 +5,6 @@ function generateJWT(user) {
     {
       id: user.id,
       username: user.username,
-      difficulty_clearance_level: user.difficulty_clearance_level,
-      role: user.role,
     },
     process.env.JWT_SECRET,
     {
@@ -20,8 +18,6 @@ function generateRefreshJWT(user) {
     {
       id: user.id,
       username: user.username,
-      difficulty_clearance_level: user.difficulty_clearance_level,
-      role: user.role,
     },
     process.env.JWT_REFRESH_SECRET,
     {

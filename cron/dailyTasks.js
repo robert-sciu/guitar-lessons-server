@@ -4,7 +4,6 @@ const logger = require("../utilities/logger");
 
 const dailyTask = cron.schedule("* * * * *", async () => {
   console.log("running a task every minute");
-  // await syncAutomaticLessonReservations();
   await syncAutomaticLessonReservations();
   logger.log("Automatic appointments have been generated");
 });
@@ -12,6 +11,6 @@ const dailyTask = cron.schedule("* * * * *", async () => {
 // setInterval(async () => {
 //   await syncAutomaticLessonReservations();
 //   console.log("Automatic appointments have been generated");
-// }, 3000);
+// }, 15000);
 
 module.exports = dailyTask;

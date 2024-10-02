@@ -35,18 +35,22 @@ module.exports = (sequelize, DataTypes) => {
       rescheduled_by_user: {
         type: DataTypes.BOOLEAN,
         allowNull: true,
+        defaultValue: false,
       },
       canceled_by_user: {
         type: DataTypes.BOOLEAN,
         allowNull: true,
+        defaultValue: false,
       },
       rescheduled_by_teacher: {
         type: DataTypes.BOOLEAN,
         allowNull: true,
+        defaultValue: false,
       },
       canceled_by_teacher: {
         type: DataTypes.BOOLEAN,
         allowNull: true,
+        defaultValue: false,
       },
     },
     {

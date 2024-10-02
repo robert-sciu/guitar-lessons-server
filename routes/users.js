@@ -9,12 +9,21 @@ const {
   validateResetPasswordRequest,
   validateResetPassword,
 } = require("../validators/userValidators");
+const {
+  authenticateJWT,
+  verifyUserIsAdmin,
+} = require("../utilities/authenticationMiddleware");
 
 router
   .route("/")
   .get(validateGetUser, usersController.getUser)
   .post(validateCreateUser, usersController.createUser)
-  .patch(validateUpdateUser, usersController.updateUser)
+  .patch(
+    validateUpdateUser,
+    authenticateJWT,
+    verifyUserIsAdmin,
+    usersController.updateUser
+  )
   .delete(validateDeleteUser, usersController.deleteUser);
 
 router
