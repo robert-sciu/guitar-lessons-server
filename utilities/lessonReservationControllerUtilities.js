@@ -238,6 +238,7 @@ function regularReservationStartAndEndAsFloats(data) {
 }
 
 function reservationsOverlap(newReservation, existingReservation) {
+  if (newReservation.id === existingReservation.id) return false;
   const { lessonStart: lessonStart1, lessonEnd: lessonEnd1 } =
     regularReservationStartAndEndAsFloats(newReservation);
   const { lessonStart: lessonStart2, lessonEnd: lessonEnd2 } =

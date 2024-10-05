@@ -8,11 +8,8 @@ const {
 const logger = require("../../utilities/logger");
 
 async function getPlanInfo(req, res) {
-  const user_id = req.query.user_id;
+  const user_id = req.user.id;
   try {
-    if (!findRecordByPk(User, user_id)) {
-      return handleErrorResponse(res, 404, "User not found");
-    }
     const planInfo = await findRecordByFk(PlanInfo, user_id);
     if (!planInfo) {
       return handleErrorResponse(res, 404, "Plan info not found");

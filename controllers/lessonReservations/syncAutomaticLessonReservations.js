@@ -1,9 +1,10 @@
 const {
   findAllRecords,
   destructureData,
+  findRecordByPk,
 } = require("../../utilities/controllerUtilites");
 
-const { PlanInfo, LessonReservation } =
+const { PlanInfo, LessonReservation, User } =
   require("../../models").sequelize.models;
 const { Op } = require("sequelize");
 const logger = require("../../utilities/logger");
@@ -13,6 +14,7 @@ const {
   handleTwoAssociatedReservations,
   checkReservationsConsistency,
 } = require("../../utilities/lessonReservationControllerUtilities");
+const { CompressionType } = require("@aws-sdk/client-s3");
 
 /**
  * syncAutomaticLessonReservations
@@ -33,29 +35,42 @@ const {
  */
 async function syncAutomaticLessonReservations() {
   try {
-    const planInfos = await findAllRecords(PlanInfo, {
-      has_permanent_reservation: true,
+    // const planInfos = await findAllRecords(PlanInfo, {
+    //   has_permanent_reservation: true,
+    // });
+    const planInfos = await PlanInfo.findAll({
+      where: { has_permanent_reservation: true },
+      include: [{ model: User, raw: true }],
+      raw: true,
+      nest: true,
     });
+    // console.log(planInfo.dataValues.User.dataValues.username);
+
     for (const planInfo of planInfos) {
+      // console.log(planInfo);
       const {
         user_id,
         permanent_reservation_weekday,
         permanent_reservation_hour,
         permanent_reservation_minute,
         permanent_reservation_lesson_length,
-      } = destructureData(planInfo.dataValues, [
+        User: { username },
+      } = destructureData(planInfo, [
         "user_id",
         "permanent_reservation_weekday",
         "permanent_reservation_hour",
         "permanent_reservation_minute",
         "permanent_reservation_lesson_length",
+        "User",
       ]);
       const planInfoReservationData = {
+        username,
         weekday: permanent_reservation_weekday,
         hour: permanent_reservation_hour,
         minute: permanent_reservation_minute,
         duration: permanent_reservation_lesson_length,
       };
+
       const today = new Date().toISOString().split("T")[0];
       const associatedReservations = await findAllRecords(LessonReservation, {
         user_id,

@@ -3,6 +3,7 @@ const {
   formatValidationErrors,
   noValuesToUndefined,
   customNotEmpty,
+  detectUnnecessaryData,
 } = require("../utilities/validatorsUtilities");
 const { handleErrorResponse } = require("../utilities/controllerUtilites");
 const allowList =
@@ -62,12 +63,10 @@ const validateCreateUser = [
 ];
 
 const validateGetUser = [
-  query("id")
-    .custom(customNotEmpty())
-    .isInt({ min: 1 })
-    .withMessage("Valid id is required"),
-
   (req, res, next) => {
+    if (detectUnnecessaryData(req)) {
+      return handleErrorResponse(res, 400, "This request has unnecessary data");
+    }
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return handleErrorResponse(

@@ -53,10 +53,23 @@ function timeToInteger(time) {
   return int;
 }
 
+function detectUnnecessaryData(req) {
+  if (
+    Object.keys(req.query).length > 0 ||
+    Object.keys(req.params).length > 0 ||
+    Object.keys(req.body).length > 0
+  ) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
 module.exports = {
   formatValidationErrors,
   noValuesToUndefined,
   customNotEmpty,
   integerToTime,
   timeToInteger,
+  detectUnnecessaryData,
 };

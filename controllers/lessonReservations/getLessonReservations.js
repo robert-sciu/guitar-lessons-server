@@ -3,6 +3,7 @@ const {
   handleErrorResponse,
   handleSuccessResponse,
 } = require("../../utilities/controllerUtilites");
+const logger = require("../../utilities/logger");
 const { LessonReservation } = require("../../models").sequelize.models;
 
 async function getLessonReservations(req, res) {

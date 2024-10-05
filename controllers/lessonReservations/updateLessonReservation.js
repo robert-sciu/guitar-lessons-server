@@ -1,4 +1,5 @@
-const { LessonReservation, User } = require("../../models/").sequelize.models;
+const { LessonReservation, User, PlanInfo } =
+  require("../../models/").sequelize.models;
 const {
   destructureData,
   findRecordByPk,
@@ -6,6 +7,7 @@ const {
   handleSuccessResponse,
   findAllRecords,
   updateRecord,
+  findRecordByFk,
 } = require("../../utilities/controllerUtilites");
 const {
   checkIfReservationDateIsAllowed,
@@ -19,7 +21,6 @@ const {
 
 async function updateLessonReservation(req, res) {
   const user = req.user;
-  // console.log(user);
   const data = destructureData(req.body, [
     "oldReservation",
     "newDate",
@@ -32,11 +33,13 @@ async function updateLessonReservation(req, res) {
     data.oldReservation.id
   );
 
-  if (reservation.rescheduled_by_user) {
+  const planInfo = await findRecordByFk(PlanInfo, user.id);
+
+  if (planInfo.reschedules_left_count <= 0) {
     return handleErrorResponse(
       res,
       400,
-      "You've already rescheduled this reservation"
+      "You've already rescheduled too many times"
     );
   }
 
@@ -65,8 +68,15 @@ async function updateLessonReservation(req, res) {
     await checkForOverlapingReservations(newReservation);
 
   if (conflictError) {
-    return handleErrorResponse(res, 400, conflictErrorMsg);
+    return handleErrorResponse(res, 409, conflictErrorMsg);
   }
+  await updateRecord(
+    PlanInfo,
+    {
+      reschedules_left_count: planInfo.reschedules_left_count - 1,
+    },
+    user.id
+  );
 
   await updateRecord(LessonReservation, newReservation, data.oldReservation.id);
   const updatedRecord = await findRecordByPk(

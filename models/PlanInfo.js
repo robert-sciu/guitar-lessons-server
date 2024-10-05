@@ -37,6 +37,14 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: true,
       },
+      reschedules_left_count: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
+      cancelled_lesson_count: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
       regular_discount: {
         type: DataTypes.INTEGER,
         allowNull: false,

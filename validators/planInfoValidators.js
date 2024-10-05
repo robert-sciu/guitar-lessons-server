@@ -11,24 +11,24 @@ const {
 const allowLists =
   require("../config/config")[process.env.NODE_ENV]["allowList"];
 
-const validateGetPlanInfo = [
-  query("user_id")
-    .custom(customNotEmpty())
-    .isInt({ min: 1 })
-    .withMessage("Valid id is required"),
+// const validateGetPlanInfo = [
+//   query("user_id")
+//     .custom(customNotEmpty())
+//     .isInt({ min: 1 })
+//     .withMessage("Valid id is required"),
 
-  (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return handleErrorResponse(
-        res,
-        400,
-        formatValidationErrors(errors.array())
-      );
-    }
-    next();
-  },
-];
+//   (req, res, next) => {
+//     const errors = validationResult(req);
+//     if (!errors.isEmpty()) {
+//       return handleErrorResponse(
+//         res,
+//         400,
+//         formatValidationErrors(errors.array())
+//       );
+//     }
+//     next();
+//   },
+// ];
 
 const validateUpdatePlanInfo = [
   query("user_id")
@@ -132,4 +132,4 @@ const validateUpdatePlanInfo = [
   },
 ];
 
-module.exports = { validateGetPlanInfo, validateUpdatePlanInfo };
+module.exports = { validateUpdatePlanInfo };

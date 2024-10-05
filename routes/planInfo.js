@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const planInfoController = require("../controllers/planInfo");
 const {
-  validateGetPlanInfo,
+  // validateGetPlanInfo,
   validateUpdatePlanInfo,
 } = require("../validators/planInfoValidators");
 const {
@@ -12,7 +12,7 @@ const {
 
 router
   .route("/")
-  .get(validateGetPlanInfo, planInfoController.getPlanInfo)
+  .get(authenticateJWT, planInfoController.getPlanInfo)
   .patch(
     validateUpdatePlanInfo,
     authenticateJWT,

@@ -28,6 +28,7 @@ async function updatePlanInfo(req, res) {
     "permanent_reservation_minute",
     "permanent_reservation_lesson_length",
     "permanent_reservation_lesson_count",
+    "reschedules_left_count",
     "special_discount",
   ]);
 

@@ -16,19 +16,14 @@ const {
 
 router
   .route("/")
-  .get(validateGetUser, usersController.getUser)
-  .post(validateCreateUser, usersController.createUser)
-  .patch(
-    validateUpdateUser,
-    authenticateJWT,
-    verifyUserIsAdmin,
-    usersController.updateUser
-  )
-  .delete(validateDeleteUser, usersController.deleteUser);
+  .get(validateGetUser, authenticateJWT, usersController.getUser)
+  .post(usersController.createUser)
+  .patch(authenticateJWT, verifyUserIsAdmin, usersController.updateUser)
+  .delete(usersController.deleteUser);
 
 router
   .route("/reset_password")
-  .post(validateResetPasswordRequest, usersController.resetPasswordRequest)
-  .patch(validateResetPassword, usersController.resetPassword);
+  .post(usersController.resetPasswordRequest)
+  .patch(usersController.resetPassword);
 
 module.exports = router;

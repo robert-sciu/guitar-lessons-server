@@ -9,6 +9,7 @@ const {
 } = require("../../utilities/controllerUtilites");
 const {
   checkIfReservationDateIsAllowed,
+  checkForOverlapingReservations,
 } = require("../../utilities/lessonReservationControllerUtilities");
 
 const logger = require("../../utilities/logger");
@@ -16,29 +17,29 @@ const logger = require("../../utilities/logger");
 async function createLessonReservation(req, res) {
   const user = req.user;
   const data = destructureData(req.body, [
-    "year",
-    "month",
-    "day",
+    "date",
     "hour",
     "minute",
     "duration",
   ]);
-  data["user_id"] = req.user.id;
+  data["user_id"] = user.id;
+  data["username"] = user.username;
   data["is_permanent"] = false;
-  data["date"] = new Date(data.year, data.month - 1, data.day)
-    .toISOString()
-    .split("T")[0];
+
   const { error, errorMsg } = checkIfReservationDateIsAllowed(data.date);
   if (error) {
     return handleErrorResponse(res, 400, errorMsg);
   }
+
+  const { error: conflictError, errorMsg: conflictErrorMsg } =
+    await checkForOverlapingReservations(data);
+  if (conflictError) {
+    return handleErrorResponse(res, 409, conflictErrorMsg);
+  }
   try {
-    await createRecord(LessonReservation, data);
-    return handleSuccessResponse(
-      res,
-      201,
-      "Lesson reservation created successfully"
-    );
+    const createdRecord = await createRecord(LessonReservation, data);
+    console.log(createdRecord);
+    return handleSuccessResponse(res, 201, createdRecord);
   } catch (error) {
     logger.error(error);
     return handleErrorResponse(res, 500, "Server error");

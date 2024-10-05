@@ -11,7 +11,6 @@ async function getTasks(req, res) {
   const id = req.query.id;
 
   const { difficulty_clearance_level } = req.user;
-  console.log(difficulty_clearance_level);
 
   try {
     if (id) {
@@ -33,7 +32,6 @@ async function getTasks(req, res) {
         },
       ],
     });
-    console.log(tasks);
 
     if (tasks.length < 1) {
       return handleErrorResponse(res, 404, "No tasks found");
