@@ -9,21 +9,39 @@ const {
   destructureData,
   unchangedDataToUndefined,
 } = require("../../utilities/controllerUtilites");
+const { userCache } = require("../../utilities/nodeCache");
+
+const responses = require("../../responses");
 
 async function updateUser(req, res) {
-  const id = req.query.id;
-  const updateData = destructureData(req.body, [
-    "difficulty_clearance_level",
-    "is_confirmed",
-  ]);
+  const language = req.language;
+  let user;
+  let id;
+  let updateData;
+  if (req.user.role === "admin") {
+    updateData = destructureData(req.body, [
+      "difficulty_clearance_level",
+      "is_confirmed",
+    ]);
+    id = req.query.id;
+    user = await findRecordByPk(User, id);
+  }
+
+  if (req.user.role === "user") {
+    updateData = destructureData(req.body, ["username"]);
+    user = req.user;
+    id = req.user.id;
+  }
+
   try {
-    const user = await findRecordByPk(User, id);
-    if (!user) {
-      return handleErrorResponse(res, 404, "User not found");
-    }
     const updateDataNoDuplicates = unchangedDataToUndefined(user, updateData);
+
     if (checkMissingUpdateData(updateDataNoDuplicates)) {
-      return handleErrorResponse(res, 400, "No update data provided");
+      return handleErrorResponse(
+        res,
+        400,
+        responses.commonMessages.noUpdateData[language]
+      );
     }
 
     const updatedRecordCount = await updateRecord(
@@ -32,12 +50,26 @@ async function updateUser(req, res) {
       id
     );
     if (updatedRecordCount === 0) {
-      return handleErrorResponse(res, 409, "Update failed");
+      return handleErrorResponse(
+        res,
+        409,
+        responses.commonMessages.updateError[language]
+      );
     }
-    return handleSuccessResponse(res, 200, "User updated successfully");
+    userCache.del(id);
+    const updatedUser = await findRecordByPk(User, id);
+    const userData = destructureData(updatedUser, [
+      "id",
+      "username",
+      "email",
+      "role",
+      "difficulty_clearance_level",
+      "is_confirmed",
+    ]);
+    return handleSuccessResponse(res, 200, userData);
   } catch (error) {
     logger.error(error);
-    return handleErrorResponse(res, 500, "Server error");
+    return handleErrorResponse(res, 500, responses.commonMessages.serverError);
   }
 }
 

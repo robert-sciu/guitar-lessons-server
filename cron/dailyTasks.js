@@ -11,6 +11,6 @@ const dailyTask = cron.schedule("* * * * *", async () => {
 setInterval(async () => {
   await syncAutomaticLessonReservations();
   console.log("Automatic appointments have been generated");
-}, 5000);
+}, 15000);
 
 module.exports = dailyTask;

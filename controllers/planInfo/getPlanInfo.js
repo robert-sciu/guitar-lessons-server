@@ -1,9 +1,8 @@
-const { PlanInfo, User } = require("../../models").sequelize.models;
+const { PlanInfo } = require("../../models").sequelize.models;
 const {
   findRecordByFk,
   handleErrorResponse,
   handleSuccessResponse,
-  findRecordByPk,
 } = require("../../utilities/controllerUtilites");
 const logger = require("../../utilities/logger");
 

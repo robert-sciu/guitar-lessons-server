@@ -1,14 +1,15 @@
 const { User } = require("../../models").sequelize.models;
 const {
-  findRecordByPk,
   handleErrorResponse,
   handleSuccessResponse,
   destructureData,
   findAllRecords,
 } = require("../../utilities/controllerUtilites");
 const logger = require("../../utilities/logger");
+const responses = require("../../responses");
 
 async function getUser(req, res) {
+  const language = req.language;
   const user = req.user;
   if (user.role === "admin") {
     try {
@@ -28,7 +29,11 @@ async function getUser(req, res) {
       return handleSuccessResponse(res, 200, filteredUsers);
     } catch (error) {
       logger.error(error);
-      return handleErrorResponse(res, 500, "Internal server error");
+      return handleErrorResponse(
+        res,
+        500,
+        responses.commonMessages.serverError[language]
+      );
     }
   }
   return handleSuccessResponse(res, 200, user);

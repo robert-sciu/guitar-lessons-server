@@ -1,8 +1,8 @@
-function formatValidationErrors(errors) {
-  return errors.map((error) => {
-    // if (error.msg === "Invalid value") return;
-    return `${error.msg}`;
-  });
+function formatValidationErrors(errors, language = "en") {
+  const firstError = errors.map((error) => {
+    return `${error.msg[language]}`;
+  })[0];
+  return firstError;
 }
 
 function noValuesToUndefined(input) {

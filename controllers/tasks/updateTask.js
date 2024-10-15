@@ -11,6 +11,7 @@ const {
   destructureData,
   unchangedDataToUndefined,
 } = require("../../utilities/controllerUtilites");
+const logger = require("../../utilities/logger");
 
 async function updateTask(req, res) {
   const bucketName = process.env.BUCKET_NAME;
@@ -65,7 +66,7 @@ async function updateTask(req, res) {
     return handleSuccessResponse(res, 200, "Task updated successfully");
   } catch (error) {
     await transaction.rollback();
-    console.log(error);
+    logger.error(error);
     return handleErrorResponse(res, 500, "Server error");
   }
 }

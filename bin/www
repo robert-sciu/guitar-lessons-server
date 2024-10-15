@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 require("dotenv").config();
-
+const logger = require("../utilities/logger");
 /**
  * Module dependencies.
  */

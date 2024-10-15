@@ -38,7 +38,7 @@ async function createLessonReservation(req, res) {
   }
   try {
     const createdRecord = await createRecord(LessonReservation, data);
-    console.log(createdRecord);
+
     return handleSuccessResponse(res, 201, createdRecord);
   } catch (error) {
     logger.error(error);

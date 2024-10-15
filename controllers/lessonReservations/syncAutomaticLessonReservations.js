@@ -44,10 +44,8 @@ async function syncAutomaticLessonReservations() {
       raw: true,
       nest: true,
     });
-    // console.log(planInfo.dataValues.User.dataValues.username);
 
     for (const planInfo of planInfos) {
-      // console.log(planInfo);
       const {
         user_id,
         permanent_reservation_weekday,

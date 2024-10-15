@@ -2,28 +2,32 @@ var express = require("express");
 var router = express.Router();
 const usersController = require("../controllers/users");
 const {
-  validateCreateUser,
   validateGetUser,
   validateUpdateUser,
-  validateDeleteUser,
-  validateResetPasswordRequest,
-  validateResetPassword,
+  validateChangeEmailRequest,
+  validateChangeEmail,
 } = require("../validators/userValidators");
-const {
-  authenticateJWT,
-  verifyUserIsAdmin,
-} = require("../utilities/authenticationMiddleware");
+const { authenticateJWT } = require("../utilities/authenticationMiddleware");
 
 router
   .route("/")
-  .get(validateGetUser, authenticateJWT, usersController.getUser)
+  .get(authenticateJWT, validateGetUser, usersController.getUser)
   .post(usersController.createUser)
-  .patch(authenticateJWT, verifyUserIsAdmin, usersController.updateUser)
+  .patch(authenticateJWT, validateUpdateUser, usersController.updateUser)
   .delete(usersController.deleteUser);
 
 router
   .route("/reset_password")
   .post(usersController.resetPasswordRequest)
   .patch(usersController.resetPassword);
+
+router
+  .route("/change_email_address")
+  .post(
+    authenticateJWT,
+    validateChangeEmailRequest,
+    usersController.changeEmailRequest
+  )
+  .patch(authenticateJWT, validateChangeEmail, usersController.changeEmail);
 
 module.exports = router;

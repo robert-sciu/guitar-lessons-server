@@ -12,10 +12,12 @@ const lessonReservationRouter = require("./lessonReservation");
 const authenticationRouter = require("./authentication");
 
 const { sanitize } = require("../utilities/sanitization");
+const { detectLanguage } = require("../utilities/languageDetector");
 
 const apiBaseUrl = process.env.API_BASE_URL;
 //prettier-ignore
 module.exports = (app) => {
+  app.use(detectLanguage)
   app.use(`${apiBaseUrl}/users`, sanitize, usersRouter);
   app.use(`${apiBaseUrl}/tasks`, sanitize, tasksRouter);
   app.use(`${apiBaseUrl}/userTasks`, sanitize, userTasksRouter);

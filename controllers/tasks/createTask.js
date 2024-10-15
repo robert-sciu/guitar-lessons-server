@@ -19,6 +19,7 @@ async function createTask(req, res) {
     "artist",
     "title",
     "url",
+    "youtube_url",
     "notes_pl",
     "notes_en",
     "difficulty_level",

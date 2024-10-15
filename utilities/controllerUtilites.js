@@ -1,5 +1,6 @@
 const fileCompressor = require("./sharpCompressor");
 const s3Manager = require("./s3Manager");
+const crypto = require("crypto");
 
 /**
  * Checks if all values in the data object are missing (i.e., undefined).
@@ -339,6 +340,12 @@ async function deleteAllPageImageFiles(imgObject) {
   }
 }
 
+function generateResetToken() {
+  const resetToken = crypto.randomInt(10000, 99999);
+  const resetTokenExpiry = Date.now() + 60 * 15 * 1000;
+  return { resetToken, resetTokenExpiry };
+}
+
 function unchangedDataToUndefined(originalData, updateData) {
   /**
    * Updates the given update data object by setting the values that are the same as the original values to undefined.
@@ -377,4 +384,5 @@ module.exports = {
   createImageSizesConfigObject,
   createPathsObjectForAllSizes,
   deleteAllPageImageFiles,
+  generateResetToken,
 };

@@ -21,6 +21,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: true,
       },
+      youtube_url: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
       filename: {
         type: DataTypes.STRING,
         allowNull: true,
