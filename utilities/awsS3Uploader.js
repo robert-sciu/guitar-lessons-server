@@ -7,6 +7,8 @@ const {
   ListObjectsV2Command,
 } = require("@aws-sdk/client-s3");
 
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+
 const s3Client = new S3Client({
   endpoint: "http://localhost:4569", // S3rver endpoint
   region: "us-east-1",
@@ -107,6 +109,21 @@ async function attachImageURLs(pageImages, bucketName) {
   }
 }
 
+async function getSignedUrlFromS3(bucketName, filePath) {
+  const params = {
+    Bucket: bucketName,
+    Key: filePath,
+  };
+  try {
+    const command = new GetObjectCommand(params);
+    const url = await getSignedUrl(s3Client, command, { expiresIn: 3600 });
+    return url;
+  } catch (error) {
+    logger.error(error);
+    throw new Error(`Error getting signed URL`);
+  }
+}
+
 async function deleteAllFilesFromS3(bucketName, path) {
   try {
     const listParams = {
@@ -190,4 +207,5 @@ module.exports = {
   deleteAllFilesFromS3,
   bulkCheckIfFilesExist,
   bulkUploadFiles,
+  getSignedUrlFromS3,
 };

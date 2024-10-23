@@ -25,12 +25,13 @@ router
     userTasksController.updateUserTask
   );
 
-router.delete(
-  "/:id",
-  authenticateJWT,
-  attachIdParam,
-  userTasksController.deleteUserTask
-);
+router
+  .route("/completed")
+  .get(authenticateJWT, userTasksController.getCompletedUserTasks);
+
+router
+  .route("/:id")
+  .delete(authenticateJWT, attachIdParam, userTasksController.deleteUserTask);
 
 router
   .route("/userNotes")

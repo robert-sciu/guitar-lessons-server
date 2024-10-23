@@ -1,39 +1,33 @@
-const { User } = require("../../models").sequelize.models;
 const logger = require("../../utilities/logger");
 const {
-  destructureData,
-  findRecordByPk,
   handleSuccessResponse,
   handleErrorResponse,
-  updateRecord,
 } = require("../../utilities/controllerUtilites");
-const { userCache } = require("../../utilities/nodeCache");
 const responses = require("../../responses");
+const userService = require("./userService");
 
 async function changeEmail(req, res) {
   const language = req.language;
-  const id = req.user.id;
-  const data = destructureData(req.body, ["email", "change_email_token"]);
-  const { email, change_email_token } = data;
+  const user_id = req.user.id;
+  const { change_email_token } = userService.destructureEmailChangeData(
+    req.body
+  );
   try {
-    const user = await findRecordByPk(User, id);
-    if (user.change_email_token !== change_email_token) {
+    const { change_email_token: saved_change_email_token, new_email_temp } =
+      await userService.getSavedChangeEmailTokenAndNewEmail(user_id);
+    if (saved_change_email_token !== change_email_token) {
       return handleErrorResponse(
         res,
         400,
         responses.commonMessages.invalidToken[language]
       );
     }
-    const updatedRecordCount = await updateRecord(
-      User,
-      {
-        email: email,
-        change_email_token: null,
-        change_email_token_expiry: null,
-      },
-      user.id
-    );
-
+    const updatedRecordCount = await userService.updateUser(user_id, {
+      email: new_email_temp,
+      change_email_token: null,
+      change_email_token_expiry: null,
+      new_email_temp: null,
+    });
     if (updatedRecordCount === 0) {
       return handleErrorResponse(
         res,
@@ -41,12 +35,9 @@ async function changeEmail(req, res) {
         responses.commonMessages.updateError[language]
       );
     }
-    userCache.del(id);
-    return handleSuccessResponse(
-      res,
-      200,
-      responses.usersMessages.mailUpdated[language]
-    );
+    userService.clearUserCache(user_id);
+    const updatedUser = await userService.findUserById(user_id);
+    return handleSuccessResponse(res, 200, updatedUser);
   } catch (error) {
     logger.error(error);
     return handleErrorResponse(

@@ -1,26 +1,34 @@
-const { UserTask } = require("../../models").sequelize.models;
 const {
-  findRecordByPk,
   handleErrorResponse,
-  deleteRecord,
   handleSuccessResponse,
 } = require("../../utilities/controllerUtilites");
 const logger = require("../../utilities/logger");
+const userTaskService = require("./userTaskService");
+const responses = require("../../responses");
 
 async function deleteUserTask(req, res, next) {
-  const id = req.id;
+  const language = req.language;
+  const task_id = req.id;
   const user_id = req.user.id;
   try {
-    const userTask = await findRecordByPk(UserTask, id);
-
-    if (!userTask || userTask.user_id !== user_id) {
-      return handleErrorResponse(res, 404, "User task not found");
+    const userTask = await userTaskService.findUserTask(user_id, task_id);
+    if (!userTask) {
+      return handleErrorResponse(
+        res,
+        404,
+        responses.userTasksMessages.taskNotFound[language]
+      );
     }
-    await deleteRecord(UserTask, id);
-    return handleSuccessResponse(res, 200, "User task deleted successfully");
+    await userTaskService.deleteUserTask(userTask.id);
+    const userTasksAfterDelete = await userTaskService.fetchUserTasks(user_id);
+    return handleSuccessResponse(res, 200, userTasksAfterDelete);
   } catch (error) {
     logger.error(error);
-    return handleErrorResponse(res, 500, "Server error");
+    return handleErrorResponse(
+      res,
+      500,
+      responses.commonMessages.serverError[language]
+    );
   }
 }
 

@@ -1,5 +1,7 @@
-const { Task, Tag } = require("../../models").sequelize.models;
-const { Op } = require("sequelize");
+const { Task, Tag, UserTask, User } = require("../../models").sequelize.models;
+// const db = require("../../models");
+// const sequelize = require("../../models").sequelize;
+const { Op, where } = require("sequelize");
 const logger = require("../../utilities/logger");
 const {
   findRecordByPk,
@@ -9,6 +11,7 @@ const {
 
 async function getTasks(req, res) {
   const id = req.query.id;
+  const user_id = req.user.id;
 
   const { difficulty_clearance_level } = req.user;
 
@@ -24,20 +27,31 @@ async function getTasks(req, res) {
       return handleSuccessResponse(res, 200, task);
     }
     const tasks = await Task.findAll({
-      where: { difficulty_level: { [Op.lte]: difficulty_clearance_level } },
       include: [
+        {
+          model: User,
+          through: { attributes: [] },
+          where: { id: user_id }, // exclude tasks associated with the user
+          required: false, // use LEFT JOIN
+          attributes: [], // exclude user data
+        },
         {
           model: Tag,
           through: { attributes: [] },
         },
       ],
+      where: {
+        difficulty_level: { [Op.lte]: difficulty_clearance_level },
+        "$Users.id$": null,
+      },
     });
 
-    if (tasks.length < 1) {
-      return handleErrorResponse(res, 404, "No tasks found");
-    }
+    // if (tasks.length < 1) {
+    //   return handleErrorResponse(res, 404, "No tasks found");
+    // }
     return handleSuccessResponse(res, 200, tasks);
   } catch (error) {
+    console.log(error);
     logger.error(error);
     return handleErrorResponse(res, 500, "Server error");
   }

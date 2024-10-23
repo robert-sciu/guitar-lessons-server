@@ -11,8 +11,8 @@ async function getUserTasks(req, res) {
   const language = req.language;
   const user_id = req.user.id;
   try {
-    const allUserTasks = await userTaskService.fetchUserTasks(user_id);
-    return handleSuccessResponse(res, 200, allUserTasks);
+    const completedTasks = await userTaskService.fetchUserTasks(user_id, true);
+    return handleSuccessResponse(res, 200, completedTasks);
   } catch (error) {
     logger.error(error);
     return handleErrorResponse(

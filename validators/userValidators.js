@@ -99,6 +99,7 @@ const validateUpdateUser = [
     .isAlpha()
     .withMessage(responses.validatorErrors.invalidString),
   body("username")
+    .optional()
     .isLength({ min: 4, max: 20 })
     .withMessage(responses.validatorErrors.stringLength),
 

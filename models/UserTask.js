@@ -10,18 +10,10 @@ module.exports = (sequelize, DataTypes) => {
       },
       user_id: {
         type: DataTypes.INTEGER,
-        references: {
-          model: "User",
-          key: "id",
-        },
         allowNull: false,
       },
       task_id: {
         type: DataTypes.INTEGER,
-        references: {
-          model: "Task",
-          key: "id",
-        },
         allowNull: false,
       },
       user_notes: {
@@ -38,6 +30,15 @@ module.exports = (sequelize, DataTypes) => {
       timestamps: false,
     }
   );
+
+  UserTask.associate = (models) => {
+    UserTask.belongsTo(models.User, {
+      foreignKey: "user_id",
+    });
+    UserTask.belongsTo(models.Task, {
+      foreignKey: "task_id",
+    });
+  };
 
   return UserTask;
 };

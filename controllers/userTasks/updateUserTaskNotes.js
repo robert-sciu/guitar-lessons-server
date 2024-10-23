@@ -1,34 +1,47 @@
-const { UserTask } = require("../../models").sequelize.models;
 const {
-  findRecordByFk,
   handleErrorResponse,
-  updateRecord,
   handleSuccessResponse,
-  destructureData,
-  findRecordByPk,
 } = require("../../utilities/controllerUtilites");
 const logger = require("../../utilities/logger");
+const userTaskService = require("./userTaskService");
+const responses = require("../../responses");
 
-async function updateUserTaskNotes(req, res, next) {
-  const updateData = destructureData(req.body, ["id", "user_notes"]);
-  updateData.user_id = req.user.id;
-  const { id, user_id, user_notes = "" } = updateData;
+async function updateUserTaskNotes(req, res) {
+  const language = req.language;
+  const user_id = req.user.id;
+  const { task_id, user_notes = "" } =
+    userTaskService.destructureUpdateUserTaskNotesData(req.body);
   try {
-    const userTask = await findRecordByPk(UserTask, id);
-
-    if (!userTask || userTask.user_id !== user_id) {
-      return handleErrorResponse(res, 404, "User task not found");
+    const userTask = await userTaskService.findUserTask(user_id, task_id);
+    if (!userTask) {
+      return handleErrorResponse(
+        res,
+        404,
+        responses.userTasksMessages.taskNotFound[language]
+      );
     }
-
-    const updatedRecordCount = await updateRecord(UserTask, { user_notes }, id);
+    const updatedRecordCount = await userTaskService.updateUserTask(
+      userTask.id,
+      { user_notes }
+    );
     if (updatedRecordCount === 0) {
-      return handleErrorResponse(res, 409, "User task not updated");
+      return handleErrorResponse(
+        res,
+        409,
+        responses.commonMessages.updateError[language]
+      );
     }
-    const sendData = { id, user_notes };
-    return handleSuccessResponse(res, 200, sendData);
+    return handleSuccessResponse(res, 200, {
+      user_task_id: userTask.id,
+      user_notes,
+    });
   } catch (error) {
     logger.error(error);
-    return handleErrorResponse(res, 500, "Server error");
+    return handleErrorResponse(
+      res,
+      500,
+      responses.commonMessages.serverError[language]
+    );
   }
 }
 

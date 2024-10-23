@@ -44,6 +44,11 @@ module.exports = {
         database: process.env.DB_DATABASE,
         // host: process.env.DB_HOST,
         dialect: "postgres",
+        logging: (msg) => {
+          if (msg.includes("ERROR")) {
+            console.log(msg); // Log only SELECT queries
+          }
+        },
       },
     },
     allowList: {

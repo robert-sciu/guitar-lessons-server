@@ -11,6 +11,10 @@ const usersMessages = {
     pl: "Email został zaktualizowany",
     en: "Email has been updated",
   },
+  usersNotFound: {
+    pl: "Nie znaleziono użytkowników",
+    en: "Users not found",
+  },
 };
 
 module.exports = usersMessages;

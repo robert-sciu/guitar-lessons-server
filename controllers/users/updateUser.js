@@ -1,16 +1,11 @@
-const User = require("../../models").sequelize.models.User;
 const logger = require("../../utilities/logger");
 const {
   checkMissingUpdateData,
   handleErrorResponse,
-  updateRecord,
-  findRecordByPk,
   handleSuccessResponse,
-  destructureData,
   unchangedDataToUndefined,
 } = require("../../utilities/controllerUtilites");
-const { userCache } = require("../../utilities/nodeCache");
-
+const userService = require("./userService");
 const responses = require("../../responses");
 
 async function updateUser(req, res) {
@@ -19,23 +14,25 @@ async function updateUser(req, res) {
   let id;
   let updateData;
   if (req.user.role === "admin") {
-    updateData = destructureData(req.body, [
-      "difficulty_clearance_level",
-      "is_confirmed",
-    ]);
+    const { difficulty_clearance_level, is_confirmed } =
+      userService.destructureUpdateUserDataAdmin(req.body);
+    updateData = { difficulty_clearance_level, is_confirmed };
     id = req.query.id;
-    user = await findRecordByPk(User, id);
-  }
-
-  if (req.user.role === "user") {
-    updateData = destructureData(req.body, ["username"]);
+    user = await userService.findUserById(id);
+  } else if (req.user.role === "user") {
+    const { username } = userService.destructureUpdateUserDataUser(req.body);
+    updateData = { username };
     user = req.user;
     id = req.user.id;
+  } else {
+    return handleErrorResponse(
+      res,
+      403,
+      responses.commonMessages.forbidden[language]
+    );
   }
-
   try {
     const updateDataNoDuplicates = unchangedDataToUndefined(user, updateData);
-
     if (checkMissingUpdateData(updateDataNoDuplicates)) {
       return handleErrorResponse(
         res,
@@ -43,11 +40,9 @@ async function updateUser(req, res) {
         responses.commonMessages.noUpdateData[language]
       );
     }
-
-    const updatedRecordCount = await updateRecord(
-      User,
-      updateDataNoDuplicates,
-      id
+    const updatedRecordCount = await userService.updateUser(
+      id,
+      updateDataNoDuplicates
     );
     if (updatedRecordCount === 0) {
       return handleErrorResponse(
@@ -56,17 +51,9 @@ async function updateUser(req, res) {
         responses.commonMessages.updateError[language]
       );
     }
-    userCache.del(id);
-    const updatedUser = await findRecordByPk(User, id);
-    const userData = destructureData(updatedUser, [
-      "id",
-      "username",
-      "email",
-      "role",
-      "difficulty_clearance_level",
-      "is_confirmed",
-    ]);
-    return handleSuccessResponse(res, 200, userData);
+    userService.clearUserCache(id);
+    const updatedUser = await userService.findUserById(id);
+    return handleSuccessResponse(res, 200, updatedUser);
   } catch (error) {
     logger.error(error);
     return handleErrorResponse(res, 500, responses.commonMessages.serverError);

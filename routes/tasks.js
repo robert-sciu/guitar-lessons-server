@@ -17,4 +17,6 @@ router
   .patch(uploadFile, validateUpdateTask, tasksController.updateTask)
   .delete(validateDeleteTask, tasksController.deleteTask);
 
+router.route("/download").get(tasksController.getTaskDownload);
+
 module.exports = router;

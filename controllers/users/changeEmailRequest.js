@@ -1,23 +1,17 @@
 const {
-  updateRecord,
   handleErrorResponse,
   handleSuccessResponse,
-  findRecordByValue,
   generateResetToken,
 } = require("../../utilities/controllerUtilites");
-const { User } = require("../../models").sequelize.models;
-const { sendMail } = require("../../utilities/mailer");
 const responses = require("../../responses");
+const userService = require("./userService");
 
 async function changeEmailRequest(req, res) {
   const language = req.language;
-  const id = req.user.id;
+  const user_id = req.user.id;
   const email = req.body.email;
-
   try {
-    const existingEmail = await findRecordByValue(User, { email });
-
-    if (existingEmail) {
+    if (await userService.emailIsInDatabase(email)) {
       return handleErrorResponse(
         res,
         409,
@@ -25,14 +19,11 @@ async function changeEmailRequest(req, res) {
       );
     }
     const { resetToken, resetTokenExpiry } = generateResetToken();
-    const updatedRecordCount = await updateRecord(
-      User,
-      {
-        change_email_token: resetToken,
-        change_email_token_expiry: resetTokenExpiry,
-      },
-      id
-    );
+    const updatedRecordCount = await userService.updateUser(user_id, {
+      new_email_temp: email,
+      change_email_token: resetToken,
+      change_email_token_expiry: resetTokenExpiry,
+    });
     if (updatedRecordCount === 0) {
       return handleErrorResponse(
         res,
@@ -40,20 +31,8 @@ async function changeEmailRequest(req, res) {
         responses.commonMessages.updateError[language]
       );
     }
-    await sendMail(
-      {
-        pl: {
-          email,
-          subject: "Zmiana adresu Email",
-          text: `Twój kod bezpieczeństwa: ${resetToken}`,
-        },
-        en: {
-          email,
-          subject: "Change Email",
-          text: `Your reset token is: ${resetToken}`,
-        },
-      }[language]
-    );
+    const userEmail = await userService.findUserEmail(user_id);
+    await userService.sendEmailWithResetToken(userEmail, resetToken, language);
     return handleSuccessResponse(
       res,
       200,

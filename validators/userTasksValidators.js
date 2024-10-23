@@ -26,18 +26,10 @@ const { handleErrorResponse } = require("../utilities/controllerUtilites");
 // ];
 
 const validateCreateUserTask = [
-  // body("user_id")
-  //   .custom(customNotEmpty())
-  //   .isInt({ min: 1 })
-  //   .withMessage("User id is required"),
   body("task_id")
     .custom(customNotEmpty())
     .isInt({ min: 1 })
     .withMessage("Task id is required"),
-  body("user_notes")
-    .optional()
-    .isString()
-    .withMessage("User notes is required"),
 
   (req, res, next) => {
     req.body = noValuesToUndefined(req.body);
@@ -83,11 +75,7 @@ const validateUpdateUserTask = [
 ];
 
 const validateUpdateUserTaskNotes = [
-  // body("user_id")
-  //   .custom(customNotEmpty())
-  //   .isInt({ min: 1 })
-  //   .withMessage("User id is required"),
-  body("id")
+  body("task_id")
     .custom(customNotEmpty())
     .isInt({ min: 1 })
     .withMessage("Task id is required"),

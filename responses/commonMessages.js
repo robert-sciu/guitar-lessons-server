@@ -1,4 +1,8 @@
 const commonMessages = {
+  updateSuccess: {
+    pl: "Dane zostały zaktualizowane",
+    en: "Data was updated",
+  },
   serverError: {
     pl: "Błąd serwera",
     en: "Server error",
@@ -14,6 +18,10 @@ const commonMessages = {
   noUpdateData: {
     pl: "Brak danych do aktualizacji",
     en: "No update data",
+  },
+  forbidden: {
+    pl: "Brak uprawnien",
+    en: "Forbidden",
   },
 };
 

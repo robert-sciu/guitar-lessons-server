@@ -52,13 +52,16 @@ module.exports = (sequelize, DataTypes) => {
       through: models.UserTask,
       foreignKey: "task_id",
       otherKey: "user_id",
-      allowNull: false,
+    });
+    Task.belongsTo(models.UserTask, {
+      foreignKey: "id",
+      targetKey: "task_id",
+      as: "user_task",
     });
     Task.belongsToMany(models.Tag, {
       through: "TaskTag",
       foreignKey: "task_id",
       otherKey: "tag_id",
-      allowNull: false,
     });
   };
 

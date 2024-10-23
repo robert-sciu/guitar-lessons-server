@@ -17,6 +17,11 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         unique: true,
       },
+      new_email_temp: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        unique: true,
+      },
       password: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -64,7 +69,6 @@ module.exports = (sequelize, DataTypes) => {
       through: models.UserTask,
       foreignKey: "user_id",
       otherKey: "task_id",
-      allowNull: false,
     });
     User.hasOne(models.PlanInfo, {
       foreignKey: "user_id",

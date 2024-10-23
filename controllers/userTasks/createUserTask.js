@@ -1,42 +1,45 @@
-const { User, Task, UserTask } = require("../../models").sequelize.models;
 const {
-  findRecordByPk,
   handleErrorResponse,
-  findRecordByFk,
-  createRecord,
   handleSuccessResponse,
-  destructureData,
 } = require("../../utilities/controllerUtilites");
 const logger = require("../../utilities/logger");
-
+const userTaskService = require("./userTaskService");
+const responses = require("../../responses");
 async function createUserTask(req, res) {
-  const data = destructureData(req.body, ["task_id", "user_notes"]);
-  data.user_id = req.user.id;
-  const { task_id, user_id } = data;
+  const language = req.language;
+  const user_id = req.user.id;
+  const { task_id } = userTaskService.destrucureCreateUserTaskData(req.body);
+  const data = { task_id, user_id };
   try {
-    const user = await findRecordByPk(User, user_id);
-    if (!user) {
-      return handleErrorResponse(res, 404, "User not found");
-    }
-    const task = await findRecordByPk(Task, task_id);
+    const task = await userTaskService.findTaskById(task_id);
     if (!task) {
-      return handleErrorResponse(res, 404, "Task not found");
+      return handleErrorResponse(
+        res,
+        404,
+        responses.userTasksMessages.taskNotFound[language]
+      );
     }
-    const existingUserTask = await findRecordByFk(UserTask, {
+    const existingUserTask = await userTaskService.findUserTask(
       user_id,
-      task_id,
-    });
+      task_id
+    );
     if (existingUserTask) {
-      return handleErrorResponse(res, 409, "User task already exists");
+      return handleErrorResponse(
+        res,
+        409,
+        responses.userTasksMessages.userTaskAlreadyExists[language]
+      );
     }
-    const userTask = await createRecord(UserTask, data);
-
-    const sendData = { ...task.dataValues, UserTask: userTask };
-
-    return handleSuccessResponse(res, 201, sendData);
+    await userTaskService.createUserTask(data);
+    const allUserTasks = await userTaskService.fetchUserTasks(user_id);
+    return handleSuccessResponse(res, 201, allUserTasks);
   } catch (error) {
     logger.error(error);
-    return handleErrorResponse(res, 500, "Server error");
+    return handleErrorResponse(
+      res,
+      500,
+      responses.commonMessages.serverError[language]
+    );
   }
 }
 
