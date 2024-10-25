@@ -1,39 +1,49 @@
-const jwt = require("jsonwebtoken");
 const { logger } = require("../../utilities/logger");
 const {
   handleSuccessResponse,
   handleErrorResponse,
-  findRecordByValue,
 } = require("../../utilities/controllerUtilites");
-const { RefreshToken } = require("../../models").sequelize.models;
-const { generateJWT } = require("../../utilities/tokenUtilities");
+const responses = require("../../responses");
+const authenticationService = require("./authenticationService");
 
 async function refreshToken(req, res) {
+  const language = req.language;
   const refreshToken = req.cookies.refreshToken;
   if (!refreshToken) {
-    return handleErrorResponse(res, 401, "No token, authorization denied");
+    return handleErrorResponse(
+      res,
+      401,
+      responses.authenticationMessages.noToken[language]
+    );
   }
   try {
-    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-
-    const storedToken = await findRecordByValue(RefreshToken, {
-      token: refreshToken,
-      revoked: false,
-    });
-
+    const decoded = authenticationService.decodeJWT(refreshToken);
+    const storedToken = await authenticationService.findStoredToken(
+      refreshToken
+    );
     if (!storedToken) {
-      return handleErrorResponse(res, 401, "Token is not valid");
+      return handleErrorResponse(
+        res,
+        401,
+        responses.authenticationMessages.invalidToken[language]
+      );
     }
-
     if (storedToken.expires < Date.now()) {
-      return handleErrorResponse(res, 401, "Token is not valid");
+      return handleErrorResponse(
+        res,
+        401,
+        responses.authenticationMessages.tokenExpired[language]
+      );
     }
-
-    const accessToken = generateJWT(decoded);
+    const accessToken = authenticationService.getJWT(decoded);
     return handleSuccessResponse(res, 200, { token: accessToken });
   } catch (error) {
     // logger.error(error);
-    return handleErrorResponse(res, 401, "Token is not valid");
+    return handleErrorResponse(
+      res,
+      401,
+      responses.commonMessages.serverError[language]
+    );
   }
 }
 

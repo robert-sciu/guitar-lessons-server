@@ -1,7 +1,6 @@
-const jwt = require("jsonwebtoken");
 const { handleSuccessResponse } = require("../../utilities/controllerUtilites");
 
-function verifyToken(req, res, next) {
+function verifyToken(req, res) {
   const user = req.user;
   return handleSuccessResponse(res, 200, { message: "Token verified", user });
 }

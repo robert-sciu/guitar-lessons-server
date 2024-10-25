@@ -26,4 +26,8 @@ function generateRefreshJWT(user) {
   );
 }
 
-module.exports = { generateJWT, generateRefreshJWT };
+function verifyJWT(token) {
+  return jwt.verify(token, process.env.JWT_REFRESH_SECRET);
+}
+
+module.exports = { generateJWT, generateRefreshJWT, verifyJWT };
