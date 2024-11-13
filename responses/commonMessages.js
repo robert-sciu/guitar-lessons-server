@@ -23,6 +23,10 @@ const commonMessages = {
     pl: "Brak uprawnien",
     en: "Forbidden",
   },
+  notFound: {
+    pl: "Nie znaleziono",
+    en: "Not found",
+  },
 };
 
 module.exports = commonMessages;

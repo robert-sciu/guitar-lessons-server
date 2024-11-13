@@ -1,5 +1,5 @@
 const cron = require("node-cron");
-const syncAutomaticLessonReservations = require("../controllers/lessonReservations/syncAutomaticLessonReservations");
+const syncAutomaticLessonReservations = require("../services/reservationSyncService");
 const logger = require("../utilities/logger");
 
 const dailyTask = cron.schedule("* * * * *", async () => {
@@ -11,6 +11,6 @@ const dailyTask = cron.schedule("* * * * *", async () => {
 setInterval(async () => {
   await syncAutomaticLessonReservations();
   console.log("Automatic appointments have been generated");
-}, 15000);
+}, 4000);
 
 module.exports = dailyTask;

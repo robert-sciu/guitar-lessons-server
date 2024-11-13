@@ -2,15 +2,24 @@ const express = require("express");
 const router = express.Router();
 const lessonReservationController = require("../controllers/lessonReservations");
 const { authenticateJWT } = require("../utilities/authenticationMiddleware");
+const { attachIdParam } = require("../utilities/middleware");
 
 router
   .route("/")
-  .get(lessonReservationController.getLessonReservations)
-  .post(authenticateJWT, lessonReservationController.createLessonReservation)
-  .patch(authenticateJWT, lessonReservationController.updateLessonReservation);
+  .get(authenticateJWT, lessonReservationController.getLessonReservations)
+  .post(authenticateJWT, lessonReservationController.createLessonReservation);
 
 router
   .route("/:id")
-  .delete(authenticateJWT, lessonReservationController.deleteLessonReservation);
+  .patch(
+    authenticateJWT,
+    attachIdParam,
+    lessonReservationController.updateLessonReservation
+  )
+  .delete(
+    authenticateJWT,
+    attachIdParam,
+    lessonReservationController.deleteLessonReservation
+  );
 
 module.exports = router;

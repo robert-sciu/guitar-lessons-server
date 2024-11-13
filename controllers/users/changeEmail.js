@@ -15,6 +15,7 @@ async function changeEmail(req, res) {
   try {
     const { change_email_token: saved_change_email_token, new_email_temp } =
       await userService.getSavedChangeEmailTokenAndNewEmail(user_id);
+
     if (saved_change_email_token !== change_email_token) {
       return handleErrorResponse(
         res,
@@ -22,6 +23,7 @@ async function changeEmail(req, res) {
         responses.commonMessages.invalidToken[language]
       );
     }
+
     const updatedRecordCount = await userService.updateUser(user_id, {
       email: new_email_temp,
       change_email_token: null,
@@ -36,8 +38,11 @@ async function changeEmail(req, res) {
       );
     }
     userService.clearUserCache(user_id);
-    const updatedUser = await userService.findUserById(user_id);
-    return handleSuccessResponse(res, 200, updatedUser);
+    return handleSuccessResponse(
+      res,
+      200,
+      responses.commonMessages.updateSuccess[language]
+    );
   } catch (error) {
     logger.error(error);
     return handleErrorResponse(

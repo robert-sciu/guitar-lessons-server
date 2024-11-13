@@ -100,7 +100,14 @@ function useRateLimit(app) {
 function attachIdParam(req, res, next) {
   const { id } = req.params;
   if (!id) {
-    return handleErrorResponse(res, 400, "No id provided");
+    return handleErrorResponse(
+      res,
+      400,
+      {
+        pl: "Brak identyfikatora",
+        en: "No id",
+      }[req.language]
+    );
   }
   req.id = id;
   next();

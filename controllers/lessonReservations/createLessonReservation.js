@@ -1,48 +1,55 @@
-const { LessonReservation, User } = require("../../models/").sequelize.models;
 const {
-  destructureData,
-  findRecordByPk,
   handleErrorResponse,
   handleSuccessResponse,
-  findAllRecords,
-  createRecord,
 } = require("../../utilities/controllerUtilites");
-const {
-  checkIfReservationDateIsAllowed,
-  checkForOverlapingReservations,
-} = require("../../utilities/lessonReservationControllerUtilities");
+const lessonReservationsService = require("./lessonReservationsService");
+const responses = require("../../responses");
 
 const logger = require("../../utilities/logger");
 
 async function createLessonReservation(req, res) {
+  const language = req.language;
   const user = req.user;
-  const data = destructureData(req.body, [
-    "date",
-    "hour",
-    "minute",
-    "duration",
-  ]);
-  data["user_id"] = user.id;
-  data["username"] = user.username;
-  data["is_permanent"] = false;
+  const timeData = req.body;
+  // TODO: get detected user timezone from headers
+  const userTimezone = "Europe/Warsaw";
 
-  const { error, errorMsg } = checkIfReservationDateIsAllowed(data.date);
+  // these are the start and end times of the reservation in UTC iso strings.
+  const { start_UTC, end_UTC } =
+    lessonReservationsService.getStartAndEndUTCMomentIsoStrings(
+      {
+        timeData,
+      },
+      userTimezone
+    );
+
+  const data = {
+    user_id: user.id,
+    username: user.username,
+    start_UTC,
+    end_UTC,
+    duration: timeData.duration,
+    is_permanent: false,
+  };
+
+  const { error, errorMsg } =
+    await lessonReservationsService.veryfyReservationData(data);
   if (error) {
-    return handleErrorResponse(res, 400, errorMsg);
+    return handleErrorResponse(res, 409, errorMsg[language]);
   }
 
-  const { error: conflictError, errorMsg: conflictErrorMsg } =
-    await checkForOverlapingReservations(data);
-  if (conflictError) {
-    return handleErrorResponse(res, 409, conflictErrorMsg);
-  }
   try {
-    const createdRecord = await createRecord(LessonReservation, data);
-
+    const createdRecord = await lessonReservationsService.createReservation(
+      data
+    );
     return handleSuccessResponse(res, 201, createdRecord);
   } catch (error) {
     logger.error(error);
-    return handleErrorResponse(res, 500, "Server error");
+    return handleErrorResponse(
+      res,
+      500,
+      responses.commonMessages.serverError[language]
+    );
   }
 }
 

@@ -28,6 +28,7 @@ async function authenticateJWT(req, res, next) {
         reset_password_token_expiry,
         change_email_token,
         change_email_token_expiry,
+        new_email_temp,
         ...userDataValues
       } = user.dataValues;
 

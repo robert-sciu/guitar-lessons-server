@@ -1,35 +1,53 @@
-const { User, PlanInfo } = require("../../models").sequelize.models;
 const { sequelize } = require("../../models");
 const {
-  findRecordByPk,
   handleErrorResponse,
-  findRecordByFk,
-  deleteRecord,
   handleSuccessResponse,
 } = require("../../utilities/controllerUtilites");
 const logger = require("../../utilities/logger");
+const responses = require("../../responses");
+const userService = require("./userService");
 
 async function deleteUser(req, res) {
-  const id = req.query.id;
+  const language = req.language;
+  const user = req.user;
+
+  if (!userService.userIsAdmin(user)) {
+    return handleErrorResponse(
+      res,
+      403,
+      responses.commonMessages.forbidden[language]
+    );
+  }
+  const id = req.id;
   const transaction = await sequelize.transaction();
   try {
-    const user = await findRecordByPk(User, id, transaction);
+    const user = await userService.findUserById(id, transaction);
     if (!user) {
       await transaction.rollback();
-      return handleErrorResponse(res, 404, "User not found");
+      return handleErrorResponse(
+        res,
+        404,
+        responses.usersMessages.userNotFound[language]
+      );
     }
-    if (!(await findRecordByFk(PlanInfo, user.id, transaction))) {
-      await transaction.rollback();
-      return handleErrorResponse(res, 404, "Plan info not found");
-    }
-    await deleteRecord(PlanInfo, user.id, transaction);
-    await deleteRecord(User, id, transaction);
+    await userService.deletePlanInfo(id, transaction);
+    await userService.deleteUserRefreshTokens(id, transaction);
+    await userService.deleteUser(id, transaction);
     await transaction.commit();
-    return handleSuccessResponse(res, 200, "User deleted successfully");
+
+    return handleSuccessResponse(
+      res,
+      200,
+      responses.usersMessages.userDeleted[language]
+    );
   } catch (error) {
     await transaction.rollback();
     logger.error(error);
-    return handleErrorResponse(res, 500, "Server error");
+    return handleErrorResponse(
+      res,
+      500,
+      responses.commonMessages.serverError[language]
+    );
   }
 }
 

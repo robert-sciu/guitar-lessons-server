@@ -10,10 +10,6 @@ module.exports = (sequelize, DataTypes) => {
       },
       task_id: {
         type: DataTypes.INTEGER,
-        references: {
-          model: "Task",
-          key: "id",
-        },
         allowNull: false,
       },
       task_difficulty_level: {
@@ -22,10 +18,6 @@ module.exports = (sequelize, DataTypes) => {
       },
       tag_id: {
         type: DataTypes.INTEGER,
-        references: {
-          model: "Tag",
-          key: "id",
-        },
         allowNull: false,
       },
     },
@@ -33,5 +25,16 @@ module.exports = (sequelize, DataTypes) => {
       timestamps: false,
     }
   );
+
+  TaskTag.associate = (models) => {
+    TaskTag.belongsTo(models.Task, {
+      foreignKey: "task_id",
+      allowNull: false,
+    });
+    TaskTag.belongsTo(models.Tag, {
+      foreignKey: "tag_id",
+      allowNull: false,
+    });
+  };
   return TaskTag;
 };

@@ -10,27 +10,30 @@ const responses = require("../../responses");
 
 async function updateUser(req, res) {
   const language = req.language;
+  const user_id = req.id;
   let user;
-  let id;
   let updateData;
-  if (req.user.role === "admin") {
+  if (userService.userIsAdmin(req.user)) {
     const { difficulty_clearance_level, is_confirmed } =
       userService.destructureUpdateUserDataAdmin(req.body);
     updateData = { difficulty_clearance_level, is_confirmed };
-    id = req.query.id;
-    user = await userService.findUserById(id);
-  } else if (req.user.role === "user") {
-    const { username } = userService.destructureUpdateUserDataUser(req.body);
-    updateData = { username };
-    user = req.user;
-    id = req.user.id;
-  } else {
-    return handleErrorResponse(
-      res,
-      403,
-      responses.commonMessages.forbidden[language]
-    );
+    user = await userService.findUserById(user_id);
   }
+  if (userService.userIsUser(req.user)) {
+    const { username, minimum_task_level_to_display } =
+      userService.destructureUpdateUserDataUser(req.body);
+    updateData = { username, minimum_task_level_to_display };
+    user = req.user;
+    if (Number(user.id) !== Number(user_id)) {
+      return handleErrorResponse(
+        res,
+        403,
+        responses.commonMessages.forbidden[language]
+      );
+    }
+  }
+  console.log(updateData);
+
   try {
     const updateDataNoDuplicates = unchangedDataToUndefined(user, updateData);
     if (checkMissingUpdateData(updateDataNoDuplicates)) {
@@ -41,7 +44,7 @@ async function updateUser(req, res) {
       );
     }
     const updatedRecordCount = await userService.updateUser(
-      id,
+      user_id,
       updateDataNoDuplicates
     );
     if (updatedRecordCount === 0) {
@@ -51,12 +54,19 @@ async function updateUser(req, res) {
         responses.commonMessages.updateError[language]
       );
     }
-    userService.clearUserCache(id);
-    const updatedUser = await userService.findUserById(id);
-    return handleSuccessResponse(res, 200, updatedUser);
+    userService.clearUserCache(user_id);
+    return handleSuccessResponse(
+      res,
+      200,
+      responses.commonMessages.updateSuccess[language]
+    );
   } catch (error) {
     logger.error(error);
-    return handleErrorResponse(res, 500, responses.commonMessages.serverError);
+    return handleErrorResponse(
+      res,
+      500,
+      responses.commonMessages.serverError[language]
+    );
   }
 }
 

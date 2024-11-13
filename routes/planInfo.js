@@ -9,14 +9,16 @@ const {
   verifyUserIsAdmin,
   authenticateJWT,
 } = require("../utilities/authenticationMiddleware");
+const { attachIdParam } = require("../utilities/middleware");
+
+router.route("/").get(authenticateJWT, planInfoController.getPlanInfo);
 
 router
-  .route("/")
-  .get(authenticateJWT, planInfoController.getPlanInfo)
+  .route("/:id")
   .patch(
-    validateUpdatePlanInfo,
     authenticateJWT,
     verifyUserIsAdmin,
+    attachIdParam,
     planInfoController.updatePlanInfo
   );
 

@@ -16,16 +16,12 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      date: {
-        type: DataTypes.DATEONLY,
+      start_UTC: {
+        type: DataTypes.DATE,
         allowNull: false,
       },
-      hour: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-      },
-      minute: {
-        type: DataTypes.INTEGER,
+      end_UTC: {
+        type: DataTypes.DATE,
         allowNull: false,
       },
       duration: {
@@ -35,6 +31,7 @@ module.exports = (sequelize, DataTypes) => {
       is_permanent: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
+        defaultValue: false,
       },
       rescheduled_by_user: {
         type: DataTypes.BOOLEAN,
@@ -42,6 +39,11 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: false,
       },
       rescheduled_by_teacher: {
+        type: DataTypes.BOOLEAN,
+        allowNull: true,
+        defaultValue: false,
+      },
+      canceled_by_teacher: {
         type: DataTypes.BOOLEAN,
         allowNull: true,
         defaultValue: false,

@@ -10,10 +10,10 @@ async function getUser(req, res) {
   const language = req.language;
   const user = req.user;
   try {
-    if (user.role === "user") {
+    if (userService.userIsUser(user)) {
       return handleSuccessResponse(res, 200, user);
     }
-    if (user.role === "admin") {
+    if (userService.userIsAdmin(user)) {
       const users = await userService.findAllUsers();
       if (!users) {
         return handleErrorResponse(

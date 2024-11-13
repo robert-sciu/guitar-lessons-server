@@ -1,7 +1,6 @@
 const {
   handleErrorResponse,
   handleSuccessResponse,
-  generateResetToken,
 } = require("../../utilities/controllerUtilites");
 const responses = require("../../responses");
 const userService = require("./userService");
@@ -18,7 +17,7 @@ async function changeEmailRequest(req, res) {
         responses.usersMessages.mailInUse[language]
       );
     }
-    const { resetToken, resetTokenExpiry } = generateResetToken();
+    const { resetToken, resetTokenExpiry } = userService.generateResetToken();
     const updatedRecordCount = await userService.updateUser(user_id, {
       new_email_temp: email,
       change_email_token: resetToken,
@@ -36,7 +35,7 @@ async function changeEmailRequest(req, res) {
     return handleSuccessResponse(
       res,
       200,
-      responses.usersMessages.tokenSent[language]
+      responses.usersMessages.tokenRequired[language]
     );
   } catch (error) {
     logger.error(error);

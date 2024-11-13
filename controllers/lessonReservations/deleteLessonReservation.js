@@ -1,48 +1,63 @@
 const {
-  findRecordByPk,
   handleErrorResponse,
-  deleteRecord,
   handleSuccessResponse,
-  findRecordByFk,
-  updateRecord,
 } = require("../../utilities/controllerUtilites");
-const { LessonReservation } = require("../../models");
 const logger = require("../../utilities/logger");
-const { PlanInfo } = require("../../models").sequelize.models;
+const lessonReservationsService = require("./lessonReservationsService");
+const responses = require("../../responses");
 
 async function deleteLessonReservation(req, res) {
-  const id = req.params.id;
+  const language = req.language;
+  const reservation_id = req.id;
   const user = req.user;
+  const user_id = user.id;
 
   try {
-    const lessonReservation = await findRecordByPk(LessonReservation, id);
+    const lessonReservation =
+      await lessonReservationsService.findReservationById(reservation_id);
+
     if (!lessonReservation) {
-      return handleErrorResponse(res, 404, "Lesson reservation not found");
+      return handleErrorResponse(
+        res,
+        404,
+        responses.lessonReservationsMessages.reservationNotFound[language]
+      );
     }
-    if (lessonReservation.user_id !== user.id) {
-      return handleErrorResponse(res, 403, "Forbidden");
+    if (lessonReservation.user_id !== user_id) {
+      return handleErrorResponse(
+        res,
+        403,
+        responses.commonMessages.forbidden[language]
+      );
     }
-    if (lessonReservation.is_permanent) {
+    if (
+      lessonReservation.is_permanent &&
+      !lessonReservationsService.userIsAdmin(user)
+    ) {
       return handleErrorResponse(
         res,
         400,
-        "Cannot delete permanent reservation, you need to update Plan Info instead"
+        responses.lessonReservationsMessages.cannotDeletePermanentReservation[
+          language
+        ]
       );
     }
-    const planInfo = await findRecordByFk(PlanInfo, user.id);
 
-    const cancelled_lesson_count = planInfo.cancelled_lesson_count + 1;
-    await updateRecord(PlanInfo, { cancelled_lesson_count }, user.id);
+    await lessonReservationsService.updateCancelledReservationsCount(user_id);
 
-    await deleteRecord(LessonReservation, id);
+    await lessonReservationsService.deleteReservation(reservation_id);
     return handleSuccessResponse(
       res,
       200,
-      "Lesson reservation deleted successfully"
+      responses.lessonReservationsMessages.reservationDeleted[language]
     );
   } catch (error) {
     logger.error(error);
-    return handleErrorResponse(res, 500, "Server error");
+    return handleErrorResponse(
+      res,
+      500,
+      responses.commonMessages.serverError[language]
+    );
   }
 }
 

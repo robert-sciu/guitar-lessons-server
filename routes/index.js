@@ -10,6 +10,7 @@ const youTubeVideosRouter = require("./youTubeVideos");
 const calendarRouter = require("./calendar");
 const lessonReservationRouter = require("./lessonReservation");
 const authenticationRouter = require("./authentication");
+const dbResetRouter = require("./dbReset");
 
 const { sanitize } = require("../utilities/sanitization");
 const { detectLanguage } = require("../utilities/languageDetector");
@@ -30,4 +31,5 @@ module.exports = (app) => {
   app.use(`${apiBaseUrl}/calendar`, sanitize, calendarRouter);
   app.use(`${apiBaseUrl}/lessonReservations`, sanitize, lessonReservationRouter);
   app.use(`${apiBaseUrl}/auth`, sanitize, authenticationRouter);
+  app.use(`${apiBaseUrl}/reset`, dbResetRouter)
 };

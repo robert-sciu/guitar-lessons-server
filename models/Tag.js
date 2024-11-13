@@ -24,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
 
   Tag.associate = (models) => {
     Tag.belongsToMany(models.Task, {
-      through: "Task_tag",
+      through: models.TaskTag,
       foreignKey: "tag_id",
       otherKey: "task_id",
       allowNull: false,

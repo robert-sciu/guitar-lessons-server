@@ -6,20 +6,38 @@ const {
   validateUpdateUser,
   validateChangeEmailRequest,
   validateChangeEmail,
+  validateDeleteUser,
+  validateResetPasswordRequest,
+  validateResetPassword,
+  validateCreateUser,
 } = require("../validators/userValidators");
 const { authenticateJWT } = require("../utilities/authenticationMiddleware");
+const { attachIdParam } = require("../utilities/middleware");
 
 router
   .route("/")
   .get(authenticateJWT, validateGetUser, usersController.getUser)
-  .post(usersController.createUser)
-  .patch(authenticateJWT, validateUpdateUser, usersController.updateUser)
-  .delete(usersController.deleteUser);
+  .post(validateCreateUser, usersController.createUser);
+
+router
+  .route("/:id")
+  .patch(
+    authenticateJWT,
+    validateUpdateUser,
+    attachIdParam,
+    usersController.updateUser
+  )
+  .delete(
+    authenticateJWT,
+    validateDeleteUser,
+    attachIdParam,
+    usersController.deleteUser
+  );
 
 router
   .route("/reset_password")
-  .post(usersController.resetPasswordRequest)
-  .patch(usersController.resetPassword);
+  .post(validateResetPasswordRequest, usersController.resetPasswordRequest)
+  .patch(validateResetPassword, usersController.resetPassword);
 
 router
   .route("/change_email_address")

@@ -1,47 +1,53 @@
-const transporter = require("../../utilities/mailer");
-const User = require("../../models").sequelize.models.User;
 const logger = require("../../utilities/logger");
-const crypto = require("crypto");
 const {
-  findRecordByValue,
   handleErrorResponse,
-  updateRecord,
   handleSuccessResponse,
 } = require("../../utilities/controllerUtilites");
+const userService = require("./userService");
+const responses = require("../../responses");
 
 async function resetPassword(req, res, next) {
+  const language = req.language;
   const { email } = req.body;
   try {
-    const user = await findRecordByValue(User, { email });
-
+    const user = await userService.findUserByEmail(email);
     if (!user) {
-      return handleErrorResponse(res, 404, "User not found");
+      return handleErrorResponse(
+        res,
+        404,
+        responses.usersMessages.userNotFound[language]
+      );
     }
-    const resetToken = crypto.randomInt(1000, 9999);
-    const resetTokenExpiry = Date.now() + 60 * 15 * 1000;
 
-    const updatedRecordCount = await updateRecord(
-      User,
-      {
-        reset_password_token: resetToken,
-        reset_password_token_expiry: resetTokenExpiry,
-      },
-      user.id
+    const { resetToken, resetTokenExpiry } = userService.generateResetToken();
+
+    const updatedRecordCount = await userService.saveResetPasswordToken(
+      user.id,
+      resetToken,
+      resetTokenExpiry
     );
+
     if (updatedRecordCount === 0) {
-      return handleErrorResponse(res, 409, "Update failed");
+      return handleErrorResponse(
+        res,
+        409,
+        responses.commonMessages.updateError[language]
+      );
     }
-    const mailOptions = {
-      from: process.env.SMTP_USER,
-      to: email,
-      subject: "Reset Password",
-      text: `Your reset token is: ${resetToken}`,
-    };
-    await transporter.sendMail(mailOptions);
-    return handleSuccessResponse(res, 200, "Password reset token sent");
+
+    await userService.sendPasswordResetEmail(email, resetToken, language);
+    return handleSuccessResponse(
+      res,
+      200,
+      responses.usersMessages.tokenSent[language]
+    );
   } catch (error) {
     logger.error(error);
-    return handleErrorResponse(res, 500, "Server error");
+    return handleErrorResponse(
+      res,
+      500,
+      responses.commonMessages.serverError[language]
+    );
   }
 }
 

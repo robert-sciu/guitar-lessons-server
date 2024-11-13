@@ -1,30 +1,27 @@
-const { User, PlanInfo } = require("../../models").sequelize.models;
 const { sequelize } = require("../../models");
 const {
-  findRecordByValue,
   handleErrorResponse,
   handleSuccessResponse,
-  createRecord,
-  destructureData,
 } = require("../../utilities/controllerUtilites");
 const logger = require("../../utilities/logger");
-const bcrypt = require("bcryptjs");
+const userService = require("./userService");
+const responses = require("../../responses");
 
 async function createUser(req, res) {
-  const data = destructureData(req.body, [
-    "username",
-    "email",
-    "password",
-    "role",
-  ]);
-  const { email, password, role } = data;
+  const language = req.language;
+  const data = userService.destructureCreateUserData(req.body);
+  const role = data.role;
   const transaction = await sequelize.transaction();
   try {
-    if (await findRecordByValue(User, { email }, transaction)) {
+    if (await userService.emailIsInDatabase(data.email, transaction)) {
       await transaction.rollback();
-      return handleErrorResponse(res, 409, "User already exists");
+      return handleErrorResponse(
+        res,
+        409,
+        responses.usersMessages.mailInUse[language]
+      );
     }
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await userService.hashPassword(data.password);
     const userData = {
       ...data,
       password: hashedPassword,
@@ -35,19 +32,29 @@ async function createUser(req, res) {
       process.env.CREATE_ADMIN_USER_ENABLED === "true";
     if (role === "admin" && !createAdminUserIsEnabled) {
       await transaction.rollback();
-      return handleErrorResponse(res, 400, "Creating admin user is disabled");
+      return handleErrorResponse(
+        res,
+        400,
+        responses.commonMessages.forbidden[language]
+      );
     }
-    const newUser = await createRecord(User, userData, transaction);
-    const planInfoData = {
-      user_id: newUser.id,
-    };
-    await createRecord(PlanInfo, planInfoData, transaction);
+    const newUser = await userService.createUser(userData, transaction);
+    const user_id = newUser.id;
+    await userService.createPlanInfo(user_id, transaction);
     await transaction.commit();
-    return handleSuccessResponse(res, 200, "User created successfully");
+    return handleSuccessResponse(
+      res,
+      200,
+      responses.usersMessages.userCreated[language]
+    );
   } catch (error) {
     await transaction.rollback();
     logger.error(error);
-    return handleErrorResponse(res, 500, "Server error");
+    return handleErrorResponse(
+      res,
+      500,
+      responses.commonMessages.serverError[language]
+    );
   }
 }
 

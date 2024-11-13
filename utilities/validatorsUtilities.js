@@ -1,4 +1,4 @@
-function formatValidationErrors(errors, language = "en") {
+function formatValidationErrors(errors, language = "pl") {
   const firstError = errors.map((error) => {
     return `${error.msg[language]}`;
   })[0];
@@ -25,7 +25,7 @@ function noValuesToUndefined(input) {
     } else if (typeof value === "number" && isNaN(value)) {
       result[key] = undefined;
     } else if (typeof value === "object") {
-      restult[key] = noValuesToUndefined(value);
+      result[key] = noValuesToUndefined(value);
     } else {
       result[key] = value;
     }

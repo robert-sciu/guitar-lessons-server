@@ -1,20 +1,14 @@
-const {
-  findAllRecords,
-  destructureData,
-  findRecordByPk,
-} = require("../../utilities/controllerUtilites");
-
-const { PlanInfo, LessonReservation, User } =
-  require("../../models").sequelize.models;
-const { Op } = require("sequelize");
-const logger = require("../../utilities/logger");
+const logger = require("../utilities/logger");
 const {
   handleNoAssociatedReservations,
   handleOneAssociatedReservation,
   handleTwoAssociatedReservations,
   checkReservationsConsistency,
-} = require("../../utilities/lessonReservationControllerUtilities");
-const { CompressionType } = require("@aws-sdk/client-s3");
+
+  destructureReservationDataFromPlanInfo,
+  findAllPlanInfosWithPermanentReservations,
+  getPermanentReservationsForUser,
+} = require("./reservationSyncHandlers");
 
 /**
  * syncAutomaticLessonReservations
@@ -35,50 +29,15 @@ const { CompressionType } = require("@aws-sdk/client-s3");
  */
 async function syncAutomaticLessonReservations() {
   try {
-    // const planInfos = await findAllRecords(PlanInfo, {
-    //   has_permanent_reservation: true,
-    // });
-    const planInfos = await PlanInfo.findAll({
-      where: { has_permanent_reservation: true },
-      include: [{ model: User, raw: true }],
-      raw: true,
-      nest: true,
-    });
+    const planInfos = await findAllPlanInfosWithPermanentReservations();
 
     for (const planInfo of planInfos) {
-      const {
-        user_id,
-        permanent_reservation_weekday,
-        permanent_reservation_hour,
-        permanent_reservation_minute,
-        permanent_reservation_lesson_length,
-        User: { username },
-      } = destructureData(planInfo, [
-        "user_id",
-        "permanent_reservation_weekday",
-        "permanent_reservation_hour",
-        "permanent_reservation_minute",
-        "permanent_reservation_lesson_length",
-        "User",
-      ]);
-      const planInfoReservationData = {
-        username,
-        weekday: permanent_reservation_weekday,
-        hour: permanent_reservation_hour,
-        minute: permanent_reservation_minute,
-        duration: permanent_reservation_lesson_length,
-      };
-
-      const today = new Date().toISOString().split("T")[0];
-      const associatedReservations = await findAllRecords(LessonReservation, {
-        user_id,
-        date: {
-          [Op.or]: [{ [Op.gt]: today }, { [Op.eq]: today }],
-        },
-      });
-
-      // if there are two associated reservations we need to check if the data has changed
-      // if the data has not changed we don't need to update the reservation
+      const user_id = planInfo.user_id;
+      const planInfoReservationData =
+        destructureReservationDataFromPlanInfo(planInfo);
+      const associatedReservations = await getPermanentReservationsForUser(
+        user_id
+      );
       if (associatedReservations.length === 2) {
         await handleTwoAssociatedReservations(
           associatedReservations,
@@ -96,12 +55,13 @@ async function syncAutomaticLessonReservations() {
       // but this seems to be virtually impossible to happen and even if it does
       // it will be corrected in the next sync
       if (associatedReservations.length === 1) {
-        await handleOneAssociatedReservation(
-          planInfoReservationData,
-          associatedReservations,
-          user_id,
-          permanent_reservation_weekday
-        );
+        console.log("one associated reservation");
+        // await handleOneAssociatedReservation(
+        //   planInfoReservationData,
+        //   associatedReservations,
+        //   user_id,
+        //   permanent_reservation_weekday
+        // );
         // I imagine this as very rare scenario but in case the plan info was changed
         // while there's only one reservation in the database, the handleOneAssociatedReservation would not
         // update the existing reservation. So after the handleOneAssociatedReservation we'd
@@ -112,16 +72,8 @@ async function syncAutomaticLessonReservations() {
           await syncAutomaticLessonReservations();
         }
       }
-
-      // this is the case where there are no associated reservations so we need to create them
-      // the typical scenario is that the user had no permanent lesson reservations
-      // and now they have. We need to create two entries for the next week and the same week.
       if (associatedReservations.length === 0) {
-        await handleNoAssociatedReservations(
-          planInfoReservationData,
-          user_id,
-          permanent_reservation_weekday
-        );
+        await handleNoAssociatedReservations(planInfoReservationData);
       }
     }
   } catch (error) {
