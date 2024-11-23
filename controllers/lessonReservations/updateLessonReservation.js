@@ -13,9 +13,9 @@ async function updateLessonReservation(req, res) {
   const user = req.user;
   const user_id = user.id;
   const reservation_id = req.id;
-  const { start_UTC, end_UTC, duration } =
+  const updateTimeData =
     lessonReservationsService.destructureUpdateReservationData(req.body);
-  const userTimezone = "Europe/Warsaw";
+
   try {
     const planInfo = await planInfoService.getPlanInfo(user.id);
 
@@ -50,12 +50,10 @@ async function updateLessonReservation(req, res) {
 
     const updateData = {
       id: reservation_id,
-      start_UTC,
-      end_UTC,
-      duration,
+      ...updateTimeData,
       user_id,
       username: user.username,
-      is_permanent: planInfo.has_permanent_reservation,
+      // is_permanent: planInfo.has_permanent_reservation,
       rescheduled_by_user: lessonReservationsService.userIsUser(user),
       rescheduled_by_admin: lessonReservationsService.userIsAdmin(user),
     };

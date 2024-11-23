@@ -141,70 +141,70 @@ class LessonReservationsService {
     });
   }
 
-  /**
-   * Calculates start and end UTC ISO strings given time data and timezone.
-   *
-   * @param {object} options
-   * @param {object} options.timeData - an object containing year, month, day, hour, minute and duration
-   * @param {string} timezone - the timezone to use for the moment calculations
-   *
-   * @returns {object} containing startUTC and endUTC as ISO strings
-   */
-  getStartAndEndUTCMomentIsoStrings({ timeData }, timezone) {
-    const { year, month, day, hour, minute, duration } =
-      this.destructureLessonReservationData(timeData);
+  // /**
+  //  * Calculates start and end UTC ISO strings given time data and timezone.
+  //  *
+  //  * @param {object} options
+  //  * @param {object} options.timeData - an object containing year, month, day, hour, minute and duration
+  //  * @param {string} timezone - the timezone to use for the moment calculations
+  //  *
+  //  * @returns {object} containing startUTC and endUTC as ISO strings
+  //  */
+  // getStartAndEndUTCMomentIsoStrings({ timeData }, timezone) {
+  //   const { year, month, day, hour, minute, duration } =
+  //     this.destructureLessonReservationData(timeData);
 
-    const hoursToAdd = Math.floor(duration / 60);
-    const minutesToAdd = duration % 60;
-    const endHour = hour + hoursToAdd;
-    const endMinute = minute + minutesToAdd;
+  //   const hoursToAdd = Math.floor(duration / 60);
+  //   const minutesToAdd = duration % 60;
+  //   const endHour = hour + hoursToAdd;
+  //   const endMinute = minute + minutesToAdd;
 
-    const localMomentStart = moment.tz(
-      {
-        year,
-        month,
-        day,
-        hour,
-        minute,
-      },
-      timezone
-    );
-    const localMomentEnd = moment.tz(
-      {
-        year,
-        month,
-        day,
-        hour: endHour,
-        minute: endMinute,
-      },
-      timezone
-    );
+  //   const localMomentStart = moment.tz(
+  //     {
+  //       year,
+  //       month,
+  //       day,
+  //       hour,
+  //       minute,
+  //     },
+  //     timezone
+  //   );
+  //   const localMomentEnd = moment.tz(
+  //     {
+  //       year,
+  //       month,
+  //       day,
+  //       hour: endHour,
+  //       minute: endMinute,
+  //     },
+  //     timezone
+  //   );
 
-    const start_UTC = localMomentStart.utc();
-    const end_UTC = localMomentEnd.utc();
+  //   const start_UTC = localMomentStart.utc();
+  //   const end_UTC = localMomentEnd.utc();
 
-    return {
-      start_UTC: start_UTC.toISOString(),
-      end_UTC: end_UTC.toISOString(),
-    };
-  }
+  //   return {
+  //     start_UTC: start_UTC.toISOString(),
+  //     end_UTC: end_UTC.toISOString(),
+  //   };
+  // }
 
-  /**
-   * Destructure the data object into the separate values required
-   * to create a lesson reservation.
-   * @param {Object} data the data object to destructure
-   * @returns {Object} an object with the destructured values
-   */
-  destructureLessonReservationData(data) {
-    return destructureData(data, [
-      "year",
-      "month",
-      "day",
-      "hour",
-      "minute",
-      "duration",
-    ]);
-  }
+  // /**
+  //  * Destructure the data object into the separate values required
+  //  * to create a lesson reservation.
+  //  * @param {Object} data the data object to destructure
+  //  * @returns {Object} an object with the destructured values
+  //  */
+  // destructureLessonReservationData(data) {
+  //   return destructureData(data, [
+  //     "year",
+  //     "month",
+  //     "day",
+  //     "hour",
+  //     "minute",
+  //     "duration",
+  //   ]);
+  // }
 
   /**
    * Destructures the data object into the separate values required
@@ -213,6 +213,10 @@ class LessonReservationsService {
    * @returns {{start_UTC: string, end_UTC: string, duration: number}} an object with the destructured values
    */
   destructureUpdateReservationData(data) {
+    return destructureData(data, ["start_UTC", "end_UTC", "duration"]);
+  }
+
+  destructureCreateReservationData(data) {
     return destructureData(data, ["start_UTC", "end_UTC", "duration"]);
   }
 }

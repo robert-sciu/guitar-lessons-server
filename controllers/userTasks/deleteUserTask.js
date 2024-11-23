@@ -20,8 +20,8 @@ async function deleteUserTask(req, res, next) {
       );
     }
     await userTaskService.deleteUserTask(userTask.id);
-    const userTasksAfterDelete = await userTaskService.fetchUserTasks(user_id);
-    return handleSuccessResponse(res, 200, userTasksAfterDelete);
+    // const userTasksAfterDelete = await userTaskService.fetchUserTasks(user_id);
+    return handleSuccessResponse(res, 204, null);
   } catch (error) {
     logger.error(error);
     return handleErrorResponse(

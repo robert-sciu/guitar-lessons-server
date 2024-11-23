@@ -13,47 +13,27 @@ function checkIfReservationDateIsAllowed(data) {
       },
     };
   }
-  // this is the setup for working hours so that users can't reserve outside working hours
-  // not really sure if it's a good idea to put it here
-  // maybe I'll have some config file later
-  const myTimezone = "Europe/Warsaw";
-  const localWorkingHoursStart = "08:00:00";
-  const localWorkingHoursEnd = "22:00:00";
 
-  // working hours have to be converted to UTC
-  // to compare with reservation date which is also in UTC
+  // series of checks veryfying the date
   const today = new Date().toISOString().split("T")[0];
-  const startHourUTC = moment
-    .tz(`${today} ${localWorkingHoursStart}`, myTimezone)
-    .utc()
-    .hour();
-  const endHourUTC = moment
-    .tz(`${today} ${localWorkingHoursEnd}`, myTimezone)
-    .utc()
-    .hour();
-
   const reservationStartDate = data.start_UTC.split("T")[0];
-  const reservationStartHour = data.start_UTC.split("T")[1].split(":")[0];
-  const reservationEndHour = data.end_UTC.split("T")[1].split(":")[0];
 
-  let error;
-
-  if (reservationStartHour < startHourUTC || reservationEndHour > endHourUTC) {
-    error = {
-      pl: "Czas rezerwacji musi zawierać się w dostępnych godzinach",
-      en: "Reservation time is not within the allowed time frame",
-    };
-  }
   if (reservationStartDate < today) {
-    error = {
-      pl: "Data rezerwacji nie może być w przeszłości",
-      en: "Reservation date cannot be in the past",
+    return {
+      error: true,
+      errorMsg: {
+        pl: "Data rezerwacji nie może być w przeszłości",
+        en: "Reservation date cannot be in the past",
+      },
     };
   }
   if (reservationStartDate === today) {
-    error = {
-      pl: "Data rezerwacji nie może być dzisiaj",
-      en: "Reservation date cannot be today",
+    return {
+      error: true,
+      errorMsg: {
+        pl: "Data rezerwacji nie może być dzisiaj",
+        en: "Reservation date cannot be today",
+      },
     };
   }
   if (
@@ -61,14 +41,56 @@ function checkIfReservationDateIsAllowed(data) {
       (new Date(reservationStartDate) - new Date(today)) / (24 * 60 * 60 * 1000)
     ) >= 14
   ) {
-    error = {
-      pl: "Data rezerwacji nie może być dalej niż 14 dni w przyszłości",
-      en: "Reservation date cannot be more than 14 days in the future",
+    return {
+      error: true,
+      errorMsg: {
+        pl: "Data rezerwacji nie może być dalej jak 14 dni w przyszłości",
+        en: "Reservation date cannot be more than 14 days in the future",
+      },
     };
   }
+
+  // if date is valid then we check time
+
+  const duration = data.duration;
+  if (duration < 30 || duration > 120) {
+    return {
+      error: true,
+      errorMsg: {
+        pl: "Długość rezerwacji musi być pomiędzy 30 i 180 minutami",
+        en: "Reservation duration must be between 30 and 180 minutes",
+      },
+    };
+  }
+
+  const startHourUTC = "07:00:00";
+  const endHourUTC = "21:00:00";
+
+  const reservationStartHour = data.start_UTC.split("T")[1].split(".")[0];
+  const reservationEndHour = data.end_UTC.split("T")[1].split(".")[0];
+
+  if (reservationStartHour > reservationEndHour) {
+    return {
+      error: true,
+      errorMsg: {
+        pl: "Początkowy czas rezerwacji musi być mniejszy od koncowego czasu rezerwacji",
+        en: "Start time of reservation must be less than end time of reservation",
+      },
+    };
+  }
+
+  if (reservationStartHour < startHourUTC || reservationEndHour > endHourUTC) {
+    return {
+      error: true,
+      errorMsg: {
+        pl: "Czas rezerwacji musi zawierać się w dostępnych godzinach",
+        en: "Reservation time is not within the allowed time frame",
+      },
+    };
+  }
+
   return {
-    error: error ? true : false,
-    errorMsg: error,
+    error: false,
   };
 }
 
@@ -115,10 +137,10 @@ async function checkForOverlapingReservations(newReservationData) {
     where: {
       [Op.and]: {
         start_UTC: {
-          [Op.lte]: end_UTC,
+          [Op.lt]: end_UTC,
         },
         end_UTC: {
-          [Op.gte]: start_UTC,
+          [Op.gt]: start_UTC,
         },
         id: {
           [Op.ne]: newReservationData?.id || null,
@@ -126,6 +148,7 @@ async function checkForOverlapingReservations(newReservationData) {
       },
     },
   });
+
   if (overlappingReservations.length > 0) {
     overlap = overlappingReservations.map((reservation) => {
       return {

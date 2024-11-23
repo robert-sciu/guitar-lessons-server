@@ -10,25 +10,13 @@ const logger = require("../../utilities/logger");
 async function createLessonReservation(req, res) {
   const language = req.language;
   const user = req.user;
-  const timeData = req.body;
-  // TODO: get detected user timezone from headers
-  const userTimezone = "Europe/Warsaw";
-
-  // these are the start and end times of the reservation in UTC iso strings.
-  const { start_UTC, end_UTC } =
-    lessonReservationsService.getStartAndEndUTCMomentIsoStrings(
-      {
-        timeData,
-      },
-      userTimezone
-    );
+  const reservationData =
+    lessonReservationsService.destructureCreateReservationData(req.body);
 
   const data = {
+    ...reservationData,
     user_id: user.id,
     username: user.username,
-    start_UTC,
-    end_UTC,
-    duration: timeData.duration,
     is_permanent: false,
   };
 
@@ -37,7 +25,6 @@ async function createLessonReservation(req, res) {
   if (error) {
     return handleErrorResponse(res, 409, errorMsg[language]);
   }
-
   try {
     const createdRecord = await lessonReservationsService.createReservation(
       data

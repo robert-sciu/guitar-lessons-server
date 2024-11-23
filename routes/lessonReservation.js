@@ -3,11 +3,18 @@ const router = express.Router();
 const lessonReservationController = require("../controllers/lessonReservations");
 const { authenticateJWT } = require("../utilities/authenticationMiddleware");
 const { attachIdParam } = require("../utilities/middleware");
+const {
+  validateCreateLessonReservation,
+} = require("../validators/lessonReservationsValidators");
 
 router
   .route("/")
   .get(authenticateJWT, lessonReservationController.getLessonReservations)
-  .post(authenticateJWT, lessonReservationController.createLessonReservation);
+  .post(
+    authenticateJWT,
+    validateCreateLessonReservation,
+    lessonReservationController.createLessonReservation
+  );
 
 router
   .route("/:id")

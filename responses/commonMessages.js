@@ -3,6 +3,10 @@ const commonMessages = {
     pl: "Dane zostały zaktualizowane",
     en: "Data was updated",
   },
+  deleteSuccess: {
+    pl: "Dane zostały usunięte",
+    en: "Data was deleted",
+  },
   serverError: {
     pl: "Błąd serwera",
     en: "Server error",

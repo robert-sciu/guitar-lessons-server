@@ -37,7 +37,17 @@ function customNotEmpty() {
   return (value) => {
     const checkedValue = noValuesToUndefined({ value });
     if (checkedValue.value === undefined) {
-      throw new Error("Value is required");
+      throw new Error();
+    }
+    return true;
+  };
+}
+
+function validateIsISODateString() {
+  const isoDateStringRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
+  return (value) => {
+    if (!isoDateStringRegex.test(value)) {
+      throw new Error();
     }
     return true;
   };
@@ -72,4 +82,5 @@ module.exports = {
   integerToTime,
   timeToInteger,
   detectUnnecessaryData,
+  validateIsISODateString,
 };
