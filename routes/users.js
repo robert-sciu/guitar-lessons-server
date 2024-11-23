@@ -20,6 +20,20 @@ router
   .post(validateCreateUser, usersController.createUser);
 
 router
+  .route("/reset_password")
+  .post(validateResetPasswordRequest, usersController.resetPasswordRequest)
+  .patch(validateResetPassword, usersController.resetPassword);
+
+router
+  .route("/change_email_address")
+  .post(
+    authenticateJWT,
+    validateChangeEmailRequest,
+    usersController.changeEmailRequest
+  )
+  .patch(authenticateJWT, validateChangeEmail, usersController.changeEmail);
+
+router
   .route("/:id")
   .patch(
     authenticateJWT,
@@ -33,19 +47,5 @@ router
     attachIdParam,
     usersController.deleteUser
   );
-
-router
-  .route("/reset_password")
-  .post(validateResetPasswordRequest, usersController.resetPasswordRequest)
-  .patch(validateResetPassword, usersController.resetPassword);
-
-router
-  .route("/change_email_address")
-  .post(
-    authenticateJWT,
-    validateChangeEmailRequest,
-    usersController.changeEmailRequest
-  )
-  .patch(authenticateJWT, validateChangeEmail, usersController.changeEmail);
 
 module.exports = router;

@@ -15,6 +15,10 @@ const lessonReservationsMessages = {
     pl: "Nie masz już dostępnych zmian terminów",
     en: "No more reschedules left",
   },
+  userNotConfirmed: {
+    pl: "Zanim dokonasz rezerwacji Twoje konto musi zostać potwierdzone",
+    en: "Before making a reservation, your account must be confirmed",
+  },
 };
 
 module.exports = lessonReservationsMessages;

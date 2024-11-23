@@ -13,6 +13,14 @@ async function createLessonReservation(req, res) {
   const reservationData =
     lessonReservationsService.destructureCreateReservationData(req.body);
 
+  if (!user.is_confirmed) {
+    return handleErrorResponse(
+      res,
+      403,
+      responses.lessonReservationsMessages.userNotConfirmed[language]
+    );
+  }
+
   const data = {
     ...reservationData,
     user_id: user.id,

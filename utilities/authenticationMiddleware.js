@@ -42,7 +42,6 @@ async function authenticateJWT(req, res, next) {
     req.user = userData;
     next();
   } catch (error) {
-    // console.log(error);
     logger.error(error);
     return handleErrorResponse(res, 401, "Token is not valid");
   }

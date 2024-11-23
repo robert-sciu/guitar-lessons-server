@@ -32,7 +32,6 @@ async function updateUser(req, res) {
       );
     }
   }
-  console.log(updateData);
 
   try {
     const updateDataNoDuplicates = unchangedDataToUndefined(user, updateData);
