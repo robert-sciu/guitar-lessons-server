@@ -18,7 +18,7 @@ async function refreshToken(req, res) {
   }
   try {
     const decoded = authenticationService.decodeJWT(refreshToken);
-    const storedToken = await authenticationService.findStoredToken(
+    const storedToken = await authenticationService.getStoredToken(
       refreshToken
     );
     if (!storedToken) {
@@ -38,7 +38,7 @@ async function refreshToken(req, res) {
     const accessToken = authenticationService.getJWT(decoded);
     return handleSuccessResponse(res, 200, { token: accessToken });
   } catch (error) {
-    // logger.error(error);
+    logger.error(error);
     return handleErrorResponse(
       res,
       401,

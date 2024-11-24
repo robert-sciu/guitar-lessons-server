@@ -10,7 +10,7 @@ async function getLessonReservations(req, res) {
   const language = req.language;
   try {
     const lessonReservations =
-      await lessonReservationsService.findAllReservations();
+      await lessonReservationsService.getAllReservations();
     return handleSuccessResponse(res, 200, lessonReservations);
   } catch (error) {
     logger.error(error);

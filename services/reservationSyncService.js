@@ -8,6 +8,7 @@ const {
   destructureReservationDataFromPlanInfo,
   findAllPlanInfosWithPermanentReservations,
   getPermanentReservationsForUser,
+  removeReservationsOlderThanMonth,
 } = require("./reservationSyncHandlers");
 
 /**
@@ -46,29 +47,19 @@ async function syncAutomaticLessonReservations() {
       }
       // this is the case where there is one associated reservation
       // the most typical scenario is that the day of the lesson reservation has passed
-      // and we need to create a new one for after the next week so we always have two.
-      // Reservations older than today are not in the loop anyway
-      // but to be safe it's also going to create this week entry
-      // in case this week's reservation is gone for some reason
-      // I don't account for the scenario where there's reservation to be created
-      // and for some reason the plan info has changed in the meantime
-      // but this seems to be virtually impossible to happen and even if it does
-      // it will be corrected in the next sync
       if (associatedReservations.length === 1) {
-        console.log("one associated reservation");
-        // await handleOneAssociatedReservation(
-        //   planInfoReservationData,
-        //   associatedReservations,
-        //   user_id,
-        //   permanent_reservation_weekday
-        // );
+        await handleOneAssociatedReservation(
+          associatedReservations,
+          planInfoReservationData
+        );
         // I imagine this as very rare scenario but in case the plan info was changed
         // while there's only one reservation in the database, the handleOneAssociatedReservation would not
         // update the existing reservation. So after the handleOneAssociatedReservation we'd
         // be left with two different reservations for each week. That's why we need to sync
         // the reservations again. This time we have two reservations so the handleTwoAssociatedReservations
         // will update both. As this should be very rare I do not worry about performance too much.
-        if (!(await checkReservationsConsistency(user_id, today))) {
+
+        if (!(await checkReservationsConsistency(user_id))) {
           await syncAutomaticLessonReservations();
         }
       }
@@ -76,6 +67,8 @@ async function syncAutomaticLessonReservations() {
         await handleNoAssociatedReservations(planInfoReservationData);
       }
     }
+
+    removeReservationsOlderThanMonth();
   } catch (error) {
     logger.error(error);
   }

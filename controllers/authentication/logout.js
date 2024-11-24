@@ -17,7 +17,7 @@ async function logout(req, res) {
     );
   }
   try {
-    const existingToken = await authenticationService.findStoredToken(
+    const existingToken = await authenticationService.getStoredToken(
       refreshToken
     );
     if (existingToken) {

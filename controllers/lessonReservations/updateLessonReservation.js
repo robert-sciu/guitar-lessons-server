@@ -27,7 +27,7 @@ async function updateLessonReservation(req, res) {
       );
     }
 
-    const reservation = await lessonReservationsService.findReservationById(
+    const reservation = await lessonReservationsService.getReservationById(
       reservation_id
     );
     if (!reservation) {

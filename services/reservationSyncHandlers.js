@@ -121,6 +121,29 @@ function reservationDataToPlanInfoFormat(reservationData) {
   return dataForComparison;
 }
 
+/**
+ * Creates a reservation data object for a given date.
+ *
+ * @param {Object} planInfoReservationData - The plan info reservation data object.
+ * @param {string} date - The date for which to create the reservation data object.
+ *
+ * @returns {Object} The reservation data object.
+ *
+ */
+function createReservationDataForDate(planInfoReservationData, date) {
+  const start_UTC = `${date}T${planInfoReservationData.start_hour_UTC}.000Z`;
+  const end_UTC = `${date}T${planInfoReservationData.end_hour_UTC}.000Z`;
+  const reservationData = {
+    user_id: planInfoReservationData.user_id,
+    username: planInfoReservationData.username,
+    start_UTC,
+    end_UTC,
+    duration: planInfoReservationData.duration,
+    is_permanent: true,
+  };
+  return reservationData;
+}
+
 function dateToWeekday(date) {
   return new Date(date).getDay();
 }
@@ -163,41 +186,21 @@ function checkIfDateIsNextWeek(date) {
   }
 }
 
-async function checkReservationsConsistency(user_id, today) {
+async function checkReservationsConsistency(user_id) {
+  const today = new Date().toISOString().split("T")[0];
   const reservationForCurrentUser = await findAllRecords(LessonReservation, {
     user_id,
     date: {
       [Op.or]: [{ [Op.gt]: today }, { [Op.eq]: today }],
     },
   });
+
   if (reservationForCurrentUser.length !== 2) {
     logger.error(
       "syncAutomaticLessonReservations: handleOneAssociatedReservation did not create two new reservations for user",
       user_id
     );
     return;
-  }
-  const {
-    hour: hour1,
-    minute: minute1,
-    duration: duration1,
-  } = destructureData(reservationForCurrentUser[0].dataValues, [
-    "hour",
-    "minute",
-    "duration",
-  ]);
-
-  const {
-    hour: hour2,
-    minute: minute2,
-    duration: duration2,
-  } = destructureData(reservationForCurrentUser[1].dataValues, [
-    "hour",
-    "minute",
-    "duration",
-  ]);
-  if (hour1 !== hour2 || minute1 !== minute2 || duration1 !== duration2) {
-    return false;
   }
   return true;
 }
@@ -237,6 +240,7 @@ async function handleTwoAssociatedReservations(
         );
         // check if the associated reservation is consistent with the plan info
         // if the planInfo was not changed we don't need to update the reservation
+
         if (
           !checkForChangedPermanentReservation(
             planInfoReservationData,
@@ -276,25 +280,31 @@ async function handleTwoAssociatedReservations(
   }
 }
 
+/**
+ * Handles creating a new lesson reservation when there is one existing associated reservation.
+ * It calculates the date for the new reservation based on the plan info data and the existing reservation.
+ *
+ * @param {Object[]} associatedReservations - An array containing the existing associated reservation.
+ * @param {Object} planInfoReservationData - The reservation data extracted from the plan info.
+ * @returns {Promise<void>}
+ */
 async function handleOneAssociatedReservation(
-  planInfoReservationData,
   associatedReservations,
-  user_id,
-  permanent_reservation_weekday
+  planInfoReservationData
 ) {
   try {
-    const { date } = destructureData(associatedReservations[0].dataValues, [
-      "date",
-    ]);
-    await createRecord(LessonReservation, {
-      ...planInfoReservationData,
-      user_id,
-      date: weekdayToDate({
-        weekday: permanent_reservation_weekday,
-        nextWeek: !checkIfDateIsNextWeek(date),
-      }),
-      is_permanent: true,
+    const associatedReservationData = destructureReservationDataFromReservation(
+      associatedReservations[0]
+    );
+    const date = weekdayToDate({
+      weekday: planInfoReservationData.weekday,
+      nextWeek: !checkIfDateIsNextWeek(associatedReservationData.start_UTC),
     });
+    const reservationData = createReservationDataForDate(
+      planInfoReservationData,
+      date
+    );
+    await createRecord(LessonReservation, reservationData);
   } catch (error) {
     logger.error(error);
   }
@@ -324,16 +334,10 @@ async function handleNoAssociatedReservations(planInfoReservationData) {
         weekday: planInfoReservationData.weekday,
         nextWeek: isNextWeek.nextWeek,
       });
-      const start_UTC = `${date}T${planInfoReservationData.start_hour_UTC}.000Z`;
-      const end_UTC = `${date}T${planInfoReservationData.end_hour_UTC}.000Z`;
-      const reservationData = {
-        user_id: planInfoReservationData.user_id,
-        username: planInfoReservationData.username,
-        start_UTC,
-        end_UTC,
-        duration: planInfoReservationData.duration,
-        is_permanent: true,
-      };
+      const reservationData = createReservationDataForDate(
+        planInfoReservationData,
+        date
+      );
       try {
         await createRecord(LessonReservation, reservationData);
       } catch (error) {
@@ -341,6 +345,22 @@ async function handleNoAssociatedReservations(planInfoReservationData) {
       }
     })
   );
+}
+
+async function removeReservationsOlderThanMonth() {
+  try {
+    const monthAgo = new Date();
+    monthAgo.setDate(monthAgo.getDate() - 30);
+    await LessonReservation.destroy({
+      where: {
+        start_UTC: {
+          [Op.lt]: monthAgo,
+        },
+      },
+    });
+  } catch (error) {
+    logger.error(error);
+  }
 }
 
 module.exports = {
@@ -355,4 +375,5 @@ module.exports = {
   handleOneAssociatedReservation,
   checkReservationsConsistency,
   handleNoAssociatedReservations,
+  removeReservationsOlderThanMonth,
 };

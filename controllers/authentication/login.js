@@ -10,11 +10,7 @@ async function login(req, res) {
   const language = req.language;
   const { email, password } = req.body;
   try {
-    // TODO: add validation and remove this check
-    if (!email || !password) {
-      return handleErrorResponse(res, 400, "Email and password are required");
-    }
-    const user = await authenticationService.findUserByEmail(email);
+    const user = await authenticationService.getUserByEmail(email);
     if (!user) {
       return handleErrorResponse(
         res,

@@ -17,9 +17,21 @@ const {
 const { Op } = require("sequelize");
 
 class LessonReservationsService {
+/**
+ * Determines if the given user has an admin role.
+ *
+ * @param {Object} user - The user object to check.
+ * @returns {boolean} - Returns true if the user's role is "admin", false otherwise.
+ */
   userIsAdmin(user) {
     return user.role === "admin";
   }
+/**
+ * Checks if the given user has a role of "user".
+ *
+ * @param {Object} user - The user object to check.
+ * @returns {boolean} - Returns true if the user's role is "user", false otherwise.
+ */
   userIsUser(user) {
     return user.role === "user";
   }
@@ -62,7 +74,7 @@ class LessonReservationsService {
    * Finds all LessonReservations in the database.
    * @returns {Promise<LessonReservation[]>} a promise resolving to an array of all LessonReservations
    */
-  async findAllReservations() {
+  async getAllReservations() {
     return await LessonReservation.findAll({
       attributes: [
         "id",
@@ -79,7 +91,7 @@ class LessonReservationsService {
    * @param {number} id - the id of the LessonReservation to find
    * @returns {Promise<LessonReservation>} a promise resolving to the LessonReservation with the given id, or null if no such reservation exists
    */
-  async findReservationById(id) {
+  async getReservationById(id) {
     return await findRecordByPk(LessonReservation, id);
   }
 
@@ -89,7 +101,7 @@ class LessonReservationsService {
    * @returns {Promise<PlanInfo>} a promise resolving to the PlanInfo record for the given user, or null if no such record exists
    */
 
-  async findUserPlanInfo(user_id) {
+  async getUserPlanInfo(user_id) {
     return await findRecordByFk(PlanInfo, user_id);
   }
 
