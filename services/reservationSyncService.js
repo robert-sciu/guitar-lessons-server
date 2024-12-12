@@ -68,7 +68,7 @@ async function syncAutomaticLessonReservations() {
       }
     }
 
-    removeReservationsOlderThanMonth();
+    // removeReservationsOlderThanMonth();
   } catch (error) {
     logger.error(error);
   }

@@ -26,6 +26,7 @@ async function createLessonReservation(req, res) {
     user_id: user.id,
     username: user.username,
     is_permanent: false,
+    free_edit_expiry: lessonReservationsService.addMinutesToNow(60),
   };
 
   const { error, errorMsg } =

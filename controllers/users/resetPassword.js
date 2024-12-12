@@ -11,15 +11,16 @@ async function resetPassword(req, res) {
   const data = userService.destructurePasswordResetData(req.body);
   const { email, password, reset_password_token } = data;
   try {
-    const user = await userService.findUserByEmail(email);
-    if (!user) {
+    const { resetPasswordToken, userId } =
+      await userService.getResetPasswordToken(email);
+    if (!resetPasswordToken) {
       return handleErrorResponse(
         res,
         404,
         responses.usersMessages.userNotFound[language]
       );
     }
-    if (user.reset_password_token !== reset_password_token) {
+    if (resetPasswordToken !== reset_password_token) {
       return handleErrorResponse(
         res,
         400,
@@ -28,7 +29,7 @@ async function resetPassword(req, res) {
     }
     const hashedPassword = await userService.hashPassword(password);
     const updatedRecordCount = await userService.updateUserPassword(
-      user.id,
+      userId,
       hashedPassword
     );
 

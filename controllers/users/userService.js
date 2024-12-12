@@ -81,8 +81,19 @@ class UserService {
    * @param {string} email The email address of the user to find
    * @returns {Promise<User>} The user with the given email, or null if none is found
    */
-  async findUserByEmail(email) {
-    return await findRecordByValue(User, { email });
+
+  /**
+   * Finds a user by their email address and returns the user's reset_password_token and id
+   * @param {string} email The email address of the user to find
+   * @returns {Promise<{ resetPasswordToken: string, userId: number }|null>}
+   * The user with the given email, or null if none is found
+   */
+  async getResetPasswordToken(email) {
+    const user = await findRecordByValue(User, { email });
+    if (!user) {
+      return null;
+    }
+    return { resetPasswordToken: user.reset_password_token, userId: user.id };
   }
   /**
    * Finds all users in the database
@@ -285,6 +296,7 @@ class UserService {
       "email",
       "difficulty_clearance_level",
       "is_confirmed",
+      "role",
       "minimum_task_level_to_display",
     ]);
   }

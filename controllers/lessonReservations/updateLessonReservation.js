@@ -53,7 +53,6 @@ async function updateLessonReservation(req, res) {
       ...updateTimeData,
       user_id,
       username: user.username,
-      // is_permanent: planInfo.has_permanent_reservation,
       rescheduled_by_user: lessonReservationsService.userIsUser(user),
       rescheduled_by_admin: lessonReservationsService.userIsAdmin(user),
     };

@@ -29,10 +29,6 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.TIME,
         allowNull: true,
       },
-      // permanent_reservation_minute: {
-      //   type: DataTypes.INTEGER,
-      //   allowNull: true,
-      // },
       permanent_reservation_lesson_duration: {
         type: DataTypes.INTEGER,
         allowNull: true,
@@ -42,6 +38,11 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
       },
       reschedules_left_count: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+      },
+      completed_lesson_count: {
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: 0,

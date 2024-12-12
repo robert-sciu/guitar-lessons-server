@@ -48,6 +48,10 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
         defaultValue: false,
       },
+      free_edit_expiry: {
+        type: DataTypes.DATE,
+        allowNull: true,
+      },
     },
     {
       timestamps: false,

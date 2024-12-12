@@ -170,9 +170,10 @@ function checkForChangedPermanentReservation(
   dataFromPlanInfo,
   dataFromCalendar
 ) {
-  const inconsistent = Object.keys(dataFromPlanInfo).some(
-    (key) => dataFromPlanInfo[key] !== dataFromCalendar[key]
-  );
+  const inconsistent = Object.keys(dataFromPlanInfo).some((key) => {
+    if (key === "username") return false;
+    dataFromPlanInfo[key] !== dataFromCalendar[key];
+  });
 
   return inconsistent;
 }
@@ -250,8 +251,6 @@ async function handleTwoAssociatedReservations(
           return;
         }
 
-        // TODO: after this point it may not work
-
         // previous if statement breaks the loop if the data has not changed
         // now we need to update the reservation with the new data
         // but drop the data that has not changed
@@ -259,6 +258,8 @@ async function handleTwoAssociatedReservations(
           associatedReservationData,
           planInfoReservationData
         );
+
+        // TODO: after this point it does not work
 
         // this will only do something if the permanent weekday was changed
         // in planInfo. As the idea is that we always have two db entries for

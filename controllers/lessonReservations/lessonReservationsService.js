@@ -17,21 +17,21 @@ const {
 const { Op } = require("sequelize");
 
 class LessonReservationsService {
-/**
- * Determines if the given user has an admin role.
- *
- * @param {Object} user - The user object to check.
- * @returns {boolean} - Returns true if the user's role is "admin", false otherwise.
- */
+  /**
+   * Determines if the given user has an admin role.
+   *
+   * @param {Object} user - The user object to check.
+   * @returns {boolean} - Returns true if the user's role is "admin", false otherwise.
+   */
   userIsAdmin(user) {
     return user.role === "admin";
   }
-/**
- * Checks if the given user has a role of "user".
- *
- * @param {Object} user - The user object to check.
- * @returns {boolean} - Returns true if the user's role is "user", false otherwise.
- */
+  /**
+   * Checks if the given user has a role of "user".
+   *
+   * @param {Object} user - The user object to check.
+   * @returns {boolean} - Returns true if the user's role is "user", false otherwise.
+   */
   userIsUser(user) {
     return user.role === "user";
   }
@@ -82,6 +82,8 @@ class LessonReservationsService {
         ["username", "title"],
         ["start_UTC", "start"],
         ["end_UTC", "end"],
+        ["free_edit_expiry", "free_edit_expiry"],
+        ["duration", "duration"],
       ],
     });
   }
@@ -112,7 +114,7 @@ class LessonReservationsService {
    * @returns {Promise<PlanInfo>} a promise resolving to the updated PlanInfo record
    */
   async updateCancelledReservationsCount(user_id) {
-    const planInfo = await this.findUserPlanInfo(user_id);
+    const planInfo = await this.getUserPlanInfo(user_id);
     const cancelled_reservations_count =
       planInfo.cancelled_reservations_count + 1;
     return await updateRecord(
@@ -123,7 +125,7 @@ class LessonReservationsService {
   }
 
   async updateReschedulesLeftCount(user_id) {
-    const planInfo = await this.findUserPlanInfo(user_id);
+    const planInfo = await this.getUserPlanInfo(user_id);
     const reschedules_left_count = planInfo.reschedules_left_count - 1;
     return await updateRecord(PlanInfo, { reschedules_left_count }, user_id);
   }
@@ -153,70 +155,11 @@ class LessonReservationsService {
     });
   }
 
-  // /**
-  //  * Calculates start and end UTC ISO strings given time data and timezone.
-  //  *
-  //  * @param {object} options
-  //  * @param {object} options.timeData - an object containing year, month, day, hour, minute and duration
-  //  * @param {string} timezone - the timezone to use for the moment calculations
-  //  *
-  //  * @returns {object} containing startUTC and endUTC as ISO strings
-  //  */
-  // getStartAndEndUTCMomentIsoStrings({ timeData }, timezone) {
-  //   const { year, month, day, hour, minute, duration } =
-  //     this.destructureLessonReservationData(timeData);
-
-  //   const hoursToAdd = Math.floor(duration / 60);
-  //   const minutesToAdd = duration % 60;
-  //   const endHour = hour + hoursToAdd;
-  //   const endMinute = minute + minutesToAdd;
-
-  //   const localMomentStart = moment.tz(
-  //     {
-  //       year,
-  //       month,
-  //       day,
-  //       hour,
-  //       minute,
-  //     },
-  //     timezone
-  //   );
-  //   const localMomentEnd = moment.tz(
-  //     {
-  //       year,
-  //       month,
-  //       day,
-  //       hour: endHour,
-  //       minute: endMinute,
-  //     },
-  //     timezone
-  //   );
-
-  //   const start_UTC = localMomentStart.utc();
-  //   const end_UTC = localMomentEnd.utc();
-
-  //   return {
-  //     start_UTC: start_UTC.toISOString(),
-  //     end_UTC: end_UTC.toISOString(),
-  //   };
-  // }
-
-  // /**
-  //  * Destructure the data object into the separate values required
-  //  * to create a lesson reservation.
-  //  * @param {Object} data the data object to destructure
-  //  * @returns {Object} an object with the destructured values
-  //  */
-  // destructureLessonReservationData(data) {
-  //   return destructureData(data, [
-  //     "year",
-  //     "month",
-  //     "day",
-  //     "hour",
-  //     "minute",
-  //     "duration",
-  //   ]);
-  // }
+  addMinutesToNow(minutes) {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + minutes);
+    return now.toISOString();
+  }
 
   /**
    * Destructures the data object into the separate values required
