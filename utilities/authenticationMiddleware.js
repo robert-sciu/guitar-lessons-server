@@ -22,24 +22,21 @@ async function authenticateJWT(req, res, next) {
         },
       });
 
-      const {
-        password,
-        reset_password_token,
-        reset_password_token_expiry,
-        change_email_token,
-        change_email_token_expiry,
-        new_email_temp,
-        ...userDataValues
-      } = user.dataValues;
+      const { password, new_email_temp, ...userDataValues } = user.dataValues;
 
       if (!userDataValues) {
         return handleErrorResponse(res, 404, "User not found");
+      }
+
+      if (userDataValues.is_verified === false) {
+        return handleErrorResponse(res, 403, "User is not verified");
       }
 
       userData = userDataValues;
       userCache.set(decoded.id, userData);
     }
     req.user = userData;
+
     next();
   } catch (error) {
     logger.error(error);

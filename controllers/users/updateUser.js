@@ -14,9 +14,9 @@ async function updateUser(req, res) {
   let user;
   let updateData;
   if (userService.userIsAdmin(req.user)) {
-    const { difficulty_clearance_level, is_confirmed } =
+    const { difficulty_clearance_level, is_confirmed_by_admin } =
       userService.destructureUpdateUserDataAdmin(req.body);
-    updateData = { difficulty_clearance_level, is_confirmed };
+    updateData = { difficulty_clearance_level, is_confirmed_by_admin };
     user = await userService.findUserById(user_id);
   }
   if (userService.userIsUser(req.user)) {

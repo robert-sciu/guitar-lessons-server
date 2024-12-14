@@ -24,9 +24,6 @@ async function getTags(req, res) {
   if (!id) {
     try {
       const tags = await findAllRecords(Tag);
-      if (tags.length < 1) {
-        return handleErrorResponse(res, 404, "No tags found");
-      }
       return handleSuccessResponse(res, 200, tags);
     } catch (error) {
       logger.error(error);

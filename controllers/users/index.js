@@ -1,5 +1,7 @@
 const getUser = require("./getUser");
 const createUser = require("./createUser");
+const createAdmin = require("./createAdmin");
+const verifyUser = require("./verifyUser");
 const updateUser = require("./updateUser");
 const deleteUser = require("./deleteUser");
 const resetPasswordRequest = require("./resetPasswordRequest");
@@ -10,6 +12,8 @@ const changeEmail = require("./changeEmail");
 module.exports = {
   getUser,
   createUser,
+  createAdmin,
+  verifyUser,
   updateUser,
   deleteUser,
   resetPasswordRequest,

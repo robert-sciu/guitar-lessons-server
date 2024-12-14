@@ -20,6 +20,12 @@ router
   .post(validateCreateUser, usersController.createUser);
 
 router
+  .route("/create_admin")
+  .post(validateCreateUser, usersController.createAdmin);
+
+router.route("/verifyUser").post(usersController.verifyUser);
+
+router
   .route("/reset_password")
   .post(validateResetPasswordRequest, usersController.resetPasswordRequest)
   .patch(validateResetPassword, usersController.resetPassword);

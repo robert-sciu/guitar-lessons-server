@@ -15,6 +15,7 @@ async function getPlanInfo(req, res) {
       return handleSuccessResponse(res, 200, planInfos);
     }
     const planInfo = await planInfoService.getPlanInfo(user_id);
+
     if (!planInfo) {
       return handleErrorResponse(
         res,

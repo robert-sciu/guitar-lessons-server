@@ -3,7 +3,7 @@ const {
   createRecord,
   updateRecord,
 } = require("../../utilities/controllerUtilites");
-const { User, RefreshToken } = require("../../models").sequelize.models;
+const { User, UserToken } = require("../../models").sequelize.models;
 const bcrypt = require("bcryptjs");
 const {
   generateJWT,
@@ -28,7 +28,7 @@ class AuthenticationService {
    * @returns {Promise<RefreshToken|null>} The refresh token if found and not revoked, or null if not found.
    */
   async getStoredToken(token) {
-    return await findRecordByValue(RefreshToken, { token, revoked: false });
+    return await findRecordByValue(UserToken, { token, revoked: false });
   }
 
   /**
@@ -37,7 +37,7 @@ class AuthenticationService {
    * @returns {Promise<RefreshToken>} The revoked token.
    */
   async revokeToken(token) {
-    return await updateRecord(RefreshToken, { revoked: true }, token.id);
+    return await updateRecord(UserToken, { revoked: true }, token.id);
   }
 
   /**
@@ -58,10 +58,11 @@ class AuthenticationService {
    * @returns {Promise<RefreshToken>} The newly created refresh token record.
    */
   async saveRefreshToken(refreshToken, userId) {
-    return await createRecord(RefreshToken, {
+    return await createRecord(UserToken, {
       token: refreshToken,
       user_id: userId,
-      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      type: "refresh",
       revoked: false,
     });
   }

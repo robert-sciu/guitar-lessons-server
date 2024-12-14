@@ -7,11 +7,10 @@ const logger = require("../../utilities/logger");
 const userService = require("./userService");
 const responses = require("../../responses");
 
-async function createUser(req, res) {
+async function createAdmin(req, res) {
   const language = req.language;
-  const data = userService.destructureCreateUserData(req.body);
+  const data = userService.destructureCreateUserDataAdmin(req.body);
   const transaction = await sequelize.transaction();
-
   try {
     if (await userService.emailIsInDatabase(data.email, transaction)) {
       await transaction.rollback();
@@ -25,40 +24,27 @@ async function createUser(req, res) {
     const userData = {
       ...data,
       password: hashedPassword,
-      role: "user",
-      difficulty_clearance_level: 1,
-      is_confirmed_by_admin: false,
-      is_verified: false,
+      role: "admin",
+      difficulty_clearance_level: 999,
+      is_confirmed_by_admin: true,
+      is_verified: true,
     };
 
-    const newUser = await userService.createUser(userData, transaction);
-    const user_id = newUser.id;
-
-    const verificationToken = userService.createVerificationToken(user_id);
-
-    await userService.createPlanInfo(user_id, transaction);
-    await userService.saveVerificationToken(
-      user_id,
-      verificationToken,
-      transaction
-    );
-
-    const verificationLink = `${process.env.DEV_ORIGIN}/verifyUser?token=${verificationToken}`;
-
-    const mailError = await userService.sendMailWithVerificationToken(
-      data.email,
-      verificationLink
-    );
-
-    if (mailError) {
+    if (
+      process.env.CREATE_ADMIN_USER_ENABLED !== "true" ||
+      process.env.CREATE_ADMIN_TOKEN !== data.token
+    ) {
       await transaction.rollback();
       return handleErrorResponse(
         res,
-        500,
-        responses.commonMessages.serverError[language]
+        400,
+        responses.commonMessages.forbidden[language]
       );
     }
 
+    const newUser = await userService.createUser(userData, transaction);
+    const user_id = newUser.id;
+    await userService.createPlanInfo(user_id, transaction);
     await transaction.commit();
     return handleSuccessResponse(
       res,
@@ -76,4 +62,4 @@ async function createUser(req, res) {
   }
 }
 
-module.exports = createUser;
+module.exports = createAdmin;

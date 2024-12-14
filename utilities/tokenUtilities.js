@@ -13,6 +13,26 @@ function generateJWT(user) {
   );
 }
 
+function generateVerificationToken(userId) {
+  const secret = process.env.JWT_VERIFICATION_SECRET;
+  const id = userId;
+  const expiresIn = "60m";
+  return jwt.sign(
+    {
+      id,
+    },
+    secret,
+    {
+      expiresIn,
+    }
+  );
+}
+
+function verifyVerificationToken(token) {
+  const secret = process.env.JWT_VERIFICATION_SECRET;
+  return jwt.verify(token, secret);
+}
+
 function generateRefreshJWT(user) {
   return jwt.sign(
     {
@@ -30,4 +50,10 @@ function verifyJWT(token) {
   return jwt.verify(token, process.env.JWT_REFRESH_SECRET);
 }
 
-module.exports = { generateJWT, generateRefreshJWT, verifyJWT };
+module.exports = {
+  generateJWT,
+  generateRefreshJWT,
+  verifyJWT,
+  generateVerificationToken,
+  verifyVerificationToken,
+};

@@ -92,10 +92,6 @@ const validateCreateUser = [
   ...validateUsername(),
   ...validateEmail(),
   ...validatePassword(),
-  body("role")
-    .custom(customNotEmpty())
-    .isIn(allowList.user.roles)
-    .withMessage({ pl: "Niepoprawna rola", en: "Invalid role" }),
 
   (req, res, next) => {
     req.body = noValuesToUndefined(req.body);

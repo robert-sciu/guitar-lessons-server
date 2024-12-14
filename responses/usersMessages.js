@@ -31,6 +31,10 @@ const usersMessages = {
     pl: "Użytkownik został utworzony",
     en: "User has been created",
   },
+  userNotVerified: {
+    pl: "Użytkownik nie został zwerifikowany",
+    en: "User has not been verified",
+  },
 };
 
 module.exports = usersMessages;

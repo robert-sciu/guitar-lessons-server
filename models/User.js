@@ -37,31 +37,17 @@ module.exports = (sequelize, DataTypes) => {
       minimum_task_level_to_display: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        defaultValue: 0,
+        defaultValue: 1,
       },
-      is_confirmed: {
+      is_verified: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
+        defaultValue: false,
       },
-      reset_password_token: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        defaultValue: null,
-      },
-      reset_password_token_expiry: {
-        type: DataTypes.DATE,
-        allowNull: true,
-        defaultValue: null,
-      },
-      change_email_token: {
-        type: DataTypes.STRING,
-        allowNull: true,
-        defaultValue: null,
-      },
-      change_email_token_expiry: {
-        type: DataTypes.DATE,
-        allowNull: true,
-        defaultValue: null,
+      is_confirmed_by_admin: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
       },
     },
     {

@@ -11,8 +11,12 @@ const { sendMail } = require("../../utilities/mailer");
 const { userCache } = require("../../utilities/nodeCache");
 const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
+const {
+  generateVerificationToken,
+  verifyVerificationToken,
+} = require("../../utilities/tokenUtilities");
 
-const { User, PlanInfo, RefreshToken } =
+const { User, PlanInfo, RefreshToken, UserToken } =
   require("../../models").sequelize.models;
 
 class UserService {
@@ -39,7 +43,7 @@ class UserService {
   //crypto ////////////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////////////////////
   generateResetToken() {
-    const resetToken = crypto.randomInt(10000, 99999);
+    const resetToken = crypto.randomInt(1000000, 9999999);
     const resetTokenExpiry = Date.now() + 60 * 15 * 1000;
     return { resetToken, resetTokenExpiry };
   }
@@ -66,6 +70,58 @@ class UserService {
     return await createRecord(User, data, transaction);
   }
 
+  createVerificationToken(userId) {
+    return generateVerificationToken(userId);
+  }
+
+  async saveVerificationToken(userId, verificationToken, transaction) {
+    return await createRecord(
+      UserToken,
+      {
+        token: verificationToken,
+        user_id: userId,
+        type: "verification",
+        expires_at: new Date(Date.now() + 30 * 60 * 1000),
+      },
+      transaction
+    );
+  }
+
+  verifyVerificationToken(token) {
+    return verifyVerificationToken(token);
+  }
+
+  async compareVerificationToken(token, userId) {
+    const verificationToken = await UserToken.findOne({
+      where: {
+        token,
+        user_id: userId,
+        type: "verification",
+      },
+    });
+    if (verificationToken?.dataValues?.token !== token) {
+      return false;
+    }
+    return true;
+  }
+
+  async setUserVerified(user_id) {
+    return await updateRecord(User, { is_verified: true }, user_id);
+  }
+
+  async deleteToken(token, user_id) {
+    return await UserToken.destroy({
+      where: { token: token, user_id: user_id, type: "verification" },
+    });
+  }
+
+  async sendMailWithVerificationToken(email, verificationLink) {
+    await sendMail({
+      email,
+      subject: "Email Verification",
+      text: `Click the link to verify your email: ${verificationLink}`,
+    });
+  }
   /**
    * Creates a new PlanInfo record for a given user
    * @param {number} user_id The id of the user to create the PlanInfo for
@@ -124,6 +180,7 @@ class UserService {
       user_id
     );
   }
+
   /**
    * Finds a user by id and returns the sanitized user data
    * @param {number} user_id The id of the user to find
@@ -295,18 +352,22 @@ class UserService {
       "username",
       "email",
       "difficulty_clearance_level",
-      "is_confirmed",
+      "is_confirmed_by_admin",
+      "is_verified",
       "role",
       "minimum_task_level_to_display",
     ]);
   }
   destructureCreateUserData(data) {
-    return destructureData(data, ["username", "email", "password", "role"]);
+    return destructureData(data, ["username", "email", "password"]);
+  }
+  destructureCreateUserDataAdmin(data) {
+    return destructureData(data, ["username", "email", "password", "token"]);
   }
   destructureUpdateUserDataAdmin(data) {
     return destructureData(data, [
       "difficulty_clearance_level",
-      "is_confirmed",
+      "is_confirmed_by_admin",
     ]);
   }
   destructureUpdateUserDataUser(data) {

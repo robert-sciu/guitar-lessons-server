@@ -9,6 +9,7 @@ const userService = require("./userService");
 async function getUser(req, res) {
   const language = req.language;
   const user = req.user;
+
   try {
     if (userService.userIsUser(user)) {
       return handleSuccessResponse(res, 200, user);
@@ -22,6 +23,7 @@ async function getUser(req, res) {
           responses.usersMessages.usersNotFound[language]
         );
       }
+
       return handleSuccessResponse(res, 200, users);
     }
   } catch (error) {

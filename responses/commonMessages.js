@@ -19,6 +19,10 @@ const commonMessages = {
     pl: "Kod nieprawidłowy",
     en: "Invalid token",
   },
+  tokenExpired: {
+    pl: "Kod wygasł",
+    en: "Token expired",
+  },
   noUpdateData: {
     pl: "Brak danych do aktualizacji",
     en: "No update data",

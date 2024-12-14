@@ -1,4 +1,4 @@
-const { logger } = require("../../utilities/logger");
+const logger = require("../../utilities/logger");
 const {
   handleSuccessResponse,
   handleErrorResponse,
@@ -9,6 +9,7 @@ const authenticationService = require("./authenticationService");
 async function refreshToken(req, res) {
   const language = req.language;
   const refreshToken = req.cookies.refreshToken;
+
   if (!refreshToken) {
     return handleErrorResponse(
       res,
@@ -41,7 +42,7 @@ async function refreshToken(req, res) {
     logger.error(error);
     return handleErrorResponse(
       res,
-      401,
+      500,
       responses.commonMessages.serverError[language]
     );
   }

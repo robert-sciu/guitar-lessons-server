@@ -29,11 +29,15 @@ async function login(req, res) {
     }
     const accessToken = authenticationService.getJWT(user);
     const refreshToken = authenticationService.getRefreshJWT(user);
+    const isVerified = user.is_verified;
 
     await authenticationService.saveRefreshToken(refreshToken, user.id);
     authenticationService.attachCookies(res, refreshToken);
 
-    return handleSuccessResponse(res, 200, { token: accessToken });
+    return handleSuccessResponse(res, 200, {
+      token: accessToken,
+      isVerified,
+    });
   } catch (error) {
     logger.error(error);
     return handleErrorResponse(
