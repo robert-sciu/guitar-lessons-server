@@ -35,7 +35,23 @@ async function verifyUser(req, res) {
         responses.usersMessages.userNotVerified[language]
       );
     }
-    await userService.deleteToken(token, user.id);
+    await userService.deleteToken(token, user.id, "verification");
+
+    const activationToken = userService.createActivationToken(user.id);
+
+    await userService.saveActivationToken(user.id, activationToken);
+
+    const activationLink = `${
+      process.env.Node_ENV === "production"
+        ? process.env.PRODUCTION_ORIGIN
+        : process.env.DEV_ORIGIN
+    }/activateUser?token=${activationToken}`;
+
+    await userService.sendMailToMyselfAboutUserVerification(
+      user.email,
+      user.username,
+      activationLink
+    );
 
     return handleSuccessResponse(
       res,

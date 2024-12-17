@@ -34,6 +34,13 @@ const planInfo = {
   permanentPlanDiscountPercent: 10,
 };
 
+const registration = {
+  minPasswordLength: 8,
+  maxPasswordLength: 30,
+  minUsernameLength: 5,
+  maxUsernameLength: 20,
+};
+
 module.exports = {
   development: {
     postgres: {
@@ -58,6 +65,7 @@ module.exports = {
       user: user,
       youTubeVideo: youTubeVideo,
       lessonReservation: lessonReservation,
+      registration: registration,
     },
     config: {
       planInfo: planInfo,
@@ -95,6 +103,12 @@ module.exports = {
         categories: ["main", "secondary"],
       },
       lessonReservation: { minutes: [0, 15, 30, 45], lengths: [60, 90, 120] },
+      registration: {
+        minPasswordLength: 8,
+        maxPasswordLength: 30,
+        minUsernameLength: 5,
+        maxUsernameLength: 20,
+      },
     },
     config: {
       planInfo: planInfo,

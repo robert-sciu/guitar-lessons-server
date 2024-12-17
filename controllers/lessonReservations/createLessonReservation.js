@@ -13,7 +13,7 @@ async function createLessonReservation(req, res) {
   const reservationData =
     lessonReservationsService.destructureCreateReservationData(req.body);
 
-  if (!user.is_confirmed) {
+  if (!user.is_active) {
     return handleErrorResponse(
       res,
       403,

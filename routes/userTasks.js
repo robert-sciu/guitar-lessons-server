@@ -8,8 +8,8 @@ const {
   validateDeleteUserTask,
   validateUpdateUserTaskNotes,
 } = require("../validators/userTasksValidators");
-const { authenticateJWT } = require("../utilities/authenticationMiddleware");
-const { attachIdParam } = require("../utilities/middleware");
+const { authenticateJWT } = require("../middleware/authenticationMiddleware");
+const { attachIdParam } = require("../middleware/commonMiddleware");
 
 router
   .route("/")

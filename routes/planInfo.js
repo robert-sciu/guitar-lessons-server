@@ -8,8 +8,8 @@ const {
 const {
   verifyUserIsAdmin,
   authenticateJWT,
-} = require("../utilities/authenticationMiddleware");
-const { attachIdParam } = require("../utilities/middleware");
+} = require("../middleware/authenticationMiddleware");
+const { attachIdParam } = require("../middleware/commonMiddleware");
 
 router.route("/").get(authenticateJWT, planInfoController.getPlanInfo);
 

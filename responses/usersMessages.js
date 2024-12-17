@@ -19,10 +19,6 @@ const usersMessages = {
     pl: "Nie znaleziono użytkowników",
     en: "Users not found",
   },
-  userNotFound: {
-    pl: "Użytkownik nie został znaleziony",
-    en: "User not found",
-  },
   userDeleted: {
     pl: "Użytkownik został usunięty",
     en: "User has been deleted",
@@ -31,9 +27,17 @@ const usersMessages = {
     pl: "Użytkownik został utworzony",
     en: "User has been created",
   },
+  userActivated: {
+    pl: "Użytkownik został aktywowany",
+    en: "User has been activated",
+  },
   userNotVerified: {
     pl: "Użytkownik nie został zwerifikowany",
     en: "User has not been verified",
+  },
+  verifyFirst: {
+    pl: "Zanim się zalogujesz musisz zweryfikować swoje konto linkiem w wiadomości email",
+    en: "Before logging in, you need to verify your account by clicking the link in the email",
   },
 };
 

@@ -33,6 +33,26 @@ function verifyVerificationToken(token) {
   return jwt.verify(token, secret);
 }
 
+function generateUserActivationToken(userId) {
+  const secret = process.env.JWT_USER_ACTIVATION_SECRET;
+  const id = userId;
+  const expiresIn = "3d";
+  return jwt.sign(
+    {
+      id,
+    },
+    secret,
+    {
+      expiresIn,
+    }
+  );
+}
+
+function verifyUserActivationToken(token) {
+  const secret = process.env.JWT_USER_ACTIVATION_SECRET;
+  return jwt.verify(token, secret);
+}
+
 function generateRefreshJWT(user) {
   return jwt.sign(
     {
@@ -56,4 +76,6 @@ module.exports = {
   verifyJWT,
   generateVerificationToken,
   verifyVerificationToken,
+  generateUserActivationToken,
+  verifyUserActivationToken,
 };

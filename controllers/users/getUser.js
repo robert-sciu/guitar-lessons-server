@@ -10,6 +10,7 @@ async function getUser(req, res) {
   const language = req.language;
   const user = req.user;
 
+  console.log("trying");
   try {
     if (userService.userIsUser(user)) {
       return handleSuccessResponse(res, 200, user);

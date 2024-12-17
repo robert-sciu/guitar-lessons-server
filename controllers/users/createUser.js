@@ -27,7 +27,7 @@ async function createUser(req, res) {
       password: hashedPassword,
       role: "user",
       difficulty_clearance_level: 1,
-      is_confirmed_by_admin: false,
+      is_active: false,
       is_verified: false,
     };
 
@@ -43,13 +43,17 @@ async function createUser(req, res) {
       transaction
     );
 
-    const verificationLink = `${process.env.DEV_ORIGIN}/verifyUser?token=${verificationToken}`;
+    const verificationLink = `${
+      process.env.Node_ENV === "production"
+        ? process.env.PRODUCTION_ORIGIN
+        : process.env.DEV_ORIGIN
+    }/verifyUser?token=${verificationToken}`;
 
     const mailError = await userService.sendMailWithVerificationToken(
       data.email,
-      verificationLink
+      verificationLink,
+      language
     );
-
     if (mailError) {
       await transaction.rollback();
       return handleErrorResponse(
@@ -58,7 +62,10 @@ async function createUser(req, res) {
         responses.commonMessages.serverError[language]
       );
     }
-
+    await userService.sendMailToMyselfAboutNewUser(
+      newUser.email,
+      newUser.username
+    );
     await transaction.commit();
     return handleSuccessResponse(
       res,

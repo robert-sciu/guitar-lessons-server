@@ -4,7 +4,7 @@ const rateLimit = require("express-rate-limit");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const express = require("express");
-const { handleErrorResponse } = require("./controllerUtilites");
+const { handleErrorResponse } = require("../utilities/controllerUtilites");
 const jwt = require("jsonwebtoken");
 
 function useCommonMiddleware(app) {

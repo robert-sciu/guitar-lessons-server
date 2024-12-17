@@ -1,5 +1,8 @@
 const jwt = require("jsonwebtoken");
-const { handleErrorResponse, findRecordByPk } = require("./controllerUtilites");
+const {
+  handleErrorResponse,
+  findRecordByPk,
+} = require("../utilities/controllerUtilites");
 const { User, PlanInfo } = require("../models").sequelize.models;
 // const NodeCache = require("node-cache");
 // const userCache = new NodeCache({ stdTTL: 10 });
@@ -51,4 +54,6 @@ function verifyUserIsAdmin(req, res, next) {
   next();
 }
 
-module.exports = { authenticateJWT, verifyUserIsAdmin };
+const authenticateAdminJWT = [authenticateJWT, verifyUserIsAdmin];
+
+module.exports = { authenticateJWT, verifyUserIsAdmin, authenticateAdminJWT };

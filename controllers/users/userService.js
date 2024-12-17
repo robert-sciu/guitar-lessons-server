@@ -14,7 +14,10 @@ const bcrypt = require("bcryptjs");
 const {
   generateVerificationToken,
   verifyVerificationToken,
+  generateUserActivationToken,
+  verifyUserActivationToken,
 } = require("../../utilities/tokenUtilities");
+const mailMessages = require("../../config/mailsData");
 
 const { User, PlanInfo, RefreshToken, UserToken } =
   require("../../models").sequelize.models;
@@ -74,6 +77,10 @@ class UserService {
     return generateVerificationToken(userId);
   }
 
+  createActivationToken(userId) {
+    return generateUserActivationToken(userId);
+  }
+
   async saveVerificationToken(userId, verificationToken, transaction) {
     return await createRecord(
       UserToken,
@@ -87,8 +94,21 @@ class UserService {
     );
   }
 
+  async saveActivationToken(userId, activationToken) {
+    return await createRecord(UserToken, {
+      token: activationToken,
+      user_id: userId,
+      type: "activation",
+      expires_at: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+    });
+  }
+
   verifyVerificationToken(token) {
     return verifyVerificationToken(token);
+  }
+
+  verifyActivationToken(token) {
+    return verifyUserActivationToken(token);
   }
 
   async compareVerificationToken(token, userId) {
@@ -105,21 +125,39 @@ class UserService {
     return true;
   }
 
+  async compareActivationToken(token, userId) {
+    const activationToken = await UserToken.findOne({
+      where: {
+        token,
+        user_id: userId,
+        type: "activation",
+      },
+    });
+    if (activationToken?.dataValues?.token !== token) {
+      return false;
+    }
+    return true;
+  }
+
   async setUserVerified(user_id) {
     return await updateRecord(User, { is_verified: true }, user_id);
   }
 
-  async deleteToken(token, user_id) {
+  async setUserActive(user_id) {
+    return await updateRecord(User, { is_active: true }, user_id);
+  }
+
+  async deleteToken(token, user_id, type) {
     return await UserToken.destroy({
-      where: { token: token, user_id: user_id, type: "verification" },
+      where: { token: token, user_id: user_id, type: type },
     });
   }
 
-  async sendMailWithVerificationToken(email, verificationLink) {
+  async sendMailWithVerificationToken(email, verificationLink, language) {
     await sendMail({
       email,
-      subject: "Email Verification",
-      text: `Click the link to verify your email: ${verificationLink}`,
+      subject: mailMessages.subjects.verificationEmail[language],
+      text: `${mailMessages.content.clickVerificationLink[language]}: ${verificationLink}`,
     });
   }
   /**
@@ -128,6 +166,30 @@ class UserService {
    * @param {Sequelize.Transaction} transaction The transaction to create the record in
    * @returns {Promise<PlanInfo>} The newly created PlanInfo record
    */
+
+  async sendMailToMyselfAboutNewUser(userEmail, username) {
+    await sendMail({
+      email: process.env.MY_EMAIL,
+      subject: `Nowy użytkownik: ${username}, (${new Date().toLocaleString(
+        "pl-PL"
+      )})`,
+      text: `Nowy użytkownik właśnie się zarejestrował.\nImię: ${username}\nAdres email: ${userEmail} `,
+    });
+  }
+
+  async sendMailToMyselfAboutUserVerification(
+    userEmail,
+    username,
+    activationLink
+  ) {
+    await sendMail({
+      email: process.env.MY_EMAIL,
+      subject: `Weryfikacja użytkownika: ${username}, (${new Date().toLocaleString(
+        "pl-PL"
+      )})`,
+      text: `Nowy użytkownik właźnie się zweryfikował.\nImię: ${username}\nAdres email: ${userEmail}\nLink aktywacyjny: ${activationLink}`,
+    });
+  }
   async createPlanInfo(user_id, transaction) {
     return await createRecord(PlanInfo, { user_id }, transaction);
   }

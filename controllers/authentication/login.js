@@ -18,6 +18,13 @@ async function login(req, res) {
         responses.authenticationMessages.userNotFound[language]
       );
     }
+    if (!user.is_verified) {
+      return handleErrorResponse(
+        res,
+        400,
+        responses.usersMessages.verifyFirst[language]
+      );
+    }
     if (
       !(await authenticationService.verifyPassword(user.password, password))
     ) {

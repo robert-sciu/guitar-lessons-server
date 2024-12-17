@@ -10,7 +10,7 @@ const {
   useHelmet,
   useCommonMiddleware,
   useRateLimit,
-} = require("./utilities/middleware");
+} = require("./middleware/commonMiddleware");
 // const { sanitize } = require("./utilities/sanitization");
 
 const app = express();

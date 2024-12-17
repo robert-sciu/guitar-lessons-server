@@ -15,11 +15,14 @@ const dbResetRouter = require("./dbReset");
 const { sanitize } = require("../utilities/sanitization");
 const { detectLanguage } = require("../utilities/languageDetector");
 
+const express = require("express");
+const router = express.Router();
+
 const apiBaseUrl = process.env.API_BASE_URL;
 //prettier-ignore
-module.exports = (app) => {
+const userRoutes = (app) => {
   app.use(detectLanguage)
-  app.use(`${apiBaseUrl}/users`, sanitize, usersRouter);
+  app.use(`${apiBaseUrl}/users`, sanitize, usersRouter(router));
   app.use(`${apiBaseUrl}/tasks`, sanitize, tasksRouter);
   app.use(`${apiBaseUrl}/userTasks`, sanitize, userTasksRouter);
   app.use(`${apiBaseUrl}/tags`, sanitize, tagsRouter);
@@ -28,8 +31,20 @@ module.exports = (app) => {
   app.use(`${apiBaseUrl}/pageTexts`, sanitize, pageTextsRouter);
   app.use(`${apiBaseUrl}/pageImages`, sanitize, pageImagesRouter);
   app.use(`${apiBaseUrl}/youTubeVideos`, sanitize, youTubeVideosRouter);
-  app.use(`${apiBaseUrl}/calendar`, sanitize, calendarRouter);
-  app.use(`${apiBaseUrl}/lessonReservations`, sanitize, lessonReservationRouter);
   app.use(`${apiBaseUrl}/auth`, sanitize, authenticationRouter);
-  app.use(`${apiBaseUrl}/reset`, dbResetRouter)
+  //prettier-ignore
+  app.use(`${apiBaseUrl}/lessonReservations`, sanitize, lessonReservationRouter);
+  app.use(`${apiBaseUrl}/calendar`, sanitize, calendarRouter);
+  app.use(`${apiBaseUrl}/reset`, dbResetRouter);
+  
+}
+
+const adminRoutes = (app) => {};
+
+const openRoutes = (app) => {};
+
+module.exports = (app) => {
+  userRoutes(app);
+  adminRoutes(app);
+  openRoutes(app);
 };

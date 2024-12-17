@@ -6,8 +6,12 @@ const {
   detectUnnecessaryData,
 } = require("../utilities/validatorsUtilities");
 const { handleErrorResponse } = require("../utilities/controllerUtilites");
+// const { CompressionType } = require("@aws-sdk/client-s3");
+// const { Console } = require("winston/lib/winston/transports");
 const allowList =
   require("../config/config")[process.env.NODE_ENV]["allowList"];
+
+console.log(allowList.registration.minUsernameLength);
 
 const validateUsername = () => {
   return [
@@ -18,15 +22,18 @@ const validateUsername = () => {
         pl: "Nazwa użytkownika musi być zawierać litery",
         en: "Username must be a string",
       })
-      .isLength({ min: 4, max: 30 })
-      .withMessage({
-        pl: "Nazwa użytkownika musi mieć od 4 do 30 znaków",
-        en: "Username must be between 4 and 30 characters long",
+      .isLength({
+        min: allowList.registration.minUsernameLength,
+        max: allowList.registration.maxUsernameLength,
       })
-      .matches(/^[a-zA-Z-]+$/)
       .withMessage({
-        pl: "Nazwa użytkownik musi zawierać tylko litery i myślniki",
-        en: "Name must contain only letters and hyphens",
+        pl: `Nazwa użytkownika musi mieć od ${allowList.registration.minUsernameLength} do ${allowList.registration.maxUsernameLength} znaków`,
+        en: `Username must be between ${allowList.registration.minUsernameLength} and ${allowList.registration.maxUsernameLength} characters long`,
+      })
+      .matches(/^(?=.*[a-zA-Z])[a-zA-Z0-9]+$/)
+      .withMessage({
+        pl: "Nazwa użytkownika musi zawierać tylko litery i cyfry",
+        en: "Username must contain only letters and numbers",
       }),
   ];
 };
@@ -52,15 +59,18 @@ const validatePassword = () => {
         pl: "Hasło jest wymagane",
         en: "Password is required",
       })
-      .matches(/[a-zA-Z]/)
+      .matches(/^[^\s\n\r]*$/)
       .withMessage({
-        pl: "Hasło musi zawierać litery",
-        en: "Password must contain letters",
+        pl: "Hasło nie powinno zawierać spacji",
+        en: "Password should not contain spaces",
       })
-      .isLength({ min: 8 })
+      .isLength({
+        min: allowList.registration.minPasswordLength,
+        max: allowList.registration.maxPasswordLength,
+      })
       .withMessage({
-        pl: "Hasło musi mieć przynajmniej 8 znaków",
-        en: "Password must be at least 8 characters long",
+        pl: `Hasło musi mieć przynajmniej od ${allowList.registration.minPasswordLength} do ${allowList.registration.maxPasswordLength} znaków`,
+        en: `Password must be between ${allowList.registration.minPasswordLength} and ${allowList.registration.maxPasswordLength} characters long`,
       }),
   ];
 };

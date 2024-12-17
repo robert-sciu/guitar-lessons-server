@@ -16,6 +16,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.ENUM(
           "refresh",
           "verification",
+          "activation",
           "email_change",
           "password_reset"
         ),

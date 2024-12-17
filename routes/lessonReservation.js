@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const lessonReservationController = require("../controllers/lessonReservations");
-const { authenticateJWT } = require("../utilities/authenticationMiddleware");
-const { attachIdParam } = require("../utilities/middleware");
+const { authenticateJWT } = require("../middleware/authenticationMiddleware");
+const { attachIdParam } = require("../middleware/commonMiddleware");
 const {
   validateCreateLessonReservation,
 } = require("../validators/lessonReservationsValidators");
