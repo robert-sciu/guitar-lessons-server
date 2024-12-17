@@ -1,3 +1,5 @@
+const { userNotFound } = require("./authenticationMessages");
+
 const usersMessages = {
   mailInUse: {
     pl: "Ten email jest już zajęty",
@@ -18,6 +20,10 @@ const usersMessages = {
   usersNotFound: {
     pl: "Nie znaleziono użytkowników",
     en: "Users not found",
+  },
+  userNotFound: {
+    pl: "Użytkownik nie został znaleziony",
+    en: "User not found",
   },
   userDeleted: {
     pl: "Użytkownik został usunięty",

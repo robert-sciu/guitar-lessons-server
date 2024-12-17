@@ -12,7 +12,7 @@ async function verifyUser(req, res) {
   try {
     const decoded = userService.verifyVerificationToken(token);
 
-    const tokenVerified = await userService.compareVerificationToken(
+    const tokenVerified = await userService.compareVerificationTokens(
       token,
       decoded.id
     );
@@ -24,7 +24,7 @@ async function verifyUser(req, res) {
         responses.commonMessages.invalidToken[language]
       );
     }
-    await userService.setUserVerified(decoded.id);
+    await userService.updateUserVerificationStatus(decoded.id);
 
     const user = await userService.findUserById(decoded.id);
 
@@ -35,9 +35,9 @@ async function verifyUser(req, res) {
         responses.usersMessages.userNotVerified[language]
       );
     }
-    await userService.deleteToken(token, user.id, "verification");
+    await userService.deleteUserToken(token, user.id, "verification");
 
-    const activationToken = userService.createActivationToken(user.id);
+    const activationToken = userService.generateActivationToken(user.id);
 
     await userService.saveActivationToken(user.id, activationToken);
 

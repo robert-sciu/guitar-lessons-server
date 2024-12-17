@@ -34,7 +34,7 @@ async function createUser(req, res) {
     const newUser = await userService.createUser(userData, transaction);
     const user_id = newUser.id;
 
-    const verificationToken = userService.createVerificationToken(user_id);
+    const verificationToken = userService.generateVerificationToken(user_id);
 
     await userService.createPlanInfo(user_id, transaction);
     await userService.saveVerificationToken(
@@ -49,7 +49,7 @@ async function createUser(req, res) {
         : process.env.DEV_ORIGIN
     }/verifyUser?token=${verificationToken}`;
 
-    const mailError = await userService.sendMailWithVerificationToken(
+    const mailError = await userService.sendVerificationEmail(
       data.email,
       verificationLink,
       language
@@ -66,6 +66,7 @@ async function createUser(req, res) {
       newUser.email,
       newUser.username
     );
+
     await transaction.commit();
     return handleSuccessResponse(
       res,

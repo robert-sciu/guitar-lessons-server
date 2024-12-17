@@ -41,6 +41,13 @@ const registration = {
   maxUsernameLength: 20,
 };
 
+const tokensExpiry = {
+  inDays: {
+    userVerificationToken: 1,
+    userActivationToken: 3,
+  },
+};
+
 module.exports = {
   development: {
     postgres: {
@@ -66,6 +73,7 @@ module.exports = {
       youTubeVideo: youTubeVideo,
       lessonReservation: lessonReservation,
       registration: registration,
+      tokensExpiry: tokensExpiry,
     },
     config: {
       planInfo: planInfo,
@@ -109,6 +117,7 @@ module.exports = {
         minUsernameLength: 5,
         maxUsernameLength: 20,
       },
+      tokensExpiry,
     },
     config: {
       planInfo: planInfo,

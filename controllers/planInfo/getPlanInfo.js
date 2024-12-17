@@ -10,10 +10,6 @@ async function getPlanInfo(req, res) {
   const language = req.language;
   const user_id = req.user.id;
   try {
-    if (planInfoService.userIsAdmin(req.user)) {
-      const planInfos = await planInfoService.getAllPlanInfos();
-      return handleSuccessResponse(res, 200, planInfos);
-    }
     const planInfo = await planInfoService.getPlanInfo(user_id);
 
     if (!planInfo) {

@@ -12,7 +12,7 @@ async function resetPassword(req, res) {
   const { email, password, reset_password_token } = data;
   try {
     const { resetPasswordToken, userId } =
-      await userService.getResetPasswordToken(email);
+      userService.getResetPasswordToken(email);
     if (!resetPasswordToken) {
       return handleErrorResponse(
         res,

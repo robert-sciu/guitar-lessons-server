@@ -13,7 +13,7 @@ async function activateUser(req, res) {
   try {
     const decoded = userService.verifyActivationToken(token);
 
-    const tokenVerified = await userService.compareActivationToken(
+    const tokenVerified = await userService.compareActivationTokens(
       token,
       decoded.id
     );
@@ -25,9 +25,9 @@ async function activateUser(req, res) {
         responses.commonMessages.invalidToken[language]
       );
     }
-    await userService.setUserActive(decoded.id);
+    await userService.updateUserActivationStatus(decoded.id, true);
 
-    await userService.deleteToken(token, decoded.id, "activation");
+    await userService.deleteUserToken(token, decoded.id, "activation");
 
     return handleSuccessResponse(
       res,

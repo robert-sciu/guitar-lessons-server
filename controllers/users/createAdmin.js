@@ -26,7 +26,7 @@ async function createAdmin(req, res) {
       password: hashedPassword,
       role: "admin",
       difficulty_clearance_level: 999,
-      is_confirmed_by_admin: true,
+      is_active: true,
       is_verified: true,
     };
 

@@ -118,19 +118,19 @@ const validateCreateUser = [
 ];
 
 const validateUpdateUser = [
-  param("id").custom(customNotEmpty()).isInt({ min: 1 }).withMessage({
-    pl: "Niepoprawny identyfikator użytkownika",
-    en: "Invalid user id",
-  }),
+  // param("id").optional().isInt({ min: 1 }).withMessage({
+  //   pl: "Niepoprawny identyfikator użytkownika",
+  //   en: "Invalid user id",
+  // }),
 
-  body("difficulty_clearance_level").optional().isInt({ min: 1 }).withMessage({
-    pl: "Niepoprawny poziom trudności",
-    en: "Invalid difficulty level",
-  }),
-  body("is_confirmed").optional().isBoolean().withMessage({
-    pl: "Niepoprawna wartość",
-    en: "Invalid value",
-  }),
+  // body("difficulty_clearance_level").optional().isInt({ min: 1 }).withMessage({
+  //   pl: "Niepoprawny poziom trudności",
+  //   en: "Invalid difficulty level",
+  // }),
+  // body("is_confirmed").optional().isBoolean().withMessage({
+  //   pl: "Niepoprawna wartość",
+  //   en: "Invalid value",
+  // }),
   ...validateUsername(),
 
   (req, res, next) => {

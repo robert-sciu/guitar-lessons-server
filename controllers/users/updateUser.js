@@ -10,30 +10,12 @@ const responses = require("../../responses");
 
 async function updateUser(req, res) {
   const language = req.language;
-  const user_id = req.id;
-  let user;
-  let updateData;
-  if (userService.userIsAdmin(req.user)) {
-    const { difficulty_clearance_level, is_confirmed_by_admin } =
-      userService.destructureUpdateUserDataAdmin(req.body);
-    updateData = { difficulty_clearance_level, is_confirmed_by_admin };
-    user = await userService.findUserById(user_id);
-  }
-  if (userService.userIsUser(req.user)) {
-    const { username, minimum_task_level_to_display } =
-      userService.destructureUpdateUserDataUser(req.body);
-    updateData = { username, minimum_task_level_to_display };
-    user = req.user;
-    if (Number(user.id) !== Number(user_id)) {
-      return handleErrorResponse(
-        res,
-        403,
-        responses.commonMessages.forbidden[language]
-      );
-    }
-  }
+  const user_id = req.user.id;
+
+  const updateData = userService.destructureUpdateUserDataUser(req.body);
 
   try {
+    const user = await userService.findUserById(user_id);
     const updateDataNoDuplicates = unchangedDataToUndefined(user, updateData);
     if (checkMissingUpdateData(updateDataNoDuplicates)) {
       return handleErrorResponse(

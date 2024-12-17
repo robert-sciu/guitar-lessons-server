@@ -20,9 +20,9 @@ async function changeEmailRequest(req, res) {
     const { resetToken, resetTokenExpiry } = userService.generateResetToken();
     const updatedRecordCount = await userService.updateUser(user_id, {
       new_email_temp: email,
-      change_email_token: resetToken,
-      change_email_token_expiry: resetTokenExpiry,
     });
+    await userService.saveEmailResetToken(user_id, resetToken);
+
     if (updatedRecordCount === 0) {
       return handleErrorResponse(
         res,
@@ -31,7 +31,7 @@ async function changeEmailRequest(req, res) {
       );
     }
     const userEmail = await userService.findUserEmail(user_id);
-    await userService.sendEmailWithResetToken(userEmail, resetToken, language);
+    await userService.sendEmailResetEmail(userEmail, resetToken, language);
     return handleSuccessResponse(
       res,
       200,

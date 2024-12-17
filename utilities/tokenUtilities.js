@@ -1,5 +1,16 @@
 const jwt = require("jsonwebtoken");
 
+function getTokenExpiryMinutesVer(minutes) {
+  const now = new Date();
+  now.setMinutes(now.getMinutes() + minutes);
+  return now;
+}
+function getTokenExpiryDaysVer(days) {
+  const now = new Date();
+  now.setDate(now.getDate() + days);
+  return now;
+}
+
 function generateJWT(user) {
   return jwt.sign(
     {
@@ -13,17 +24,16 @@ function generateJWT(user) {
   );
 }
 
-function generateVerificationToken(userId) {
+function generateVerificationToken(userId, expiresIn) {
   const secret = process.env.JWT_VERIFICATION_SECRET;
   const id = userId;
-  const expiresIn = "60m";
   return jwt.sign(
     {
       id,
     },
     secret,
     {
-      expiresIn,
+      expiresIn: expiresIn,
     }
   );
 }
@@ -33,17 +43,16 @@ function verifyVerificationToken(token) {
   return jwt.verify(token, secret);
 }
 
-function generateUserActivationToken(userId) {
+function generateUserActivationToken(userId, expiresIn) {
   const secret = process.env.JWT_USER_ACTIVATION_SECRET;
   const id = userId;
-  const expiresIn = "3d";
   return jwt.sign(
     {
       id,
     },
     secret,
     {
-      expiresIn,
+      expiresIn: expiresIn,
     }
   );
 }
@@ -78,4 +87,6 @@ module.exports = {
   verifyVerificationToken,
   generateUserActivationToken,
   verifyUserActivationToken,
+  getTokenExpiryMinutesVer,
+  getTokenExpiryDaysVer,
 };

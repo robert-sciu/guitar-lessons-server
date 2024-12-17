@@ -1,24 +1,16 @@
-const { sequelize } = require("../../models");
+const { sequelize } = require("../../../models");
 const {
   handleErrorResponse,
   handleSuccessResponse,
-} = require("../../utilities/controllerUtilites");
-const logger = require("../../utilities/logger");
-const responses = require("../../responses");
-const userService = require("./userService");
+} = require("../../../utilities/controllerUtilites");
+const logger = require("../../../utilities/logger");
+const responses = require("../../../responses");
+const userService = require("../userService");
 
-async function deleteUser(req, res) {
+async function deleteUserAdmin(req, res) {
   const language = req.language;
-  const user = req.user;
-
-  if (!userService.userIsAdmin(user)) {
-    return handleErrorResponse(
-      res,
-      403,
-      responses.commonMessages.forbidden[language]
-    );
-  }
   const id = req.id;
+
   const transaction = await sequelize.transaction();
   try {
     const user = await userService.findUserById(id, transaction);
@@ -31,8 +23,11 @@ async function deleteUser(req, res) {
       );
     }
     await userService.deletePlanInfo(id, transaction);
-    await userService.deleteUserRefreshTokens(id, transaction);
+
+    await userService.deleteAllTokensForUser(id, transaction);
+
     await userService.deleteUser(id, transaction);
+
     await transaction.commit();
 
     return handleSuccessResponse(
@@ -51,4 +46,4 @@ async function deleteUser(req, res) {
   }
 }
 
-module.exports = deleteUser;
+module.exports = deleteUserAdmin;

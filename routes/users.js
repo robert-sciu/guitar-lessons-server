@@ -11,10 +11,15 @@ const {
   validateResetPassword,
   validateCreateUser,
 } = require("../validators/userValidators");
-const { authenticateJWT } = require("../middleware/authenticationMiddleware");
+const {
+  authenticateJWT,
+  authenticateAdminJWT,
+} = require("../middleware/authenticationMiddleware");
 const { attachIdParam } = require("../middleware/commonMiddleware");
 
-const unprotectedRoutes = (router) => {
+const openRoutes = (router) => {
+  router.route("/").post(validateCreateUser, usersController.createUser);
+
   router
     .route("/create_admin")
     .post(validateCreateUser, usersController.createAdmin);
@@ -28,6 +33,15 @@ const unprotectedRoutes = (router) => {
     .post(validateResetPasswordRequest, usersController.resetPasswordRequest)
     .patch(validateResetPassword, usersController.resetPassword);
 
+  return router;
+};
+
+const protectedRoutes = (router) => {
+  router
+    .route("/")
+    .get(authenticateJWT, validateGetUser, usersController.getUser)
+    .patch(authenticateJWT, validateUpdateUser, usersController.updateUser);
+
   router
     .route("/change_email_address")
     .post(
@@ -37,34 +51,35 @@ const unprotectedRoutes = (router) => {
     )
     .patch(authenticateJWT, validateChangeEmail, usersController.changeEmail);
 
+  return router;
+};
+
+const adminRoutes = (router) => {
   router
-    .route("/:id")
+    .route("/admin")
+    .get(authenticateAdminJWT, usersController.getUsersAdmin);
+
+  router
+    .route("/admin/:id")
     .patch(
-      authenticateJWT,
+      authenticateAdminJWT,
       validateUpdateUser,
       attachIdParam,
-      usersController.updateUser
+      usersController.updateUserAdmin
     )
     .delete(
-      authenticateJWT,
+      authenticateAdminJWT,
       validateDeleteUser,
       attachIdParam,
-      usersController.deleteUser
+      usersController.deleteUserAdmin
     );
 
   return router;
 };
 
-const protectedRoutes = (router) => {
-  router
-    .route("/")
-    .get(authenticateJWT, validateGetUser, usersController.getUser)
-    .post(validateCreateUser, usersController.createUser);
-  return router;
-};
-
 module.exports = (router) => {
-  unprotectedRoutes(router);
+  openRoutes(router);
   protectedRoutes(router);
+  adminRoutes(router);
   return router;
 };
