@@ -6,7 +6,8 @@ const logFormat = printf(({ level, message, timestamp }) => {
 });
 
 const logger = createLogger({
-  level: "info",
+  // level: "info",
+  level: process.env.NODE_ENV === "production" ? "info" : "debug",
   format: combine(timestamp(), logFormat),
   transports: [
     new transports.Console(),

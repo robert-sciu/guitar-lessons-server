@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const uploadFile = require("../utilities/multer");
+const uploadFile = require("../middleware/multerFileUpload");
 const pageImagesController = require("../controllers/pageImages");
 const {
   validateCreatePageImage,

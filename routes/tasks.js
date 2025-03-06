@@ -1,6 +1,5 @@
 const express = require("express");
-const router = express.Router();
-const uploadFile = require("../utilities/multer");
+const uploadFile = require("../middleware/multerFileUpload");
 const tasksController = require("../controllers/tasks");
 const {
   validateGetTasks,
@@ -8,15 +7,30 @@ const {
   validateUpdateTask,
   validateDeleteTask,
 } = require("../validators/taskValidators");
-const { authenticateJWT } = require("../middleware/authenticationMiddleware");
 
-router
-  .route("/")
-  .get(validateGetTasks, authenticateJWT, tasksController.getTasks)
-  .post(uploadFile, validateCreateTask, tasksController.createTask)
-  .patch(uploadFile, validateUpdateTask, tasksController.updateTask)
-  .delete(validateDeleteTask, tasksController.deleteTask);
+const tasksRouterProtected = () => {
+  const router = express.Router();
 
-router.route("/download").get(tasksController.getTaskDownload);
+  router.route("/").get(validateGetTasks, tasksController.getTasks);
 
-module.exports = router;
+  router.route("/download").get(tasksController.getTaskDownload);
+
+  return router;
+};
+
+const tasksRouterAdmin = () => {
+  const router = express.Router();
+
+  router
+    .route("/")
+    .post(uploadFile, validateCreateTask, tasksController.createTask)
+    .patch(uploadFile, validateUpdateTask, tasksController.updateTask)
+    .delete(validateDeleteTask, tasksController.deleteTask);
+
+  return router;
+};
+
+module.exports = {
+  tasksRouterProtected,
+  tasksRouterAdmin,
+};

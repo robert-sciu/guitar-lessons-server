@@ -1,20 +1,43 @@
-const express = require("express");
-const router = express.Router();
 const loginController = require("../controllers/authentication");
-const { authenticateJWT } = require("../middleware/authenticationMiddleware");
 const {
   validateLogin,
   validateRefreshToken,
 } = require("../validators/loginValidators");
 
-router.route("/login").post(validateLogin, loginController.login);
+const express = require("express");
 
-router.route("/logout").post(validateRefreshToken, loginController.logout);
+const authRouterOpen = () => {
+  const router = express.Router();
 
-router
-  .route("/refreshToken")
-  .post(validateRefreshToken, loginController.refreshToken);
+  router.route("/login").post(validateLogin, loginController.login);
 
-router.route("/verifyToken").post(authenticateJWT, loginController.verifyToken);
+  router
+    .route("/refreshToken")
+    .post(validateRefreshToken, loginController.refreshToken);
 
-module.exports = router;
+  router.route("/logout").post(validateRefreshToken, loginController.logout);
+
+  return router;
+};
+
+const authRouterProtected = () => {
+  const router = express.Router();
+
+  router.route("/verifyToken").post(loginController.verifyToken);
+
+  return router;
+};
+
+const authRouterAdmin = () => {
+  const router = express.Router();
+
+  router.route("/verifyToken").post(loginController.verifyAdminToken);
+
+  return router;
+};
+
+module.exports = {
+  authRouterOpen,
+  authRouterProtected,
+  authRouterAdmin,
+};

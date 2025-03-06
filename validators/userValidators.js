@@ -11,8 +11,6 @@ const { handleErrorResponse } = require("../utilities/controllerUtilites");
 const allowList =
   require("../config/config")[process.env.NODE_ENV]["allowList"];
 
-console.log(allowList.registration.minUsernameLength);
-
 const validateUsername = () => {
   return [
     body("username")

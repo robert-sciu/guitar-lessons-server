@@ -1,5 +1,3 @@
-var express = require("express");
-var router = express.Router();
 const usersController = require("../controllers/users");
 const {
   validateGetUser,
@@ -11,13 +9,14 @@ const {
   validateResetPassword,
   validateCreateUser,
 } = require("../validators/userValidators");
-const {
-  authenticateJWT,
-  authenticateAdminJWT,
-} = require("../middleware/authenticationMiddleware");
+
 const { attachIdParam } = require("../middleware/commonMiddleware");
 
-const openRoutes = (router) => {
+const express = require("express");
+
+const userRouterOpen = () => {
+  const router = express.Router();
+
   router.route("/").post(validateCreateUser, usersController.createUser);
 
   router
@@ -36,50 +35,38 @@ const openRoutes = (router) => {
   return router;
 };
 
-const protectedRoutes = (router) => {
+const userRouterProtected = () => {
+  const router = express.Router();
+
   router
     .route("/")
-    .get(authenticateJWT, validateGetUser, usersController.getUser)
-    .patch(authenticateJWT, validateUpdateUser, usersController.updateUser);
+    .get(validateGetUser, usersController.getUser)
+    .patch(usersController.updateUser);
 
   router
     .route("/change_email_address")
-    .post(
-      authenticateJWT,
-      validateChangeEmailRequest,
-      usersController.changeEmailRequest
-    )
-    .patch(authenticateJWT, validateChangeEmail, usersController.changeEmail);
+    .post(validateChangeEmailRequest, usersController.changeEmailRequest)
+    .patch(validateChangeEmail, usersController.changeEmail);
 
   return router;
 };
 
-const adminRoutes = (router) => {
-  router
-    .route("/admin")
-    .get(authenticateAdminJWT, usersController.getUsersAdmin);
+const userRouterAdmin = () => {
+  const router = express.Router();
+
+  router.route("/").get(usersController.getUsersAdmin);
 
   router
-    .route("/admin/:id")
-    .patch(
-      authenticateAdminJWT,
-      validateUpdateUser,
-      attachIdParam,
-      usersController.updateUserAdmin
-    )
-    .delete(
-      authenticateAdminJWT,
-      validateDeleteUser,
-      attachIdParam,
-      usersController.deleteUserAdmin
-    );
+    .route("/:id")
+    .all(attachIdParam)
+    .patch(validateUpdateUser, usersController.updateUserAdmin)
+    .delete(validateDeleteUser, usersController.deleteUserAdmin);
 
   return router;
 };
 
-module.exports = (router) => {
-  openRoutes(router);
-  protectedRoutes(router);
-  adminRoutes(router);
-  return router;
+module.exports = {
+  userRouterProtected,
+  userRouterAdmin,
+  userRouterOpen,
 };

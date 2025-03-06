@@ -26,6 +26,10 @@ async function deleteUserAdmin(req, res) {
 
     await userService.deleteAllTokensForUser(id, transaction);
 
+    await userService.deleteUserReservations(id, transaction);
+
+    await userService.deleteUserTasks(id, transaction);
+
     await userService.deleteUser(id, transaction);
 
     await transaction.commit();

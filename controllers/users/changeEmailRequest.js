@@ -4,6 +4,7 @@ const {
 } = require("../../utilities/controllerUtilites");
 const responses = require("../../responses");
 const userService = require("./userService");
+const logger = require("../../utilities/logger");
 
 async function changeEmailRequest(req, res) {
   const language = req.language;

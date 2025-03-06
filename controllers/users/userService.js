@@ -22,9 +22,9 @@ const mailMessages = require("../../config/mailsData");
 
 const tokensExpiry = require("../../config/config")[process.env.NODE_ENV]
   .allowList.tokensExpiry;
-console.log(tokensExpiry);
 
-const { User, PlanInfo, UserToken } = require("../../models").sequelize.models;
+const { User, PlanInfo, UserToken, LessonReservation, UserTask } =
+  require("../../models").sequelize.models;
 
 class UserService {
   /////////////////////////////////////////////////////////////////////////////////
@@ -170,6 +170,20 @@ class UserService {
 
   async deleteAllTokensForUser(user_id, transaction) {
     await UserToken.destroy({
+      where: { user_id: user_id },
+      transaction,
+    });
+  }
+
+  async deleteUserTasks(user_id, transaction) {
+    await UserTask.destroy({
+      where: { user_id: user_id },
+      transaction,
+    });
+  }
+
+  async deleteUserReservations(user_id, transaction) {
+    await LessonReservation.destroy({
       where: { user_id: user_id },
       transaction,
     });
@@ -437,7 +451,11 @@ class UserService {
     return destructureData(data, ["username", "email", "password", "token"]);
   }
   destructureUpdateUserDataAdmin(data) {
-    return destructureData(data, ["difficulty_clearance_level", "is_active"]);
+    return destructureData(data, [
+      "difficulty_clearance_level",
+      "is_active",
+      "is_verified",
+    ]);
   }
   destructureUpdateUserDataUser(data) {
     return destructureData(data, ["username", "minimum_task_level_to_display"]);

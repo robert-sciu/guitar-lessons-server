@@ -13,7 +13,6 @@ async function getUser(req, res) {
   if (user) {
     return handleSuccessResponse(res, 200, user);
   }
-
   return handleErrorResponse(
     res,
     500,

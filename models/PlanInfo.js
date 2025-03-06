@@ -12,6 +12,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
+      lesson_language: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
       has_permanent_reservation: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
@@ -33,10 +37,6 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: true,
       },
-      permanent_reservation_lesson_count: {
-        type: DataTypes.INTEGER,
-        allowNull: true,
-      },
       reschedules_left_count: {
         type: DataTypes.INTEGER,
         allowNull: false,
@@ -52,17 +52,27 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: 0,
       },
-      regular_discount: {
+      regular_lesson_balance: {
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: 0,
       },
-      plan_discount: {
+      permanent_lesson_balance_60_min: {
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: 0,
       },
-      special_discount: {
+      permanent_lesson_balance_90_min: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+      },
+      permanent_lesson_balance_120_min: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 0,
+      },
+      discount: {
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: 0,

@@ -1,19 +1,19 @@
 const sharp = require("sharp");
 
+const resolutions = {
+  big: 1920,
+  medium: 960,
+  small: 500,
+  mobile: 500,
+  lazy: 100,
+};
+
 function compressImage(width, buffer) {
   return sharp(buffer)
     .resize({ width: width, fit: "inside", withoutEnlargement: true })
     .webp({ quality: 85 })
     .toBuffer();
 }
-
-const resolutions = {
-  small: 500,
-  medium: 960,
-  big: 1920,
-  mobile: 500,
-  lazy: 100,
-};
 
 function sharpCompressor(size, buffer) {
   switch (size) {

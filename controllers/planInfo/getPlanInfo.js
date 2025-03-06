@@ -9,6 +9,7 @@ const responses = require("../../responses");
 async function getPlanInfo(req, res) {
   const language = req.language;
   const user_id = req.user.id;
+
   try {
     const planInfo = await planInfoService.getPlanInfo(user_id);
 

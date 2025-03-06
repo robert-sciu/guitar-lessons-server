@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const config = require("../config/config")[process.env.NODE_ENV]["postgres"];
+const config = require("../config/dbConfig")[process.env.NODE_ENV]["postgres"];
 const basename = path.basename(__filename);
 const { Sequelize, DataTypes } = require("sequelize");
 

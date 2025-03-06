@@ -13,6 +13,9 @@ async function updateUserAdmin(req, res) {
   const updateData = userService.destructureUpdateUserDataAdmin(req.body);
 
   try {
+    if (Number(req.user.id) === Number(user_id)) {
+      return handleErrorResponse(res, 403, "Just don't do this");
+    }
     await userService.updateUser(user_id, updateData);
     return handleSuccessResponse(res, 200, updateData);
   } catch (error) {

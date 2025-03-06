@@ -8,6 +8,10 @@ const { User, PlanInfo } = require("../models").sequelize.models;
 // const userCache = new NodeCache({ stdTTL: 10 });
 const { userCache } = require("../utilities/nodeCache");
 const logger = require("../utilities/logger");
+const {
+  CompressionType,
+  ListBucketInventoryConfigurationsOutputFilterSensitiveLog,
+} = require("@aws-sdk/client-s3");
 
 async function authenticateJWT(req, res, next) {
   const token = req.header("x-auth-token");
@@ -16,8 +20,8 @@ async function authenticateJWT(req, res, next) {
   }
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    let userData = await userCache.get(decoded.id);
 
+    let userData = await userCache.get(decoded.id);
     if (!userData) {
       const user = await User.findOne({
         where: {
@@ -49,6 +53,7 @@ async function authenticateJWT(req, res, next) {
 
 function verifyUserIsAdmin(req, res, next) {
   if (req.user.role !== "admin") {
+    console.log("this");
     return handleErrorResponse(res, 403, "Access denied");
   }
   next();

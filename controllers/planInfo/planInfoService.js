@@ -16,35 +16,40 @@ class PlanInfoService {
   }
 
   getStartAndEndHoursUTC(updateData, timezone) {
+    // console.log(updateData);
     if (updateData.has_permanent_reservation !== true) {
       return;
     }
     const {
-      permanent_reservation_hour,
-      permanent_reservation_minute,
-      permanent_reservation_lesson_duration,
+      // permanent_reservation_hour,
+      // permanent_reservation_minute,
+      // permanent_reservation_lesson_duration,
+      permanent_reservation_start_hour_UTC,
+      permanent_reservation_end_hour_UTC,
     } = updateData;
-    const hoursToAdd = Math.floor(permanent_reservation_lesson_duration / 60);
-    const minutesToAdd = permanent_reservation_lesson_duration % 60;
-    const endHour = permanent_reservation_hour + hoursToAdd;
-    const endMinute = permanent_reservation_minute + minutesToAdd;
+    // const hoursToAdd = Math.floor(permanent_reservation_lesson_duration / 60);
+    // const minutesToAdd = permanent_reservation_lesson_duration % 60;
+    // const endHour = permanent_reservation_start_hour.split(":")[0] + hoursToAdd;
+    // const endMinute =
+    //   permanent_reservation_start_hour.split(":")[1] + minutesToAdd;
 
-    const momentStartHour = moment.tz(
-      `${permanent_reservation_hour}:${permanent_reservation_minute}`,
-      "HH:mm",
-      timezone
-    );
-    const momentEndHour = moment.tz(
-      `${endHour}:${endMinute}`,
-      "HH:mm",
-      timezone
-    );
-    const permanent_reservation_start_hour_UTC = momentStartHour
-      .utc()
-      .format("HH:mm");
-    const permanent_reservation_end_hour_UTC = momentEndHour
-      .utc()
-      .format("HH:mm");
+    // const momentStartHour = moment.tz(
+    //   `${permanent_reservation_start_hour}`,
+    //   "HH:mm",
+    //   timezone
+    // );
+    // const momentEndHour = moment.tz(
+    //   `${endHour}:${endMinute}`,
+    //   "HH:mm",
+    //   timezone
+    // );
+    // const permanent_reservation_start_hour_UTC = momentStartHour
+    //   .utc()
+    //   .format("HH:mm");
+    // const permanent_reservation_end_hour_UTC = momentEndHour
+    //   .utc()
+    //   .format("HH:mm");
+
     return {
       permanent_reservation_start_hour_UTC,
       permanent_reservation_end_hour_UTC,
@@ -108,6 +113,8 @@ class PlanInfoService {
       "permanent_reservation_minute",
       "permanent_reservation_lesson_duration",
       "permanent_reservation_lesson_count",
+      "permanent_reservation_start_hour_UTC",
+      "permanent_reservation_end_hour_UTC",
       "reschedules_left_count",
       "special_discount",
     ]);
