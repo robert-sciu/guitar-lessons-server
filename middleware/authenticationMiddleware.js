@@ -53,7 +53,6 @@ async function authenticateJWT(req, res, next) {
 
 function verifyUserIsAdmin(req, res, next) {
   if (req.user.role !== "admin") {
-    console.log("this");
     return handleErrorResponse(res, 403, "Access denied");
   }
   next();

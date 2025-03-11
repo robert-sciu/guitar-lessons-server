@@ -16,7 +16,7 @@ const planInfoRouterProtected = () => {
 
 const planInfoRouterAdmin = () => {
   const router = express.Router();
-  router.route("/").get(planInfoController.getPlanInfosAdmin);
+  router.route("/").get(planInfoController.getAllPlanInfos);
   router.route("/:id").patch(attachIdParam, planInfoController.updatePlanInfo);
 
   return router;

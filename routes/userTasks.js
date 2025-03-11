@@ -11,34 +11,45 @@ const {
 const { authenticateJWT } = require("../middleware/authenticationMiddleware");
 const { attachIdParam } = require("../middleware/commonMiddleware");
 
-router
-  .route("/")
-  .get(authenticateJWT, userTasksController.getUserTasks)
-  .post(
-    validateCreateUserTask,
-    authenticateJWT,
-    userTasksController.createUserTask
-  )
-  .patch(
-    validateUpdateUserTask,
-    authenticateJWT,
-    userTasksController.updateUserTask
-  );
+router.route("/");
 
-router
-  .route("/completed")
-  .get(authenticateJWT, userTasksController.getCompletedUserTasks);
+const userTasksRouterProtected = () => {
+  const router = express.Router();
 
-router
-  .route("/:id")
-  .delete(authenticateJWT, attachIdParam, userTasksController.deleteUserTask);
+  router
+    .route("/")
+    .get(userTasksController.getUserTasks)
+    .post(userTasksController.createUserTask);
 
-router
-  .route("/userNotes")
-  .patch(
-    validateUpdateUserTaskNotes,
-    authenticateJWT,
-    userTasksController.updateUserTaskNotes
-  );
+  router.route("/userNotes").patch(userTasksController.updateUserTaskNotes);
 
-module.exports = router;
+  router.route("/completed").get(userTasksController.getCompletedUserTasks);
+
+  router
+    .route("/:id")
+    .delete(attachIdParam, userTasksController.deleteUserTask);
+
+  return router;
+};
+
+const userTasksRouterAdmin = () => {
+  const router = express.Router();
+
+  router
+    .route("/:id")
+    .get(attachIdParam, userTasksController.getUserTasks)
+    .patch(userTasksController.updateUserTask);
+
+  router.route("/:id").post(attachIdParam, userTasksController.createUserTask);
+
+  router
+    .route("/:id")
+    .delete(attachIdParam, userTasksController.deleteUserTask);
+
+  return router;
+};
+
+module.exports = {
+  userTasksRouterProtected,
+  userTasksRouterAdmin,
+};

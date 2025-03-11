@@ -7,11 +7,12 @@ const {
   validateUpdateTask,
   validateDeleteTask,
 } = require("../validators/taskValidators");
+const { attachIdParam } = require("../middleware/commonMiddleware");
 
 const tasksRouterProtected = () => {
   const router = express.Router();
 
-  router.route("/").get(validateGetTasks, tasksController.getTasks);
+  router.route("/").get(tasksController.getTasks);
 
   router.route("/download").get(tasksController.getTaskDownload);
 
@@ -23,10 +24,11 @@ const tasksRouterAdmin = () => {
 
   router
     .route("/")
-    .post(uploadFile, validateCreateTask, tasksController.createTask)
-    .patch(uploadFile, validateUpdateTask, tasksController.updateTask)
-    .delete(validateDeleteTask, tasksController.deleteTask);
+    .post(uploadFile, tasksController.createTask)
+    .patch(uploadFile, tasksController.updateTask)
+    .delete(tasksController.deleteTask);
 
+  router.route("/:id").get(attachIdParam, tasksController.getTasks);
   return router;
 };
 

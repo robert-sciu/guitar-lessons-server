@@ -1,5 +1,6 @@
 const { Op } = require("sequelize");
-const { Task, User, Tag } = require("../../models").sequelize.models;
+const { findRecordByPk } = require("../../utilities/controllerUtilites");
+const { Task, User, Tag, UserTask } = require("../../models").sequelize.models;
 
 class TasksService {
   constructor() {}
@@ -37,6 +38,9 @@ class TasksService {
         "$Users.id$": null,
       },
     });
+  }
+  async findUser(id) {
+    return await findRecordByPk(User, id);
   }
 }
 

@@ -12,37 +12,13 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
-      lesson_language: {
-        type: DataTypes.STRING,
-        allowNull: false,
-      },
-      has_permanent_reservation: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false,
-        defaultValue: false,
-      },
-      permanent_reservation_weekday: {
-        type: DataTypes.INTEGER,
-        allowNull: true,
-      },
-      permanent_reservation_start_hour_UTC: {
-        type: DataTypes.TIME,
-        allowNull: true,
-      },
-      permanent_reservation_end_hour_UTC: {
-        type: DataTypes.TIME,
-        allowNull: true,
-      },
-      permanent_reservation_lesson_duration: {
-        type: DataTypes.INTEGER,
-        allowNull: true,
-      },
-      reschedules_left_count: {
+      //to keep track of the balance of paid/unpaid lessons
+      lesson_balance: {
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: 0,
       },
-      completed_lesson_count: {
+      lesson_count: {
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: 0,
@@ -52,22 +28,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: 0,
       },
-      regular_lesson_balance: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        defaultValue: 0,
-      },
-      permanent_lesson_balance_60_min: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        defaultValue: 0,
-      },
-      permanent_lesson_balance_90_min: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        defaultValue: 0,
-      },
-      permanent_lesson_balance_120_min: {
+      rescheduled_lesson_count: {
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: 0,

@@ -5,9 +5,13 @@ const {
 const logger = require("../../utilities/logger");
 const userTaskService = require("./userTaskService");
 const responses = require("../../responses");
+const {
+  getUserBasedOnRole,
+} = require("../../middleware/getUserBasedOnUserRole");
 async function createUserTask(req, res) {
   const language = req.language;
-  const user_id = req.user.id;
+  const user = await getUserBasedOnRole(req);
+  const user_id = user.id;
   const { task_id } = userTaskService.destrucureCreateUserTaskData(req.body);
   const data = { task_id, user_id };
   try {

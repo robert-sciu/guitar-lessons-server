@@ -8,35 +8,20 @@ module.exports = (sequelize, DataTypes) => {
         autoIncrement: true,
         allowNull: false,
       },
-      regular_lesson_price_pl: {
-        type: DataTypes.DECIMAL(10, 2),
+      lesson_price_pln: {
+        type: DataTypes.INTEGER,
         allowNull: false,
+        defaultValue: 50,
       },
-      permanent_lesson_price_60_min_pl: {
-        type: DataTypes.DECIMAL(10, 2),
+      lesson_price_eur: {
+        type: DataTypes.INTEGER,
         allowNull: false,
+        defaultValue: 10,
       },
-      permanent_lesson_price_90_min_pl: {
-        type: DataTypes.DECIMAL(10, 2),
+      lesson_price_usd: {
+        type: DataTypes.INTEGER,
         allowNull: false,
-      },
-      permanent_lesson_price_120_min_pl: {
-        type: DataTypes.DECIMAL(10, 2),
-      },
-      regular_lesson_price_en: {
-        type: DataTypes.DECIMAL(10, 2),
-        allowNull: false,
-      },
-      permanent_lesson_price_60_min_en: {
-        type: DataTypes.DECIMAL(10, 2),
-        allowNull: false,
-      },
-      permanent_lesson_price_90_min_en: {
-        type: DataTypes.DECIMAL(10, 2),
-        allowNull: false,
-      },
-      permanent_lesson_price_120_min_en: {
-        type: DataTypes.DECIMAL(10, 2),
+        defaultValue: 15,
       },
     },
     {

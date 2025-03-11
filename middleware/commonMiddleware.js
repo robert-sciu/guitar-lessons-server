@@ -4,8 +4,12 @@ const rateLimit = require("express-rate-limit");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const express = require("express");
-const { handleErrorResponse } = require("../utilities/controllerUtilites");
+const {
+  handleErrorResponse,
+  findRecordByPk,
+} = require("../utilities/controllerUtilites");
 const jwt = require("jsonwebtoken");
+const { User } = require("../models").sequelize.models;
 
 function useCommonMiddleware(app) {
   app.set("view engine", "ejs");

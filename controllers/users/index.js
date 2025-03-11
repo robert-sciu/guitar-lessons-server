@@ -9,9 +9,9 @@ const resetPassword = require("./resetPassword");
 const changeEmailRequest = require("./changeEmailRequest");
 const changeEmail = require("./changeEmail");
 
-const getUsersAdmin = require("./admin/getUsersAdmin");
+const getAllUsers = require("./admin/getAllUsers");
 const updateUserAdmin = require("./admin/updateUserAdmin");
-const deleteUserAdmin = require("./admin/deleteUserAdmin");
+const deleteUser = require("./admin/deleteUser");
 
 module.exports = {
   getUser,
@@ -24,8 +24,7 @@ module.exports = {
   resetPassword,
   changeEmailRequest,
   changeEmail,
-
-  getUsersAdmin,
+  getAllUsers,
   updateUserAdmin,
-  deleteUserAdmin,
+  deleteUser,
 };

@@ -360,6 +360,8 @@ function unchangedDataToUndefined(originalData, updateData) {
   return updateDataFiltered;
 }
 
+async function findUserForAdmin() {}
+
 module.exports = {
   addFilePathsToImageData,
   checkMissingUpdateData,

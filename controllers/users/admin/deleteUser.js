@@ -7,7 +7,7 @@ const logger = require("../../../utilities/logger");
 const responses = require("../../../responses");
 const userService = require("../userService");
 
-async function deleteUserAdmin(req, res) {
+async function deleteUser(req, res) {
   const language = req.language;
   const id = req.id;
 
@@ -50,4 +50,4 @@ async function deleteUserAdmin(req, res) {
   }
 }
 
-module.exports = deleteUserAdmin;
+module.exports = deleteUser;

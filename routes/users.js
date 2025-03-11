@@ -54,13 +54,13 @@ const userRouterProtected = () => {
 const userRouterAdmin = () => {
   const router = express.Router();
 
-  router.route("/").get(usersController.getUsersAdmin);
+  router.route("/").get(usersController.getAllUsers);
 
   router
     .route("/:id")
     .all(attachIdParam)
-    .patch(validateUpdateUser, usersController.updateUserAdmin)
-    .delete(validateDeleteUser, usersController.deleteUserAdmin);
+    .patch(usersController.updateUserAdmin)
+    .delete(usersController.deleteUser);
 
   return router;
 };

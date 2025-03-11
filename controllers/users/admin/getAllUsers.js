@@ -6,7 +6,7 @@ const userService = require("../userService");
 const logger = require("../../../utilities/logger");
 const responses = require("../../../responses");
 
-async function getUsersAdmin(req, res) {
+async function getAllUsers(req, res) {
   const language = req.language;
   try {
     const users = await userService.getAllUsers();
@@ -21,4 +21,4 @@ async function getUsersAdmin(req, res) {
   }
 }
 
-module.exports = getUsersAdmin;
+module.exports = getAllUsers;

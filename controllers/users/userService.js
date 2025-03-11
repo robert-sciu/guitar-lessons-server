@@ -442,6 +442,7 @@ class UserService {
       "is_verified",
       "role",
       "minimum_task_level_to_display",
+      "user_notes",
     ]);
   }
   destructureCreateUserData(data) {
@@ -455,10 +456,16 @@ class UserService {
       "difficulty_clearance_level",
       "is_active",
       "is_verified",
+      "user_notes",
+      "minimum_task_level_to_display",
     ]);
   }
   destructureUpdateUserDataUser(data) {
-    return destructureData(data, ["username", "minimum_task_level_to_display"]);
+    return destructureData(data, [
+      "username",
+      "minimum_task_level_to_display",
+      "user_notes",
+    ]);
   }
   destructureEmailChangeData(data) {
     return destructureData(data, ["email", "change_email_token"]);

@@ -7,15 +7,20 @@ const {
 } = require("../../utilities/controllerUtilites");
 const userService = require("./userService");
 const responses = require("../../responses");
+const {
+  getUserBasedOnRole,
+} = require("../../middleware/getUserBasedOnUserRole");
 
 async function updateUser(req, res) {
   const language = req.language;
-  const user_id = req.user.id;
+
+  const userId = req.user.id;
 
   const updateData = userService.destructureUpdateUserDataUser(req.body);
 
+  console.log(req.body);
   try {
-    const user = await userService.findUserById(user_id);
+    const user = await userService.findUserById(userId);
     const updateDataNoDuplicates = unchangedDataToUndefined(user, updateData);
     if (checkMissingUpdateData(updateDataNoDuplicates)) {
       return handleErrorResponse(
@@ -25,7 +30,7 @@ async function updateUser(req, res) {
       );
     }
     const updatedRecordCount = await userService.updateUser(
-      user_id,
+      userId,
       updateDataNoDuplicates
     );
     if (updatedRecordCount === 0) {
@@ -35,7 +40,7 @@ async function updateUser(req, res) {
         responses.commonMessages.updateError[language]
       );
     }
-    userService.clearUserCache(user_id);
+    userService.clearUserCache(userId);
     return handleSuccessResponse(
       res,
       200,

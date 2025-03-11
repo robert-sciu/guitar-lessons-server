@@ -12,10 +12,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false,
       },
-      task_difficulty_level: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-      },
+      // task_difficulty_level: {
+      //   type: DataTypes.INTEGER,
+      //   allowNull: false,
+      // },
       tag_id: {
         type: DataTypes.INTEGER,
         allowNull: false,

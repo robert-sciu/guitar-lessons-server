@@ -5,13 +5,20 @@ const {
 const logger = require("../../utilities/logger");
 const userTaskService = require("./userTaskService");
 const responses = require("../../responses");
+const {
+  getUserBasedOnRole,
+} = require("../../middleware/getUserBasedOnUserRole");
 
 async function deleteUserTask(req, res, next) {
   const language = req.language;
-  const task_id = req.id;
-  const user_id = req.user.id;
+  const taskId = req.id;
+  const user = req.user;
+
+  const userId =
+    user.role === "admin" && req.query?.userId ? req.query.userId : user.id;
+
   try {
-    const userTask = await userTaskService.findUserTask(user_id, task_id);
+    const userTask = await userTaskService.findUserTask(userId, taskId);
     if (!userTask) {
       return handleErrorResponse(
         res,
@@ -20,7 +27,7 @@ async function deleteUserTask(req, res, next) {
       );
     }
     await userTaskService.deleteUserTask(userTask.id);
-    // const userTasksAfterDelete = await userTaskService.fetchUserTasks(user_id);
+    // const userTasksAfterDelete = await userTaskService.fetchUserTasks(userId);
     return handleSuccessResponse(res, 204, null);
   } catch (error) {
     logger.error(error);

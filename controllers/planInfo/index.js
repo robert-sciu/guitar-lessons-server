@@ -1,11 +1,10 @@
 const getPlanInfo = require("./getPlanInfo");
 const updatePlanInfo = require("./updatePlanInfo");
 
-const getPlanInfosAdmin = require("./admin/getPlanInfosAdmin");
+const getAllPlanInfos = require("./getAllPlanInfos");
 
 module.exports = {
   getPlanInfo,
   updatePlanInfo,
-
-  getPlanInfosAdmin,
+  getAllPlanInfos,
 };

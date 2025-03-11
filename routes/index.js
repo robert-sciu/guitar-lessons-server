@@ -13,6 +13,10 @@ const { planInfoRouterProtected, planInfoRouterAdmin } = require("./planInfo");
 const { pricingRouterOpen } = require("./pricing");
 
 const { tasksRouterProtected, tasksRouterAdmin } = require("./tasks");
+const {
+  userTasksRouterProtected,
+  userTasksRouterAdmin,
+} = require("./userTasks");
 
 const userTasksRouter = require("./userTasks");
 const taskTagsRouter = require("./taskTags");
@@ -49,7 +53,7 @@ const protectedRoutes = (app) => {
   app.use(`${apiBaseUrl}/users`, sanitize, userRouterProtected());
   app.use(`${apiBaseUrl}/planInfo`, sanitize, planInfoRouterProtected());
   app.use(`${apiBaseUrl}/tasks`, sanitize, tasksRouterProtected());
-  app.use(`${apiBaseUrl}/userTasks`, sanitize, userTasksRouter);
+  app.use(`${apiBaseUrl}/userTasks`, sanitize, userTasksRouterProtected());
   app.use(`${apiBaseUrl}/tags`, sanitize, tagsRouterOpen());
   app.use(`${apiBaseUrl}/taskTags`, sanitize, taskTagsRouter);
   app.use(`${apiBaseUrl}/pageTexts`, sanitize, pageTextsRouter);
@@ -71,6 +75,7 @@ const adminRoutes = (app) => {
   //prettier-ignore
   app.use(`${apiBaseUrl}/admin/planInfo`, sanitize, planInfoRouterAdmin());
   app.use(`${apiBaseUrl}/admin/tasks`, sanitize, tasksRouterAdmin());
+  app.use(`${apiBaseUrl}/admin/userTasks`, sanitize, userTasksRouterAdmin());
   app.use(`${apiBaseUrl}/admin/tags`, sanitize, tagsRouterAdmin());
 };
 

@@ -4,12 +4,17 @@ const {
   handleSuccessResponse,
 } = require("../../utilities/controllerUtilites");
 const tasksService = require("./tasksService");
+const userService = require("../users/userService");
 const responses = require("../../responses");
+const {
+  getUserBasedOnRole,
+} = require("../../middleware/getUserBasedOnUserRole");
 
 async function getTasks(req, res) {
   const language = req.language;
+  const user = await getUserBasedOnRole(req);
   try {
-    const tasks = await tasksService.fetchTasks(req.user);
+    const tasks = await tasksService.fetchTasks(user);
     return handleSuccessResponse(res, 200, tasks);
   } catch (error) {
     logger.error(error);

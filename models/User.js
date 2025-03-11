@@ -49,6 +49,10 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: false,
       },
+      user_notes: {
+        type: DataTypes.STRING(1500),
+        allowNull: true,
+      },
     },
     {
       timestamps: false,

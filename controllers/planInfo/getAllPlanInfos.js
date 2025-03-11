@@ -1,12 +1,12 @@
-const logger = require("../../../utilities/logger");
-const responses = require("../../../responses");
-const planInfoService = require("../planInfoService");
+const logger = require("../../utilities/logger");
+const responses = require("../../responses");
+const planInfoService = require("./planInfoService");
 const {
   handleSuccessResponse,
   handleErrorResponse,
-} = require("../../../utilities/controllerUtilites");
+} = require("../../utilities/controllerUtilites");
 
-async function getPlanInfosAdmin(req, res) {
+async function getAllPlanInfos(req, res) {
   const language = req.language;
   try {
     const planInfos = await planInfoService.getAllPlanInfos();
@@ -21,4 +21,4 @@ async function getPlanInfosAdmin(req, res) {
   }
 }
 
-module.exports = getPlanInfosAdmin;
+module.exports = getAllPlanInfos;
